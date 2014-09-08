@@ -34,12 +34,14 @@ int main(int argc, char *argv[]) {
   for(i=0;i<imagesize;i++) {
 
     // invert image
-    //image[i].r = 255 - image[i].r;
-    //image[i].g = 255 - image[i].g;
-    //image[i].b = 255 - image[i].b;
-    if(	(image[i].g > 140) &&
-    	(image[i].r < 180) &&
-    	(image[i].b < 180)) {
+    /*image[i].r = 255 - image[i].r;
+    image[i].g = 255 - image[i].g;
+    image[i].b = 255 - image[i].b;*/
+
+    // define mask using the ratio of green to blue and red
+    // mask has white where green is found (background) and black elsewhere (foreground)
+    if(	(((float)image[i].g/(float)image[i].b) > 1.2) &&
+    	(((float)image[i].g/(float)image[i].r) > 1.1) ) {
 	image[i].r = 255;
 	image[i].g = 255;
 	image[i].b = 255;
