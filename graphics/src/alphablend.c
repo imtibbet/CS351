@@ -16,14 +16,24 @@ int main(int argc, char *argv[]) {
   int rows1, cols1, colors1;
   int rows2, cols2, colors2;
   int rowsMask, colsMask, colorsMask;
+  int dx, dy;
   float alphaR, alphaG, alphaB;
   long imagesize1, imagesize2, imagesizeMask;
   long i;
 
-  if(argc < 5) {
+  dx = 0;
+  dy = 0;
+  if(argc < 5 || argc > 7) {
     printf("Usage: alphablend <input file1> <input file2> <mask file> <output file1>\n");
     exit(-1);
+  } 
+  if(argc > 5) {
+    dx = atoi(argv[5]);
+  } 
+  if (argc == 7) {
+    dy = atoi(argv[6]);
   }
+  printf("%d, %d\n",dx,dy);
 
   /* read in the images */
   image1 = readPPM(&rows1, &cols1, &colors1, argv[1]);
