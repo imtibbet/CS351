@@ -1,6 +1,8 @@
 /*
-  This is an example of reading and writing an image using the ppmIO.c
-  routines.  To manipulate the image, change the pixel color values.
+Author: Ian Tibbetts (Bruce Maxwell)
+Date: 9/9/2014
+
+Use some kind of test to read in the blue/green screen image and create and write out a mask that is 1 for the blue/green background and 0 for the foreground. Make this a command line program. 
 */
 
 #include <stdio.h>
@@ -16,7 +18,7 @@ int main(int argc, char *argv[]) {
   long i;
 
   if(argc < 3) {
-    printf("Usage: ppmtest <input file> <output file>\n");
+    printf("Usage: lab1 <input file> <output file>\n");
     exit(-1);
   }
 
