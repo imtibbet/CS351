@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   int dx, dy;
   float alphaR, alphaG, alphaB;
   long imagesize1, imagesize2, imagesizeMask;
-  long i;
+  long i,j,backgroundIndex,foregroundIndex;
 
   dx = 0;
   dy = 0;
@@ -33,7 +33,6 @@ int main(int argc, char *argv[]) {
   if (argc == 7) {
     dy = atoi(argv[6]);
   }
-  printf("%d, %d\n",dx,dy);
 
   /* read in the images */
   image1 = readPPM(&rows1, &cols1, &colors1, argv[1]);
@@ -58,15 +57,21 @@ int main(int argc, char *argv[]) {
   //TODO: this would be where the images would be resized for program
 
   /* mess with the image here  */
-  for(i=0;i<imagesize1;i++) {
+  for(i=dx;i<rows1-1;i++) {
+    for(j=dy;j<cols1-1;j++) {
 
-    // alpha blend two inputs using mask
-    alphaR = (float)imageMask[i].r/255.0;
-    alphaG = (float)imageMask[i].g/255.0;
-    alphaB = (float)imageMask[i].b/255.0;
-    image1[i].r = alphaR*image1[i].r + (1 - alphaR)*image2[i].r;
-    image1[i].g = alphaG*image1[i].g + (1 - alphaG)*image2[i].g;
-    image1[i].b = alphaB*image1[i].b + (1 - alphaB)*image2[i].b;
+      // assign separate index values to offset foreground and mask
+      backgroundIndex = i * cols1 + j;
+      foregroundIndex = (i - dx) * cols1 + (j - dy);
+
+      // alpha blend two inputs using mask
+      alphaR = (float)imageMask[foregroundIndex].r / 255.0;
+      alphaG = (float)imageMask[foregroundIndex].g / 255.0;
+      alphaB = (float)imageMask[foregroundIndex].b / 255.0;
+      image1[backgroundIndex].r = alphaR*image1[backgroundIndex].r + (1 - alphaR) * image2[foregroundIndex].r;
+      image1[backgroundIndex].g = alphaG*image1[backgroundIndex].g + (1 - alphaG) * image2[foregroundIndex].g;
+      image1[backgroundIndex].b = alphaB*image1[backgroundIndex].b + (1 - alphaB) * image2[foregroundIndex].b;
+    }
   }
 
   /* write out the resulting image */
