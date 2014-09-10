@@ -18,13 +18,13 @@ int main(int argc, char *argv[]) {
   int rowsMask, colsMask, colorsMask;
   int dx, dy;
   float alphaR, alphaG, alphaB;
-  long imagesize1, imagesize2, imagesizeMask;
+  //long imagesize1, imagesize2, imagesizeMask;
   long i,j,backgroundIndex,foregroundIndex;
 
   dx = 0;
   dy = 0;
   if(argc < 5 || argc > 7) {
-    printf("Usage: alphablend <input file1> <input file2> <mask file> <output file1>\n");
+    printf("Usage: alphablend <input file1> <input file2> <mask file> <output file1> [dx (default=0)] [dy (default=0)]\n");
     exit(-1);
   } 
   if(argc > 5) {
@@ -49,20 +49,28 @@ int main(int argc, char *argv[]) {
     exit(-1);
   }
 
-  /* calculate the image size */
+  /* calculate the image size 
   imagesize1 = (long)rows1 * (long)cols1;
   imagesize2 = (long)rows2 * (long)cols2;
-  imagesizeMask = (long)rowsMask * (long)colsMask;
+  imagesizeMask = (long)rowsMask * (long)colsMask;*/
 
   //TODO: this would be where the images would be resized for program
 
-  /* mess with the image here  */
-  for(i=dx;i<rows1-1;i++) {
-    for(j=dy;j<cols1-1;j++) {
+  /* loops over the entire background image, starting at (dx, dy)
+   * overwriting the background pixel values with the alpha blending
+   * of the foreground image and the background using the mask */
+  for(i=0;i<rows1-1;i++) {
+    for(j=0;j<cols1-1;j++) {
+      
+      // test is the offset puts the index outside of the boundaries of the background image
+      // dx and dy can be negative, so check out of bounds on both sides
+      if( (i+dy < 0 || i+dy > rows1-1) || (j+dx < 0 || j+dx > cols1-1) ) {
+        continue;
+      }
 
       // assign separate index values to offset foreground and mask
-      backgroundIndex = i * cols1 + j;
-      foregroundIndex = (i - dx) * cols1 + (j - dy);
+      backgroundIndex = (i+dy) * cols1 + (j+dx);
+      foregroundIndex = i * cols1 + j;
 
       // alpha blend two inputs using mask
       alphaR = (float)imageMask[foregroundIndex].r / 255.0;
