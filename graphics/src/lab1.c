@@ -44,13 +44,13 @@ int main(int argc, char *argv[]) {
     // mask has white where green is found (background) and black elsewhere (foreground)
     if(	(((float)image[i].g/(float)image[i].b) > 1.2) &&
     	(((float)image[i].g/(float)image[i].r) > 1.1) ) {
-	image[i].r = 255;
-	image[i].g = 255;
-	image[i].b = 255;
+		image[i].r = 255;
+		image[i].g = 255;
+		image[i].b = 255;
     } else {
-	image[i].r = 0;
-	image[i].g = 0;
-	image[i].b = 0;
+		image[i].r = 0;
+		image[i].g = 0;
+		image[i].b = 0;
     }
   }
 
