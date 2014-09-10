@@ -1,8 +1,8 @@
 /*
 Author: Ian Tibbetts (Bruce Maxwell)
-Date: 9/9/2014
+Date: 9/10/2014
 
-Write a program that takes in two images and a mask image and merges the two images using the mask as an alpha mask. The alpha blending function is I = alpha*image1 + (1 - alpha)*image2. Note that you'll need to interpolate the 0-255 values in the mask to the range [0, 1].
+A program that takes in two images and a mask image and merges the two images using the mask as an alpha mask, as well as allowing offset, mirroring, and rotation
 */
 
 #include <stdio.h>
@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
 	dx = dy = mirror = 0;
 	rotate = rotateRad = 0.0;
 	if(argc < 5 || argc > 9) {
-		printf(	"Usage: alphablend <input file1> <input file2> <mask file>" 				"<output file1> [dx (default=0)] [dy (default=0)]\n");
+		printf(	"Usage: alphablend <input file1> <input file2> <mask file>" 				"<output file1> [dx (default=0)] [dy (default=0)]"
+				"[mirror (default=0)] [rotatedegrees (default=0.0)]\n");
 		exit(-1);
 	} 
 	if(argc > 5) {
