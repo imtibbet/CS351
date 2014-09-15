@@ -9,6 +9,7 @@ The images structure function implementations
 #include <stdlib.h>
 #include <string.h>
 #include "ppmIO.h"
+#include "images.h"
 
 #define USECPP 0
 
@@ -20,7 +21,7 @@ The images structure function implementations
  * structure. Returns a NULL pointer if the operation fails.
  */
 Image *image_create(int rows, int cols){
-
+	
 } // end image_create
 
 /*
