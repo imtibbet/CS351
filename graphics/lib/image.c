@@ -7,11 +7,10 @@ The images structure function implementations
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <time.h>
+#include <math.h>
 #include "ppmIO.h"
-#include "images.h"
-
-#define USECPP 0
+#include "image.h"
 
 // Constructors and destructors:
 /*
@@ -26,27 +25,28 @@ Image *image_create(int rows, int cols){
 	Image *src = NULL;
 
 	// use malloc to reserve memory for image, returning NULL on failure
-	src = (Image *)malloc(sizeof(Image)); 
+	src = malloc(sizeof(Image));
 	if(!src){
 		return(NULL);
-	}
-	src->data = (FPixel **)malloc(sizeof(FPixel *) * rows); 
+	} 
+	src->data = malloc(sizeof(FPixel *) * rows); 
 	if(!src->data){
 		return(NULL);
-	}
-	src->data[0] = (FPixel *)malloc(sizeof(FPixel) * rows * cols);
+	} 
+	src->data[0] = malloc(sizeof(FPixel) * rows * cols);
 	if(!src->data[0]){
 		return(NULL);
 	}
 
 	// assign all row pointers
-	for(i=1;i<rows-1;i++){
+	for(i=1;i<rows;i++){
 		src->data[i] = &(src->data[0][i * cols]);
 	}
 
 	// assign image data fields to parameter and return pointer to image
 	src->rows = rows;
 	src->cols = cols;
+	printf("image created\n");
 	return(src);
 	
 } // end image_create
@@ -56,7 +56,16 @@ Image *image_create(int rows, int cols){
  */
 void image_free(Image *src){
 
-	free(src);
+	if(src){
+		if(src->data){
+			if(src->data[0]){
+				free(src->data[0]);
+			}
+			free(src->data);
+		}
+		free(src);
+	}
+	printf("image freed\n");
 
 } // end image_free
 
@@ -68,6 +77,7 @@ void image_init(Image *src){
 
 	src->data = NULL;
 	src->rows = src->cols = 0;
+	printf("image initted\n");
 
 } // end image_init
 
@@ -81,24 +91,38 @@ void image_init(Image *src){
 int image_alloc(Image *src, int rows, int cols){
 
 	int i, j;
-	
-	// free existing memory if rows and cols are both non-zero.
-	if(src->rows != 0 and src->cols != 0){
-		free(src->data);
+
+	// free existing memory
+	if(src){
+		if(src->data){
+			if(src->data[0]){
+				free(src->data[0]);
+			}
+			free(src->data);
+		}
+	} else {
+		printf("null src given\n");
+		return(1);
 	}
 
 	// malloc new memory spave for data and return non-zero on failure
 	src->data = (FPixel **)malloc(sizeof(FPixel *) * rows); 
-	if(!src->data){return(1);}
+	if(!src->data){
+		return(1);
+	}
 	src->data[0] = (FPixel *)malloc(sizeof(FPixel) * rows * cols);
-	if(!src->data[0]){return(1);}
+	if(!src->data[0]){
+		return(1);
+	}
 
 	// assign all row pointers
 	for(i=0;i<rows;i++){
-		src->data[i] = &(src->data[0][i * cols]);
+		if(i){
+			src->data[i] = &(src->data[0][i * cols]);
+		}
 
 		// initialize data to appropriate values
-		for(j=0;j<cols;i++){
+		for(j=0;j<cols;j++){
 			src->data[i][j].rgb[0] = 
 			src->data[i][j].rgb[1] = 
 			src->data[i][j].rgb[2] = 
@@ -106,6 +130,9 @@ int image_alloc(Image *src, int rows, int cols){
 			src->data[i][j].z = 1.0;
 		}
 	}
+	src->rows = rows;
+	src->cols = cols;
+	printf("image allocated\n");
 	return(0);
 	
 } // end image_alloc
@@ -116,9 +143,17 @@ int image_alloc(Image *src, int rows, int cols){
  */
 void image_dealloc(Image *src){
 
-	free(src->data[0])
-	free(src->data)
-	src->rows = src->cols = 0;
+	if(src){
+		if(src->data){
+			if(src->data[0]){
+				free(src->data[0]);
+			}
+			free(src->data);
+		}
+		src->rows = src->cols = 0;
+		src->data = NULL;
+	}
+	printf("image deallocated\n");
 
 } // end image_dealloc
 
@@ -141,13 +176,20 @@ Image *image_read(char *filename){
 	if(!readData){
 		return(NULL);
 	}
+
 	src = image_create(rows, cols);
+	if(!src){
+		return(NULL);
+	}
+	
+	// convert from Pixel to FPixel
 	for(i=0;i<rows*cols;i++){
-		src->data[0][i].rgb[0] = (float)readData[i].r;
-		src->data[0][i].rgb[1] = (float)readData[i].g;
-		src->data[0][i].rgb[2] = (float)readData[i].b;
+		src->data[0][i].rgb[0] = (float)readData[i].r / 255.0;
+		src->data[0][i].rgb[1] = (float)readData[i].g / 255.0;
+		src->data[0][i].rgb[2] = (float)readData[i].b / 255.0;
 		src->data[0][i].a = src->data[0][i].z = 1.0;
 	}
+	free(readData);
 	return(src);
 	
 } // end image_read
@@ -159,7 +201,19 @@ Image *image_read(char *filename){
  */
 int image_write(Image *src, char *filename){
 
-	writePPM(src, src->rows, src->cols, 100 /* s/b 255 */, filename);
+	Pixel *image;
+	int i;
+
+	// convert from FPixel to Pixel
+	image = (Pixel *)malloc(sizeof(Pixel) * src->rows * src->cols);
+	for(i=0;i<src->rows*src->cols;i++){
+		image[i].r = (int)(fminf(src->data[0][i].rgb[0] * 255.0, 255.0));
+		image[i].g = (int)(fminf(src->data[0][i].rgb[1] * 255.0, 255.0));
+		image[i].b = (int)(fminf(src->data[0][i].rgb[2] * 255.0, 255.0));
+	}
+	writePPM(image, src->rows, src->cols, 255 /* s/b 255 */, filename);
+	free(image);
+	printf("image written\n");
 	return(0);
 
 } // end image_write
@@ -170,28 +224,36 @@ int image_write(Image *src, char *filename){
  * returns the FPixel at (r, c).
  */
 FPixel image_getf(Image *src, int r, int c){
-	return(src->data[r][c]);
+	FPixel val;
+	val = src->data[r][c];
+	return(val);
 } // end image_getf
 
 /*
  * returns the value of band b at pixel (r, c).
  */
 float image_getc(Image *src, int r, int c, int b){
-	return(src->data[r][c][b]);
+	float val;
+	val = src->data[r][c].rgb[b];
+	return(val);
 } // end image_getf
 
 /*
  * returns the alpha value at pixel (r, c).
  */
 float image_geta(Image *src, int r, int c){
-	return(src->data[r][c].a);
+	float val;
+	val = src->data[r][c].a;
+	return(val);
 } // end image_geta
 
 /*
  * returns the depth value at pixel (r, c).
  */
 float image_getz(Image *src, int r, int c){
-	return(src->data[r][c].z);
+	float val;
+	val = src->data[r][c].z;
+	return(val);
 } // end image_getz
 
 /*
@@ -205,8 +267,7 @@ void image_setf(Image *src, int r, int c, FPixel val){
  * sets the value of pixel (r, c) band b to val.
  */
 void image_setc(Image *src, int r, int c, int b, float val){
-	src->data[r][c][b] = val;
-
+	src->data[r][c].rgb[b] = val;
 } // end image_setc
 
 /*
@@ -249,9 +310,7 @@ void image_fill(Image *src, FPixel val){
 	int i, j;
 	for(i=0;i<src->rows;i++){
 		for(j=0;j<src->cols;j++){
-			src->data[i][j].rgb[0] = val.r;
-			src->data[i][j].rgb[1] = val.g;
-			src->data[i][j].rgb[2] = val.b;
+			src->data[i][j] = val;
 		}
 	}
 } // end image_fill
@@ -293,4 +352,67 @@ void image_fillz(Image *src, float z){
 		}
 	}
 } // end image_fillz
+
+// Procedural texture
+
+/*
+ *
+ */
+void image_noise(Image *src, int density){
+	
+	int i, j, k;
+	int **featurePoints;
+	float dist, dist1, dist2, closest, closest2, colorVal;
+
+	if(density < 3){
+		printf("must be denser than 2 feature points\n");
+		return;
+	}
+	featurePoints = malloc(sizeof(int *) * density);
+
+	srand(time(NULL));
+	
+	for(i=0;i<density;i++){
+		featurePoints[i] = malloc(sizeof(int) * 2);
+		featurePoints[i][0] = rand() % src->rows;
+		featurePoints[i][1] = rand() % src->cols;
+	}
+
+	for(i=0;i<src->rows;i++){
+		for(j=0;j<src->cols;j++){
+			dist1 = sqrt(	(i-featurePoints[0][0])*(i-featurePoints[0][0]) +
+							(j-featurePoints[0][1])*(j-featurePoints[0][1]));
+			dist2 = sqrt(	(i-featurePoints[1][0])*(i-featurePoints[1][0]) +
+							(j-featurePoints[1][1])*(j-featurePoints[1][1]));
+			if(dist1 < dist2){
+				closest = dist1;
+				closest2 = dist2;
+			} else {
+				closest = dist2;
+				closest2 = dist1;
+			}
+			for(k=2;k<density;k++){
+				dist = sqrt((i-featurePoints[k][0])*(i-featurePoints[k][0]) +
+							(j-featurePoints[k][1])*(j-featurePoints[k][1]));
+				if(dist < closest){
+					closest = dist;
+					closest2 = closest;
+				} else if(dist < closest2){
+					closest2 = dist;
+				}
+			}
+			colorVal = closest / closest2;
+			//printf("%f\n",closest);
+			src->data[i][j].rgb[0] = 
+			src->data[i][j].rgb[1] = 
+			src->data[i][j].rgb[2] = colorVal;
+			src->data[i][j].a = 0.0;
+			src->data[i][j].z = 1.0;
+		}
+	}
+}
+
+
+
+
 
