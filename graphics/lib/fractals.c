@@ -11,12 +11,14 @@ The fractal functions for project 2
 #include "fractals.h"
 
 /*
- *
+ * draws the complex plane at x0, y0 with width dx onto the destination image
+ * coloring according to how quickly the point reaches the infinity set of the
+ * mandelbrot set for a fixed number of iterations.
  */
 void mandelbrot( Image *dst, float x0, float y0, float dx){
 
 	int nIters = 500;
-	int i, j, k, breakIters;
+	int i, j, k, breakIters, rIters, gIters, bIters;
 	float fcols, frows, dy, cx, cy, zx, zy, zxNext, zyNext;
 
 	// floating point rows and cols for convenience
@@ -31,8 +33,7 @@ void mandelbrot( Image *dst, float x0, float y0, float dx){
 	for(i=0;i<dst->rows;i++) {
 		for(j=0;j<dst->cols;j++) {
 
-			// calculate (x, y) given (i, j)
-			// this corresponds to cx and cy in the Mandelbrot equation
+			// calculate (cx, cy) given (i, j)
 			cx = dx*j/fcols + x0;
 			cy = -dy*i/frows + y0 + dy;
 
@@ -65,21 +66,24 @@ void mandelbrot( Image *dst, float x0, float y0, float dx){
 				dst->data[i][j].rgb[1] = 0.0;
 				dst->data[i][j].rgb[2] = 0.0;
 			} else {
-				dst->data[i][j].rgb[0] = 0.0;
-				dst->data[i][j].rgb[1] = 0.0;
-				dst->data[i][j].rgb[2] = (float)(breakIters % nIters) / (float)(nIters);
+				rIters = gIters = bIters = (float)(nIters)/3.0;
+				dst->data[i][j].rgb[0] = fmod( (float)breakIters, rIters ) / rIters;
+				dst->data[i][j].rgb[1] = fmod( (float)breakIters, gIters ) / gIters;
+				dst->data[i][j].rgb[2] = fmod( (float)breakIters, bIters ) / bIters;
 			}
 		}
 	}
 }
 
 /*
- * 
+ * draws the complex plane at x0, y0 with width dx onto the destination image
+ * coloring according to how quickly the point reaches the infinity set of the
+ * julia set for a fixed number of iterations and value of c.
  */
 void julia(Image *dst, float x0, float y0, float dx){
 
 	int nIters = 500;
-	int i, j, k, breakIters;
+	int i, j, k, breakIters, rIters, gIters, bIters;
 	float fcols, frows, dy, cx, cy, zx, zy, zxNext, zyNext;
 
 	// floating point rows and cols for convenience
@@ -98,7 +102,7 @@ void julia(Image *dst, float x0, float y0, float dx){
 			cx = 0.7454054;
 			cy = 0.1130063;
 
-			// set zx and zy
+			// set zx and zy depending on pixel location
 			zx = dx*j/fcols + x0;
 			zy = -dy*i/frows + y0 + dy;
 			breakIters = nIters;
@@ -128,9 +132,10 @@ void julia(Image *dst, float x0, float y0, float dx){
 				dst->data[i][j].rgb[1] = 0.0;
 				dst->data[i][j].rgb[2] = 0.0;
 			} else {
-				dst->data[i][j].rgb[0] = 0.0;
-				dst->data[i][j].rgb[1] = 0.0;
-				dst->data[i][j].rgb[2] = (float)(breakIters % nIters) / (float)(nIters);
+				rIters = gIters = bIters = (float)(nIters)/3.0;
+				dst->data[i][j].rgb[0] = fmod( (float)breakIters, rIters ) / rIters;
+				dst->data[i][j].rgb[1] = fmod( (float)breakIters, gIters ) / gIters;
+				dst->data[i][j].rgb[2] = fmod( (float)breakIters, bIters ) / bIters;
 			}
 		}
 	}

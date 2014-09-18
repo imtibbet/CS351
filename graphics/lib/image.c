@@ -64,6 +64,9 @@ void image_free(Image *src){
 			free(src->data);
 		}
 		free(src);
+	} else{
+		printf("null image given to free\n");
+		return;
 	}
 	printf("image freed\n");
 
@@ -75,6 +78,10 @@ void image_free(Image *src){
  */
 void image_init(Image *src){
 
+	if(!src){
+		printf("null image given to init\n");
+		return;
+	}
 	src->data = NULL;
 	src->rows = src->cols = 0;
 	printf("image initted\n");
@@ -101,7 +108,7 @@ int image_alloc(Image *src, int rows, int cols){
 			free(src->data);
 		}
 	} else {
-		printf("null src given\n");
+		printf("null image given to alloc\n");
 		return(1);
 	}
 
@@ -152,6 +159,9 @@ void image_dealloc(Image *src){
 		}
 		src->rows = src->cols = 0;
 		src->data = NULL;
+	} else{
+		printf("null image given to dealloc\n");
+		return;
 	}
 	printf("image deallocated\n");
 
@@ -184,9 +194,9 @@ Image *image_read(char *filename){
 	
 	// convert from Pixel to FPixel
 	for(i=0;i<rows*cols;i++){
-		src->data[0][i].rgb[0] = (float)readData[i].r / 255.0;
-		src->data[0][i].rgb[1] = (float)readData[i].g / 255.0;
-		src->data[0][i].rgb[2] = (float)readData[i].b / 255.0;
+		src->data[0][i].rgb[0] = (float)(readData[i].r) / 255.0;
+		src->data[0][i].rgb[1] = (float)(readData[i].g) / 255.0;
+		src->data[0][i].rgb[2] = (float)(readData[i].b) / 255.0;
 		src->data[0][i].a = src->data[0][i].z = 1.0;
 	}
 	free(readData);
@@ -204,8 +214,16 @@ int image_write(Image *src, char *filename){
 	Pixel *image;
 	int i;
 
+	if(!src){
+		printf("null image given to write\n");
+		return(1);
+	}
+
 	// convert from FPixel to Pixel
 	image = (Pixel *)malloc(sizeof(Pixel) * src->rows * src->cols);
+	if(!image){
+		return(1);
+	}
 	for(i=0;i<src->rows*src->cols;i++){
 		image[i].r = (int)(fminf(src->data[0][i].rgb[0] * 255.0, 255.0));
 		image[i].g = (int)(fminf(src->data[0][i].rgb[1] * 255.0, 255.0));
@@ -356,7 +374,9 @@ void image_fillz(Image *src, float z){
 // Procedural texture
 
 /*
- *
+ * An adaptation of Worley noise, which create cell or stone like noise
+ * on the given image structure according to the given density, which
+ * must be an integer no less than 2.
  */
 void image_noise(Image *src, int density){
 	
@@ -364,22 +384,37 @@ void image_noise(Image *src, int density){
 	int **featurePoints;
 	float dist, dist1, dist2, closest, closest2, colorVal;
 
-	if(density < 3){
+	// because of the way i implement the algorithm this is a precondition
+	if(density < 2){
 		printf("must be denser than 2 feature points\n");
 		return;
+	} else if(!src){
+		printf("null src given to noise\n");
+		return;
 	}
+
+	// initialize a 2D array of integers, which will be an array of
+	// (row, col) pairs for the feature points
 	featurePoints = malloc(sizeof(int *) * density);
 
+	// initialize the seed of the random function with the current time
 	srand(time(NULL));
 	
+	// randomly select density number of feature points from the image region
 	for(i=0;i<density;i++){
 		featurePoints[i] = malloc(sizeof(int) * 2);
 		featurePoints[i][0] = rand() % src->rows;
 		featurePoints[i][1] = rand() % src->cols;
+		printf("feature at row:%d col:%d\n",
+				featurePoints[i][0],featurePoints[i][1]);
 	}
 
+	// loop over entire image, using feature points to color each FPixel
 	for(i=0;i<src->rows;i++){
 		for(j=0;j<src->cols;j++){
+
+			// initialize the closest and second closest feature from the
+			// first two feature points (method prerequisite of at least 2)
 			dist1 = sqrt(	(i-featurePoints[0][0])*(i-featurePoints[0][0]) +
 							(j-featurePoints[0][1])*(j-featurePoints[0][1]));
 			dist2 = sqrt(	(i-featurePoints[1][0])*(i-featurePoints[1][0]) +
@@ -391,21 +426,25 @@ void image_noise(Image *src, int density){
 				closest = dist2;
 				closest2 = dist1;
 			}
-			for(k=2;k<density;k++){
+
+			// loop over feature points and find the closest and second closest
+			for(k=0;k<density;k++){
 				dist = sqrt((i-featurePoints[k][0])*(i-featurePoints[k][0]) +
 							(j-featurePoints[k][1])*(j-featurePoints[k][1]));
 				if(dist < closest){
-					closest = dist;
 					closest2 = closest;
+					closest = dist;
 				} else if(dist < closest2){
 					closest2 = dist;
 				}
 			}
+
+			// the color of the FPixel must be in {0.0,1.0}
 			colorVal = closest / closest2;
-			//printf("%f\n",closest);
-			src->data[i][j].rgb[0] = 
-			src->data[i][j].rgb[1] = 
-			src->data[i][j].rgb[2] = colorVal;
+			//printf("%f, %f\n",closest,closest2);
+			src->data[i][j].rgb[0] *= colorVal;
+			src->data[i][j].rgb[1] *= colorVal;
+			src->data[i][j].rgb[2] *= colorVal;
 			src->data[i][j].a = 0.0;
 			src->data[i][j].z = 1.0;
 		}
