@@ -1,0 +1,10 @@
+2colors.ppm
+2completeMandelCrazy.ppm
+2completeMandel.ppm
+2noise.ppm
+2noiseView.ppm
+2skyblue.ppm
+2testJuliaCrazy.ppm
+2testJulia.ppm
+2testMandelCrazy.ppm
+2testMandel.ppm

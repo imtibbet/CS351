@@ -60,17 +60,13 @@ void mandelbrot( Image *dst, float x0, float y0, float dx){
 				}
 			}
 
-			// color pixel (i, j) 
-			if(breakIters == nIters){
-				dst->data[i][j].rgb[0] = 0.5;
-				dst->data[i][j].rgb[1] = 0.0;
-				dst->data[i][j].rgb[2] = 0.0;
-			} else {
-				rIters = gIters = bIters = (float)(nIters)/3.0;
-				dst->data[i][j].rgb[0] = fmod( (float)breakIters, rIters ) / rIters;
-				dst->data[i][j].rgb[1] = fmod( (float)breakIters, gIters ) / gIters;
-				dst->data[i][j].rgb[2] = fmod( (float)breakIters, bIters ) / bIters;
-			}
+			// color pixel (i, j)
+			rIters = (float)(nIters)/3.0;
+			gIters = (float)(nIters)/20.0;
+			bIters = (float)(nIters)/50.0;
+			dst->data[i][j].rgb[0] = fmod( (float)breakIters, rIters ) / rIters;
+			dst->data[i][j].rgb[1] = fmod( (float)breakIters, gIters ) / gIters;
+			dst->data[i][j].rgb[2] = fmod( (float)breakIters, bIters ) / bIters;
 		}
 	}
 }
@@ -127,16 +123,12 @@ void julia(Image *dst, float x0, float y0, float dx){
 			}
 
 			// color pixel (i, j) 
-			if(breakIters == nIters){
-				dst->data[i][j].rgb[0] = 0.5;
-				dst->data[i][j].rgb[1] = 0.0;
-				dst->data[i][j].rgb[2] = 0.0;
-			} else {
-				rIters = gIters = bIters = (float)(nIters)/3.0;
-				dst->data[i][j].rgb[0] = fmod( (float)breakIters, rIters ) / rIters;
-				dst->data[i][j].rgb[1] = fmod( (float)breakIters, gIters ) / gIters;
-				dst->data[i][j].rgb[2] = fmod( (float)breakIters, bIters ) / bIters;
-			}
+			rIters = (float)(nIters)/3.0;
+			gIters = (float)(nIters)/20.0;
+			bIters = (float)(nIters)/50.0;
+			dst->data[i][j].rgb[0] = fmod( (float)breakIters, rIters ) / rIters;
+			dst->data[i][j].rgb[1] = fmod( (float)breakIters, gIters ) / gIters;
+			dst->data[i][j].rgb[2] = fmod( (float)breakIters, bIters ) / bIters;
 		}
 	}
 }
