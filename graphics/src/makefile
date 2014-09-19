@@ -32,7 +32,7 @@ _DEPS = ppmIO.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = ppmtest
+EXECUTABLES = imagetest mandeltest
 
 # put a list of all the object files here for all executables (with .o endings)
 _OBJ = ppmmain.o

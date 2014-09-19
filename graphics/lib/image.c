@@ -99,17 +99,17 @@ int image_alloc(Image *src, int rows, int cols){
 
 	int i, j;
 
-	// free existing memory
-	if(src){
-		if(src->data){
-			if(src->data[0]){
-				free(src->data[0]);
-			}
-			free(src->data);
-		}
-	} else {
+	if(!src){
 		printf("null image given to alloc\n");
 		return(1);
+	}
+
+	// free existing memory
+	if(src->data){
+		if(src->data[0]){
+			free(src->data[0]);
+		}
+		free(src->data);
 	}
 
 	// malloc new memory spave for data and return non-zero on failure
@@ -150,19 +150,19 @@ int image_alloc(Image *src, int rows, int cols){
  */
 void image_dealloc(Image *src){
 
-	if(src){
-		if(src->data){
-			if(src->data[0]){
-				free(src->data[0]);
-			}
-			free(src->data);
-		}
-		src->rows = src->cols = 0;
-		src->data = NULL;
-	} else{
+	if(!src){
 		printf("null image given to dealloc\n");
 		return;
 	}
+
+	if(src->data){
+		if(src->data[0]){
+			free(src->data[0]);
+		}
+		free(src->data);
+	}
+	src->rows = src->cols = 0;
+	src->data = NULL;
 	printf("image deallocated\n");
 
 } // end image_dealloc
@@ -184,6 +184,7 @@ Image *image_read(char *filename){
 
 	readData = readPPM(&rows, &cols, &colors, filename);
 	if(!readData){
+		printf("readPPM failed, probably incorrect filename given.\n");
 		return(NULL);
 	}
 
@@ -309,7 +310,14 @@ void image_setz(Image *src, int r, int c, float val){
  * z value of 1.0).
  */
 void image_reset(Image *src){
+
 	int i, j;
+
+	if(!src){
+		printf("null src given to reset\n");
+		return;
+	}
+
 	for(i=0;i<src->rows;i++){
 		for(j=0;j<src->cols;j++){
 			src->data[i][j].rgb[0] = 
@@ -319,25 +327,41 @@ void image_reset(Image *src){
 			src->data[i][j].z = 1.0;
 		}
 	}
+
 } // end image_reset
 
 /*
  * sets every FPixel to the given value.
  */
 void image_fill(Image *src, FPixel val){
+
 	int i, j;
+
+	if(!src){
+		printf("null src given to fill\n");
+		return;
+	}
+
 	for(i=0;i<src->rows;i++){
 		for(j=0;j<src->cols;j++){
 			src->data[i][j] = val;
 		}
 	}
+
 } // end image_fill
 
 /*
  * sets the (r, g, b) values of each pixel to the given color.
  */
 void image_fillrgb(Image *src, float r, float g, float b){
+
 	int i, j;
+
+	if(!src){
+		printf("null src given to fillrgb\n");
+		return;
+	}
+
 	for(i=0;i<src->rows;i++){
 		for(j=0;j<src->cols;j++){
 			src->data[i][j].rgb[0] = r;
@@ -345,30 +369,47 @@ void image_fillrgb(Image *src, float r, float g, float b){
 			src->data[i][j].rgb[2] = b;
 		}
 	}
+
 } // end image_fillrgb
 
 /*
  * sets the alpha value of each pixel to the given value.
  */
 void image_filla(Image *src, float a){
+
 	int i, j;
+
+	if(!src){
+		printf("null src given to filla\n");
+		return;
+	}
+
 	for(i=0;i<src->rows;i++){
 		for(j=0;j<src->cols;j++){
 			src->data[i][j].a = a;
 		}
 	}
+
 } // end image_filla
 
 /*
  * sets the z value of each pixel to the given value.
  */
 void image_fillz(Image *src, float z){
+
 	int i, j;
+
+	if(!src){
+		printf("null src given to fillz\n");
+		return;
+	}
+
 	for(i=0;i<src->rows;i++){
 		for(j=0;j<src->cols;j++){
 			src->data[i][j].z = z;
 		}
 	}
+
 } // end image_fillz
 
 // Procedural texture
