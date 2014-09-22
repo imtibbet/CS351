@@ -1,6 +1,6 @@
-#ifndef COLOR_H
+#ifndef PRIMITIVES_H
 
-#define COLOR_H
+#define PRIMITIVES_H
 
 typedef struct {
 	double val[4];
@@ -67,6 +67,14 @@ typedef struct {
 	double a;
 } Ellipse;
 
+/** Initialize an ellipse to location tc and radii ta and tb. **/
+void ellipse_set(Ellipse *e, Point tc, double ta, double tb);
+
+/** Draw into src using color p. **/
+void ellipse_draw(Ellipse *e, Image *src, Color p);
+
+/** Draw a filled ellipse into src using color p. **/
+void ellipse_drawFill(Ellipse *e, Image *src, Color p);
 
 typedef struct {
 	int zBuffer;
