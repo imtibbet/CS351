@@ -31,6 +31,20 @@ typedef struct {
 	Point b;
 } Line;
 
+/** Initialize a 2D line. **/
+void line_set2D(Line *l, double x0, double y0, double x1, double y1);
+
+/** Initialze a line to ta and tb. **/
+void line_set(Line *l, Point ta, Point tb);
+
+/** Set the z-buffer flag to the given value. **/
+void line_zBuffer(Line *l, int flag);
+
+/** Copy the line data structure. **/
+void line_copy(Line *to, Line *from);
+
+/** Draw the line into src using Color c. **/
+void line_draw(Line *l, Image *src, Color c);
 
 typedef struct {
 	double r;
