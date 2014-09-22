@@ -84,7 +84,7 @@ typedef struct {
 
 /* Returns an allocated Polyline pointer initialized so that 
 * numVertex is 0 and vertex is NULL. */
-Polyline *polyline_create();
+Polyline *polyline_create(int x);
 
 /* Returns an allocated Polyline pointer with the vertex list initialized 
 * to the points in vlist. */

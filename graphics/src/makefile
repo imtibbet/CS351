@@ -67,6 +67,8 @@ imagetest: $(ODIR)/imagetest.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 mandeltest: $(ODIR)/mandeltest.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+testbench: $(ODIR)/testbench.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
 

@@ -5,8 +5,7 @@
 #include "ppmIO.h"
 
 /* put your include file here */
-#include "line.h"
-#include "image.h"
+#include "graphics.h"
 
 #define NUMLINES 200
 #define TIMING 5

@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "color.h"
-#include "fractals.h"
-#include "image.h"
 #include "ppmIO.h"
+#include "color.h"
+#include "image.h"
+#include "fractals.h"
 #include "primitives.h"
 
 #endif
