@@ -15,17 +15,23 @@ typedef struct {
 
 
 typedef struct {
-	double val[4];
+	double r;
+	Point c;
 } Circle;
 
 
 typedef struct {
-	double val[4];
+	double ra;
+	double rb;
+	Point c;
+	double a;
 } Ellipse;
 
 
 typedef struct {
-	double val[4];
+	int zBuffer;
+	int numVertex;
+	Point *vertex;
 } Polyline;
 
 #endif
