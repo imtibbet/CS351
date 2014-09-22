@@ -171,9 +171,7 @@ void line_draw(Line *l, Image *src, Color c){
 				e+=2*dx;
 			} 
 		}
-
 	}
-
 }
 
 // CIRCLE
