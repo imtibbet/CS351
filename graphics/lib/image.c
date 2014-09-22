@@ -1,16 +1,11 @@
 /*
-Author: Ian Tibbetts (Bruce Maxwell)
-Date: 9/14/2014
-
-The images structure function implementations
+ * Author: Ian Tibbetts (Bruce Maxwell)
+ * Date: 9/14/2014
+ *
+ * The images structure function implementations
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-#include "ppmIO.h"
-#include "image.h"
+#include "graphics.h"
 
 // Constructors and destructors:
 /*
@@ -492,7 +487,23 @@ void image_noise(Image *src, int density){
 	}
 }
 
+// Colors
 
+// copies the Color data to the proper pixel.
+void image_setColor( Image *src, int r, int c, Color val ){
+	src->data[r][c].rgb[0] = val.c[0];
+	src->data[r][c].rgb[1] = val.c[1];
+	src->data[r][c].rgb[2] = val.c[2];
+}
+
+// returns a Color structure built from the pixel values
+Color image_getColor( Image *src, int r, int c ){
+	Color val;
+	val.c[0] = src->data[r][c].rgb[0];
+	val.c[1] = src->data[r][c].rgb[1];
+	val.c[2] = src->data[r][c].rgb[2];
+	return(val);
+}
 
 
 
