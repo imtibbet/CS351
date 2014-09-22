@@ -5,6 +5,8 @@
  * The color function implementations
  */
 
+#include "graphics.h"
+
 // POINT
 
 /* 
@@ -49,12 +51,12 @@ void point_copy(Point *to, Point *from){
 
 /** Draw the point into src using Color c. **/
 void point_draw(Point *p, Image *src, Color c){
-	image_setColor( src, p->val[0], p->val[1], c );
+	image_setColor( src, p->val[1], p->val[0], c );
 }
 
 /** Draw the p into src using FPixel c. **/
 void point_drawf(Point *p, Image *src, FPixel c){
-	image_setf(src, p->val[0], p->val[1], c);
+	image_setf(src, p->val[1], p->val[0], c);
 }
 
 // LINE
@@ -94,19 +96,19 @@ void line_draw(Line *l, Image *src, Color c){
 	int x, y, dx, dy, e, i;
 	Point curp;
 
-	x = x0 = l->a[0];
-	y = y0 = l->a[1];
-	x1 = l->b[0];
-	y1 = l->b[1];
+	x = x0 = l->a.val[0];
+	y = y0 = l->a.val[1];
+	x1 = l->b.val[0];
+	y1 = l->b.val[1];
 
 	dx = x1 - x0;
 	dy = y1 - y0;
 
 	if(dy<0){
-		x = x0 = l->b[0];
-		y = y0 = l->b[1];
-		x1 = l->a[0];
-		y1 = l->a[1];
+		x = x0 = l->b.val[0];
+		y = y0 = l->b.val[1];
+		x1 = l->a.val[0];
+		y1 = l->a.val[1];
 
 		dx = x1 - x0;
 		dy = y1 - y0;
@@ -116,6 +118,17 @@ void line_draw(Line *l, Image *src, Color c){
 
 	// 1st and 2nd octants (right half)
 	if(dx>0) {
+
+		if(dy==0){
+			while(x!=x1){
+				point_set2D(&curp, (double)x, (double)y);
+				point_draw(&curp, src, c);
+				x++;
+			}
+			printf("horizontal line drawn\n");
+			return;
+		}
+
 		// 1st octant
 		if(dx>=dy) {
 			for(i=0; i<=dx; i++){
@@ -123,28 +136,40 @@ void line_draw(Line *l, Image *src, Color c){
 				point_draw(&curp, src, c);
 				if(e>0){
 					y++;
-					e-=2*dx;
+					e-=(2*dx);
 				}
 				x++;
-				e+=2*dy;
+				e+=(2*dy);
 			}
 		}
 		// 2nd octant
-		else(dy>dx){
+		else if(dy>dx){
 			for(i=0; i<=dy; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
 				if(e>0){
 					x++;
-					e-=2*dy;
+					e-=(2*dy);
 				}
 				y++;
-				e+=2*dx;
+				e+=(2*dx);
 			} 
 		}
+		printf("right half line drawn\n");
 	}
 	// 3rd and 4th octants (left half)
 	else if(dx<0){
+
+		if(dy==0){
+			while(x!=x1){
+				point_set2D(&curp, (double)x, (double)y);
+				point_draw(&curp, src, c);
+				x--;
+			}
+			printf("horizontal line drawn\n");
+			return;
+		}
+
 		// 4th octant
 		if(dx>=dy) {
 			for(i=0; i<=dx; i++){
@@ -152,25 +177,35 @@ void line_draw(Line *l, Image *src, Color c){
 				point_draw(&curp, src, c);
 				if(e>0){
 					y++;
-					e-=2*dx;
+					e-=(2*dx);
 				}
 				x--;
-				e+=2*dy;
+				e+=(2*dy);
 			}
 		}
 		// 3rd octant
-		else(dy>dx){
+		else if(dy>dx){
 			for(i=0; i<=dy; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
 				if(e>0){
 					x--;
-					e-=2*dy;
+					e-=(2*dy);
 				}
 				y++;
-				e+=2*dx;
+				e+=(2*dx);
 			} 
 		}
+		printf("left half line drawn\n");
+	}
+	// special case of vertical lines
+	else {//dx==0
+		while(y!=y1){
+			point_set2D(&curp, (double)x, (double)y);
+			point_draw(&curp, src, c);
+			y++;
+		}
+		printf("vertical line drawn\n");
 	}
 }
 
@@ -201,14 +236,14 @@ void ellipse_drawFill(Ellipse *e, Image *src, Color p){}
 /* Returns an allocated Polyline pointer initialized so that 
 * numVertex is 0 and vertex is NULL. */
 Polyline *polyline_create(int x){
-	Polyline *p;
+	Polyline *p = NULL;
 	return(p);
 }
 
 /* Returns an allocated Polyline pointer with the vertex list initialized 
 * to the points in vlist. */
 Polyline *polyline_createp(int numV, Point *vlist){
-	Polyline *p;
+	Polyline *p = NULL;
 	return(p);
 }
 
