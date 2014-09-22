@@ -125,7 +125,7 @@ void line_draw(Line *l, Image *src, Color c){
 				point_draw(&curp, src, c);
 				x++;
 			}
-			printf("horizontal line drawn\n");
+			//printf("horizontal line drawn\n");
 			return;
 		}
 
@@ -155,7 +155,7 @@ void line_draw(Line *l, Image *src, Color c){
 				e+=(2*dx);
 			} 
 		}
-		printf("right half line drawn\n");
+		//printf("right half line drawn\n");
 	}
 	// 3rd and 4th octants (left half)
 	else if(dx<0){
@@ -166,7 +166,7 @@ void line_draw(Line *l, Image *src, Color c){
 				point_draw(&curp, src, c);
 				x--;
 			}
-			printf("horizontal line drawn\n");
+			//printf("horizontal line drawn\n");
 			return;
 		}
 
@@ -196,7 +196,7 @@ void line_draw(Line *l, Image *src, Color c){
 				e+=(2*dx);
 			} 
 		}
-		printf("left half line drawn\n");
+		//printf("left half line drawn\n");
 	}
 	// special case of vertical lines
 	else {//dx==0
@@ -205,7 +205,7 @@ void line_draw(Line *l, Image *src, Color c){
 			point_draw(&curp, src, c);
 			y++;
 		}
-		printf("vertical line drawn\n");
+		//printf("vertical line drawn\n");
 	}
 }
 
