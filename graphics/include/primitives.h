@@ -54,8 +54,8 @@ typedef struct {
 /** Initialize to center tc and radius tr. **/
 void circle_set(Circle *c, Point tc, double tr);
 
-/** Draw the circle into src using color p. **/
-void circle_draw(Circle *c, Image *src, Color p);
+/** Draw the circle into src using color c. **/
+void circle_draw(Circle *circ, Image *src, Color c);
 
 /** Draw a filled circled into src using color c. **/
 void circle_drawFill(Circle *circ, Image *src, Color c);

@@ -260,8 +260,8 @@ void circle_draw(Circle *circ, Image *src, Color c){
 	}
 }
 
-/** Draw a filled circled into src using color p. **/
-void circle_drawFill(Circle *c, Image *src, Color p){
+/** Draw a filled circled into src using color c. **/
+void circle_drawFill(Circle *circ, Image *src, Color c){
 	int tr = (int)(circ->r);
 	int x = -1;
 	int y = -tr;
