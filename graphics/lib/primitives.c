@@ -261,7 +261,59 @@ void circle_draw(Circle *circ, Image *src, Color c){
 }
 
 /** Draw a filled circled into src using color p. **/
-void circle_drawFill(Circle *c, Image *src, Color p){}
+void circle_drawFill(Circle *c, Image *src, Color p){
+	int tr = (int)(circ->r);
+	int x = -1;
+	int y = -tr;
+	int p = 1 - tr;
+	int curx;
+
+	int xCenter = (int)(circ->c.val[0]);
+	int yCenter = (int)(circ->c.val[1]);
+
+	// draw the edge cases not handled by the algorithm b/cause x=-1
+	image_setColor(src, yCenter + tr, xCenter + 0, c);
+	image_setColor(src, yCenter + 0, xCenter + tr, c);
+	image_setColor(src, yCenter - tr, xCenter - 0, c);
+	image_setColor(src, yCenter - 0, xCenter - tr, c);
+
+	curx = -tr;
+
+	while(curx!=tr){
+		image_setColor(src, 0, curx++, c);
+	}
+
+	// circle draw here - plot first set of points
+	image_setColor(src, yCenter + y, xCenter + x, c);
+	image_setColor(src, yCenter - y, xCenter + x, c);
+	image_setColor(src, yCenter + y, xCenter - x, c);
+	image_setColor(src, yCenter - y, xCenter - x, c);
+	image_setColor(src, yCenter + x, xCenter + y, c);
+	image_setColor(src, yCenter - x, xCenter + y, c);
+	image_setColor(src, yCenter + x, xCenter - y, c);
+	image_setColor(src, yCenter - x, xCenter - y, c);
+
+	// sixth octant
+	while(x>y){
+		x--;
+		if(p<0)
+			p += 1 - 2*x;
+		else{
+			y++;
+			p += 1 - 2*(x-y);
+		}
+
+		// draw in all 8 octants
+		image_setColor(src, yCenter + y, xCenter + x, c);
+		image_setColor(src, yCenter - y, xCenter + x, c);
+		image_setColor(src, yCenter + y, xCenter - x, c);
+		image_setColor(src, yCenter - y, xCenter - x, c);
+		image_setColor(src, yCenter + x, xCenter + y, c);
+		image_setColor(src, yCenter - x, xCenter + y, c);
+		image_setColor(src, yCenter + x, xCenter - y, c);
+		image_setColor(src, yCenter - x, xCenter - y, c);
+	}
+}
 
 // ELLIPSE
 
