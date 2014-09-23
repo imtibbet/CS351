@@ -43,10 +43,7 @@ void point_set(Point *p, double x, double y, double z, double h){
 
 /** Copy the point data structure. **/
 void point_copy(Point *to, Point *from){
-	to->val[0] = from->val[0];
-	to->val[1] = from->val[1];
-	to->val[2] = from->val[2];
-	to->val[3] = from->val[3];
+	*to = *from;
 }
 
 /** Draw the point into src using Color c. **/
@@ -85,9 +82,7 @@ void line_zBuffer(Line *l, int flag){
 
 /** Copy the line data structure. **/
 void line_copy(Line *to, Line *from){
-	to->zBuffer = from->zBuffer;
-	point_copy(&(to->a), &(from->a));
-	point_copy(&(to->b), &(from->b));
+	*to = *from;
 }
 
 /** Draw the line into src using Color c. **/
