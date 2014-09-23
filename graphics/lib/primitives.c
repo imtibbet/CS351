@@ -273,25 +273,39 @@ void circle_drawFill(Circle *circ, Image *src, Color c){
 
 	// draw the edge cases not handled by the algorithm b/cause x=-1
 	image_setColor(src, yCenter + tr, xCenter + 0, c);
-	image_setColor(src, yCenter + 0, xCenter + tr, c);
 	image_setColor(src, yCenter - tr, xCenter - 0, c);
-	image_setColor(src, yCenter - 0, xCenter - tr, c);
-
+	//middle line
 	curx = -tr;
-
 	while(curx!=tr){
-		image_setColor(src, 0, curx++, c);
+		image_setColor(src, yCenter, xCenter + curx, c);
+		curx++;
 	}
 
-	// circle draw here - plot first set of points
-	image_setColor(src, yCenter + y, xCenter + x, c);
-	image_setColor(src, yCenter - y, xCenter + x, c);
-	image_setColor(src, yCenter + y, xCenter - x, c);
-	image_setColor(src, yCenter - y, xCenter - x, c);
-	image_setColor(src, yCenter + x, xCenter + y, c);
-	image_setColor(src, yCenter - x, xCenter + y, c);
-	image_setColor(src, yCenter + x, xCenter - y, c);
-	image_setColor(src, yCenter - x, xCenter - y, c);
+	// circle draw here - plot first set of lines
+	// line above bottom
+	curx = x;
+	while(curx!=-x){
+		image_setColor(src, yCenter + y, xCenter + curx, c);
+		curx++;
+	}
+	// line below top
+	curx = x;
+	while(curx!=-x){
+		image_setColor(src, yCenter - y, xCenter + curx, c);
+		curx++;
+	}
+	// line below middle
+	curx = y;
+	while(curx!=-y){
+		image_setColor(src, yCenter + x, xCenter + curx, c);
+		curx++;
+	}
+	// line above middle
+	curx = y;
+	while(curx!=-y){
+		image_setColor(src, yCenter - x, xCenter + curx, c);
+		curx++;
+	}
 
 	// sixth octant
 	while(x>y){
@@ -304,14 +318,30 @@ void circle_drawFill(Circle *circ, Image *src, Color c){
 		}
 
 		// draw in all 8 octants
-		image_setColor(src, yCenter + y, xCenter + x, c);
-		image_setColor(src, yCenter - y, xCenter + x, c);
-		image_setColor(src, yCenter + y, xCenter - x, c);
-		image_setColor(src, yCenter - y, xCenter - x, c);
-		image_setColor(src, yCenter + x, xCenter + y, c);
-		image_setColor(src, yCenter - x, xCenter + y, c);
-		image_setColor(src, yCenter + x, xCenter - y, c);
-		image_setColor(src, yCenter - x, xCenter - y, c);
+		// line above bottom
+		curx = x;
+		while(curx!=-x){
+			image_setColor(src, yCenter + y, xCenter + curx, c);
+			curx++;
+		}
+		// line below top
+		curx = x;
+		while(curx!=-x){
+			image_setColor(src, yCenter - y, xCenter + curx, c);
+			curx++;
+		}
+		// line below middle
+		curx = y;
+		while(curx!=-y){
+			image_setColor(src, yCenter + x, xCenter + curx, c);
+			curx++;
+		}
+		// line above middle
+		curx = y;
+		while(curx!=-y){
+			image_setColor(src, yCenter - x, xCenter + curx, c);
+			curx++;
+		}
 	}
 }
 
