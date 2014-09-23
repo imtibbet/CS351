@@ -207,10 +207,50 @@ void line_draw(Line *l, Image *src, Color c){
 // CIRCLE
 
 /** Initialize to center tc and radius tr. **/
-void circle_set(Circle *c, Point tc, double tr){}
+void circle_set(Circle *c, Point tc, double radius){
+	
+
+}
 
 /** Draw the circle into src using color p. **/
-void circle_draw(Circle *c, Image *src, Color p){}
+void circle_draw(Circle *circ, Image *src, Color c){
+	int tr = (int)(circ->r);
+	int x = -1;
+	int y = -tr;
+	int p = 1 - tr;
+
+	double xCenter = circ->c->val[0];
+	double yCenter = circ->c->val[1];
+
+	//circle draw here - plot first set of points
+	image_setColor((int)xCenter - x, (int)yCenter - y, c);
+  	image_setColor((int)xCenter + x, (int)yCenter - y, c);
+  	image_setColor((int)xCenter - x, (int)yCenter + y, c);
+  	image_setColor((int)xCenter + x, (int)yCenter + y, c);
+  	image_setColor((int)xCenter - y, (int)yCenter - x, c);
+  	image_setColor((int)xCenter + y, (int)yCenter - x, c);
+  	image_setColor((int)xCenter - y, (int)yCenter + x, c);
+  	image_setColor((int)xCenter + y, (int)yCenter + x, c);
+
+	//second octant
+	while(x>y){
+		x--;
+		if(p<0)
+			p += 1 - 2*x;
+		else{
+			y++;
+			p += 1 - 2*(x-y);
+		}
+		image_setColor((int)xCenter - x, (int)yCenter - y, c);
+	  	image_setColor((int)xCenter + x, (int)yCenter - y, c);
+	  	image_setColor((int)xCenter - x, (int)yCenter + y, c);
+	  	image_setColor((int)xCenter + x, (int)yCenter + y, c);
+	  	image_setColor((int)xCenter - y, (int)yCenter - x, c);
+	  	image_setColor((int)xCenter + y, (int)yCenter - x, c);
+	  	image_setColor((int)xCenter - y, (int)yCenter + x, c);
+	  	image_setColor((int)xCenter + y, (int)yCenter + x, c);
+	}
+}
 
 /** Draw a filled circled into src using color p. **/
 void circle_drawFill(Circle *c, Image *src, Color p){}
