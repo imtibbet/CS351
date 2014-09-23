@@ -57,8 +57,8 @@ void circle_set(Circle *c, Point tc, double tr);
 /** Draw the circle into src using color p. **/
 void circle_draw(Circle *c, Image *src, Color p);
 
-/** Draw a filled circled into src using color p. **/
-void circle_drawFill(Circle *c, Image *src, Color p);
+/** Draw a filled circled into src using color c. **/
+void circle_drawFill(Circle *circ, Image *src, Color c);
 
 typedef struct {
 	double ra;

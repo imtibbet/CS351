@@ -207,32 +207,38 @@ void line_draw(Line *l, Image *src, Color c){
 // CIRCLE
 
 /** Initialize to center tc and radius tr. **/
-void circle_set(Circle *c, Point tc, double radius){
-	
-
+void circle_set(Circle *c, Point tc, double tr){
+	c->r = tr;
+	c->c = tc;
 }
 
-/** Draw the circle into src using color p. **/
+/** Draw the circle into src using color c. **/
 void circle_draw(Circle *circ, Image *src, Color c){
 	int tr = (int)(circ->r);
 	int x = -1;
 	int y = -tr;
 	int p = 1 - tr;
 
-	double xCenter = circ->c->val[0];
-	double yCenter = circ->c->val[1];
+	int xCenter = (int)(circ->c.val[0]);
+	int yCenter = (int)(circ->c.val[1]);
 
-	//circle draw here - plot first set of points
-	image_setColor((int)xCenter - x, (int)yCenter - y, c);
-  	image_setColor((int)xCenter + x, (int)yCenter - y, c);
-  	image_setColor((int)xCenter - x, (int)yCenter + y, c);
-  	image_setColor((int)xCenter + x, (int)yCenter + y, c);
-  	image_setColor((int)xCenter - y, (int)yCenter - x, c);
-  	image_setColor((int)xCenter + y, (int)yCenter - x, c);
-  	image_setColor((int)xCenter - y, (int)yCenter + x, c);
-  	image_setColor((int)xCenter + y, (int)yCenter + x, c);
+	// draw the edge cases not handled by the algorithm b/cause x=-1
+	image_setColor(src, yCenter + tr, xCenter + 0, c);
+	image_setColor(src, yCenter + 0, xCenter + tr, c);
+	image_setColor(src, yCenter - tr, xCenter - 0, c);
+	image_setColor(src, yCenter - 0, xCenter - tr, c);
 
-	//second octant
+	// circle draw here - plot first set of points
+	image_setColor(src, yCenter + y, xCenter + x, c);
+	image_setColor(src, yCenter - y, xCenter + x, c);
+	image_setColor(src, yCenter + y, xCenter - x, c);
+	image_setColor(src, yCenter - y, xCenter - x, c);
+	image_setColor(src, yCenter + x, xCenter + y, c);
+	image_setColor(src, yCenter - x, xCenter + y, c);
+	image_setColor(src, yCenter + x, xCenter - y, c);
+	image_setColor(src, yCenter - x, xCenter - y, c);
+
+	// sixth octant
 	while(x>y){
 		x--;
 		if(p<0)
@@ -241,14 +247,16 @@ void circle_draw(Circle *circ, Image *src, Color c){
 			y++;
 			p += 1 - 2*(x-y);
 		}
-		image_setColor((int)xCenter - x, (int)yCenter - y, c);
-	  	image_setColor((int)xCenter + x, (int)yCenter - y, c);
-	  	image_setColor((int)xCenter - x, (int)yCenter + y, c);
-	  	image_setColor((int)xCenter + x, (int)yCenter + y, c);
-	  	image_setColor((int)xCenter - y, (int)yCenter - x, c);
-	  	image_setColor((int)xCenter + y, (int)yCenter - x, c);
-	  	image_setColor((int)xCenter - y, (int)yCenter + x, c);
-	  	image_setColor((int)xCenter + y, (int)yCenter + x, c);
+
+		// draw in all 8 octants
+		image_setColor(src, yCenter + y, xCenter + x, c);
+		image_setColor(src, yCenter - y, xCenter + x, c);
+		image_setColor(src, yCenter + y, xCenter - x, c);
+		image_setColor(src, yCenter - y, xCenter - x, c);
+		image_setColor(src, yCenter + x, xCenter + y, c);
+		image_setColor(src, yCenter - x, xCenter + y, c);
+		image_setColor(src, yCenter + x, xCenter - y, c);
+		image_setColor(src, yCenter - x, xCenter - y, c);
 	}
 }
 
