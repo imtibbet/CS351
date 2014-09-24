@@ -586,7 +586,15 @@ Polyline *polyline_create(int x){
  * to the points in vlist. 
  */
 Polyline *polyline_createp(int numV, Point *vlist){
+
 	Polyline *p;
+	int i;
+	
+	// make sure that numV and vlist match well enough
+	if( sizeof(vlist) < (sizeof(Point) * numV) ){
+		printf("vlist passed to polyline_createp has fewer Points than numV\n");
+		return(NULL); 
+	}
 	
 	// get space for the polyline
 	p = malloc(sizeof(Polyline));
@@ -601,15 +609,31 @@ Polyline *polyline_createp(int numV, Point *vlist){
 		return(NULL);
 	}
 	
-	// 
+	// initialize structure
+	p->zBuffer = 1;
+	p->numVertex = numV;
+	for(i=0;i<numV;i++){
+		p->vertex[i] = vlist[i];
+	}
 	
+	// return pointer
 	return(p);
 }
 
 /* 
  * Frees the internal data and the Polyline pointer. 
  */
-void polyline_free(Polyline *p){}
+void polyline_free(Polyline *p){
+
+	if(p){
+		if(p->vertex){
+			free(p->vertex);
+		}
+		free(p);
+	} else {
+		printf("null p passed to polyline_free\n");
+	}
+}
 
 // The functions polyline_init, polyline_set, and polyline_clear work on a pre-
 // existing Polyline data structure and manage only the memory required for the 
@@ -618,30 +642,137 @@ void polyline_free(Polyline *p){}
 /* 
  * Initializes the pre-existing Polyline to an empty Polyline. 
  */
-void polyline_init(Polyline *p){}
+void polyline_init(Polyline *p){
+
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polyline_init\n");
+		return;
+	}
+	
+	// free existing vertex list
+	if(p->vertex){
+		free(p->vertex);
+	}
+	
+	// reset structure
+	p->zBuffer = 1;
+	p->numVertex = 0;
+	p->vertex = NULL;
+}
 
 /* Initializes the vertex list to the points in vlist. De-allocates/allocates
  * the vertex list for p, as necessary. 
  */
-void polyline_set(Polyline *p, int numV, Point *vlist){}
+void polyline_set(Polyline *p, int numV, Point *vlist){
+	
+	// make sure that numV and vlist match well enough
+	if( sizeof(vlist) < (sizeof(Point) * numV) ){
+		printf("vlist passed to polyline_set has fewer Points than numV\n");
+		return; 
+	}
+	
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polyline_set\n");
+		return;
+	}	
+	
+	// free existing vertex list
+	if(p->vertex){
+		free(p->vertex);
+	}
+	
+	// get space for the vertex list
+	p->vertex = malloc(sizeof(Point) * numV);
+	if(!p->vertex){
+		return(NULL);
+	}
+	
+	// initialize structure
+	p->zBuffer = 1;
+	p->numVertex = numV;
+	for(i=0;i<numV;i++){
+		p->vertex[i] = vlist[i];
+	}
+}
 
 /* 
  * Frees the internal data for a Polyline, if necessary, and sets numVertex
  * to 0 and vertex to NULL. 
  */
-void polyline_clear(Polyline *p){}
+void polyline_clear(Polyline *p){
+
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polyline_clear\n");
+		return;
+	}
+	
+	// free internal data
+	if(p->vertex){
+		free(p->vertex);
+	}
+	
+	// reset structure
+	p->numVertex = 0;
+	p->vertex = NULL;
+}
 
 /* 
  * Sets the z-buffer flag to the given value. 
  */
-void polyline_zBuffer(Polyline *p, int flag){}
+void polyline_zBuffer(Polyline *p, int flag){
+
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polyline_zBuffer\n");
+		return;
+	}
+
+	p->zBuffer = flag;
+}
 
 /* 
  * De-allocates/allocates space as necessary in the destination Polyline data
  * structure and copies the vertex data from the source polyline (from) to the 
  * destination (to). 
  */
-void polyline_copy (Polyline *to, Polyline *from){}
+void polyline_copy (Polyline *to, Polyline *from){
+
+	// detect null pointer passed
+	if(!to){
+		printf("null to passed to polyline_copy\n");
+		return;
+	}
+	if(!from){
+		printf("null from passed to polyline_copy\n");
+		return;
+	}
+	
+	// free internal data in destination
+	if(to->vertex){
+		free(to->vertex);
+	}
+	
+	// allocate new destination space
+	to->vertex = malloc( sizeof(Point) * from->numVertex) );
+	if(!to->vertex){
+		return;
+	}
+	
+	// make sure the source polyline is correctly set up
+	if( sizeof(from->vertex) < (sizeof(Point) * from->numVertex) ){
+		printf("vertex list of source polyline has fewer Points than its own numVertex\n");
+		return; 
+	}
+	
+	// copy the points to destination
+	to->numVertex = from->numVertex;
+	for(i=0;i<(to->numVertex);i++){
+		to->vertex[i] = from->vertex[i];
+	}
+}
 
 /* 
  * Prints Polyline data to the stream designated by the FILE pointer. 
