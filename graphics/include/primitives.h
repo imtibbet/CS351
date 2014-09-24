@@ -3,8 +3,34 @@
 #define PRIMITIVES_H
 
 typedef struct {
-	double val[4];
+	double val[4]; // four element vector of doubles
 } Point;
+
+typedef struct {
+	int zBuffer; // whether to use the z-buffer, should default to true (1)
+	Point a; // starting point
+	Point b; // ending point
+} Line;
+
+typedef struct {
+	double r; // radius,
+	Point c; // center
+} Circle;
+
+typedef struct {
+	double ra; // major axis radius
+	double rb; // minor axis radius
+	Point c; // center
+	double a; // (optional) angle of major axis relative to the X-axis
+} Ellipse;
+
+typedef struct {
+	int zBuffer; // whether to use the z-buffer; should default to true (1)
+	int numVertex; // Number of vertices
+	Point *vertex; // vertex information
+} Polyline;
+
+// Point functions
 
 /** Sets the first two values of the vector to x and y. Sets the third value to 0.0 and the fourth value to 1.0 **/
 void point_set2D(Point *p, double x, double y);
@@ -24,12 +50,7 @@ void point_draw(Point *p, Image *src, Color c);
 /** Draw the p into src using FPixel c. **/
 void point_drawf(Point *p, Image *src, FPixel c);
 
-
-typedef struct {
-	int zBuffer;
-	Point a;
-	Point b;
-} Line;
+// Line functions
 
 /** Initialize a 2D line. **/
 void line_set2D(Line *l, double x0, double y0, double x1, double y1);
@@ -46,10 +67,7 @@ void line_copy(Line *to, Line *from);
 /** Draw the line into src using Color c. **/
 void line_draw(Line *l, Image *src, Color c);
 
-typedef struct {
-	double r;
-	Point c;
-} Circle;
+// Circle functions
 
 /** Initialize to center tc and radius tr. **/
 void circle_set(Circle *c, Point tc, double tr);
@@ -60,27 +78,18 @@ void circle_draw(Circle *circ, Image *src, Color c);
 /** Draw a filled circled into src using color c. **/
 void circle_drawFill(Circle *circ, Image *src, Color c);
 
-typedef struct {
-	double ra;
-	double rb;
-	Point c;
-	double a;
-} Ellipse;
+// Elipse functions
 
 /** Initialize an ellipse to location tc and radii ta and tb. **/
 void ellipse_set(Ellipse *e, Point tc, double ta, double tb);
 
-/** Draw into src using color p. **/
-void ellipse_draw(Ellipse *e, Image *src, Color p);
+/** Draw into src using color c. **/
+void ellipse_draw(Ellipse *e, Image *src, Color c);
 
-/** Draw a filled ellipse into src using color p. **/
-void ellipse_drawFill(Ellipse *e, Image *src, Color p);
+/** Draw a filled ellipse into src using color c. **/
+void ellipse_drawFill(Ellipse *e, Image *src, Color c);
 
-typedef struct {
-	int zBuffer;
-	int numVertex;
-	Point *vertex;
-} Polyline;
+// Polyline functions
 
 /* Returns an allocated Polyline pointer initialized so that 
 * numVertex is 0 and vertex is NULL. */

@@ -41,24 +41,32 @@ void point_set(Point *p, double x, double y, double z, double h){
 	p->val[3] = h;
 }
 
-/** Copy the point data structure. **/
+/*
+ * Copy the point data structure. 
+ */
 void point_copy(Point *to, Point *from){
 	*to = *from;
 }
 
-/** Draw the point into src using Color c. **/
+/*
+ * Draw the point into src using Color c. 
+ */
 void point_draw(Point *p, Image *src, Color c){
 	image_setColor( src, p->val[1], p->val[0], c );
 }
 
-/** Draw the p into src using FPixel c. **/
+/*
+ * Draw the p into src using FPixel c. 
+ */
 void point_drawf(Point *p, Image *src, FPixel c){
 	image_setf(src, p->val[1], p->val[0], c);
 }
 
 // LINE
 
-/** Initialize a 2D line. **/
+/*
+ * Initialize a 2D line. 
+ */
 void line_set2D(Line *l, double x0, double y0, double x1, double y1){
 	Point a;
 	Point b;
@@ -69,24 +77,34 @@ void line_set2D(Line *l, double x0, double y0, double x1, double y1){
 	l->b = b;
 }
 
-/** Initialze a line to ta and tb. **/
+/*
+ * Initialze a line to ta and tb. 
+ */
 void line_set(Line *l, Point ta, Point tb){
 	l->a = ta;
 	l->b = tb;
 }
 
-/** Set the z-buffer flag to the given value. **/
+/*
+ * Set the z-buffer flag to the given value. 
+ */
 void line_zBuffer(Line *l, int flag){
 	l->zBuffer = flag;
 }
 
-/** Copy the line data structure. **/
+/*
+ * Copy the line data structure. 
+ */
 void line_copy(Line *to, Line *from){
 	*to = *from;
 }
 
-/** Draw the line into src using Color c. **/
+/*
+ * Draw the line into src using Color c 
+ */
 void line_draw(Line *l, Image *src, Color c){
+	
+	// Bresenham's line-drawing algorithm
 	int x0, y0, x1, y1;
 	int x, y, dx, dy, e, i;
 	Point curp;
@@ -206,21 +224,26 @@ void line_draw(Line *l, Image *src, Color c){
 
 // CIRCLE
 
-/** Initialize to center tc and radius tr. **/
+/*
+ * Initialize to center tc and radius tr. 
+ */
 void circle_set(Circle *c, Point tc, double tr){
 	c->r = tr;
 	c->c = tc;
 }
 
-/** Draw the circle into src using color c. **/
+/*
+ * Draw the circle into src using color c. 
+ */
 void circle_draw(Circle *circ, Image *src, Color c){
+
+	// template connected with the Hearn and Baker textbook
+	int xCenter = (int)(circ->c.val[0]);
+	int yCenter = (int)(circ->c.val[1]);
 	int tr = (int)(circ->r);
 	int x = -1;
 	int y = -tr;
 	int p = 1 - tr;
-
-	int xCenter = (int)(circ->c.val[0]);
-	int yCenter = (int)(circ->c.val[1]);
 
 	// draw the edge cases not handled by the algorithm b/cause x=-1
 	image_setColor(src, yCenter + tr, xCenter + 0, c);
@@ -260,16 +283,19 @@ void circle_draw(Circle *circ, Image *src, Color c){
 	}
 }
 
-/** Draw a filled circled into src using color c. **/
+/*
+ * Draw a filled circled into src using color c. 
+ */
 void circle_drawFill(Circle *circ, Image *src, Color c){
+
+	// template connected with the Hearn and Baker textbook
+	int xCenter = (int)(circ->c.val[0]);
+	int yCenter = (int)(circ->c.val[1]);
 	int tr = (int)(circ->r);
 	int x = -1;
 	int y = -tr;
 	int p = 1 - tr;
 	int curx;
-
-	int xCenter = (int)(circ->c.val[0]);
-	int yCenter = (int)(circ->c.val[1]);
 
 	// draw the edge cases not handled by the algorithm b/cause x=-1
 	image_setColor(src, yCenter + tr, xCenter + 0, c);
@@ -347,55 +373,282 @@ void circle_drawFill(Circle *circ, Image *src, Color c){
 
 // ELLIPSE
 
-/** Initialize an ellipse to location tc and radii ta and tb. **/
-void ellipse_set(Ellipse *e, Point tc, double ta, double tb){}
+/*
+ * Initialize an ellipse to location tc and radii ta and tb. 
+ */
+void ellipse_set(Ellipse *e, Point tc, double ta, double tb){
+	e->ra = ta;
+	e->rb = tb;
+	e->c = tc;
+	e->a = 0.0;
+}
 
-/** Draw into src using color p. **/
-void ellipse_draw(Ellipse *e, Image *src, Color p){}
+/*
+ * Draw a filled ellipse into src using color c.
+ */
+void ellipse_draw(Ellipse *e, Image *src, Color c){
 
-/** Draw a filled ellipse into src using color p. **/
-void ellipse_drawFill(Ellipse *e, Image *src, Color p){}
+	// template connected with the Hearn and Baker textbook
+	int xCenter = (int)(e->c.val[0]);
+	int yCenter = (int)(e->c.val[1]);
+	int Rx = (int)(e->ra);
+	int Ry = (int)(e->rb);
+	int Rx2 = Rx*Rx;
+	int Ry2 = Ry*Ry;
+	int twoRx2 = 2*Rx2;
+	int twoRy2 = 2*Ry2;
+	int p;
+	int x = -1;
+	int y = -Ry;
+	int px = twoRy2;
+	int py = twoRx2 * (-y);
+
+	// draw the edge cases not handled by the algorithm b/cause x=-1
+	image_setColor(src, yCenter + Ry, xCenter + 0, c);
+	image_setColor(src, yCenter + 0, xCenter + Rx, c);
+	image_setColor(src, yCenter - Ry, xCenter - 0, c);
+	image_setColor(src, yCenter - 0, xCenter - Rx, c);
+	
+	/* Plot the first set of points */
+	image_setColor(src, yCenter + y, xCenter + x, c);
+	image_setColor(src, yCenter + y, xCenter - x, c);
+	image_setColor(src, yCenter - y, xCenter + x, c);
+	image_setColor(src, yCenter - y, xCenter - x, c);
+
+	/* Region 1 */
+	p = (int)( (Ry2 - (Rx2 * Ry) + (0.25 * Rx2)) + Ry2 + px + 0.5 );
+	while (px < py) {
+		x--;
+		px += twoRy2;
+		if (p < 0)
+			p += Ry2 + px;
+		else {
+			y++;
+			py -= twoRx2;
+			p += Ry2 + px - py;
+		}
+		image_setColor(src, yCenter + y, xCenter + x, c);
+		image_setColor(src, yCenter - y, xCenter + x, c);
+		image_setColor(src, yCenter + y, xCenter - x, c);
+		image_setColor(src, yCenter - y, xCenter - x, c);
+	}
+
+	/* Region 2 */
+	p = (int)( (Ry2*(x+0.5)*(x+0.5) + Rx2*(y-1)*(y-1) - Rx2*Ry2) + (Rx2 - py) + 0.5 );
+	while (y < 0) {
+		y++;
+		py -= twoRx2;
+		if (p > 0) 
+			p += Rx2 - py;
+		else {
+			x--;
+			px += twoRy2;
+			p += Rx2 - py + px;
+		}
+		image_setColor(src, yCenter + y, xCenter + x, c);
+		image_setColor(src, yCenter - y, xCenter + x, c);
+		image_setColor(src, yCenter + y, xCenter - x, c);
+		image_setColor(src, yCenter - y, xCenter - x, c);
+	}
+}
+
+/*
+ * Draw into src using color c. 
+ */
+void ellipse_drawFill(Ellipse *e, Image *src, Color c){
+
+	// template connected with the Hearn and Baker textbook
+	int xCenter = (int)(e->c.val[0]);
+	int yCenter = (int)(e->c.val[1]);
+	int Rx = (int)(e->ra);
+	int Ry = (int)(e->rb);
+	int Rx2 = Rx*Rx;
+	int Ry2 = Ry*Ry;
+	int twoRx2 = 2*Rx2;
+	int twoRy2 = 2*Ry2;
+	int p;
+	int x = -1;
+	int y = -Ry;
+	int px = twoRy2;
+	int py = twoRx2 * (-y);
+	int curx;
+
+	// draw the edge cases not handled by the algorithm b/cause x=-1
+	image_setColor(src, yCenter + Ry, xCenter + 0, c);
+	image_setColor(src, yCenter - Ry, xCenter - 0, c);
+	//middle line
+	curx = -Rx;
+	while(curx!=Rx){
+		image_setColor(src, yCenter, xCenter + curx, c);
+		curx++;
+	}
+
+	// circle draw here - plot first set of lines
+	// line above bottom
+	curx = x;
+	while(curx!=-x){
+		image_setColor(src, yCenter + y, xCenter + curx, c);
+		curx++;
+	}
+	// line below top
+	curx = x;
+	while(curx!=-x){
+		image_setColor(src, yCenter - y, xCenter + curx, c);
+		curx++;
+	}
+
+	/* Region 1 */
+	p = (int)( (Ry2 - (Rx2 * Ry) + (0.25 * Rx2)) + Ry2 + px + 0.5 );
+	while (px < py) {
+		x--;
+		px += twoRy2;
+		if (p < 0)
+			p += Ry2 + px;
+		else {
+			y++;
+			py -= twoRx2;
+			p += Ry2 + px - py;
+		}
+		
+		// plot two lines
+		// line above bottom
+		curx = x;
+		while(curx!=-x){
+			image_setColor(src, yCenter + y, xCenter + curx, c);
+			curx++;
+		}
+		// line below top
+		curx = x;
+		while(curx!=-x){
+			image_setColor(src, yCenter - y, xCenter + curx, c);
+			curx++;
+		}
+	}
+
+	/* Region 2 */
+	p = (int)( (Ry2*(x+0.5)*(x+0.5) + Rx2*(y-1)*(y-1) - Rx2*Ry2) + (Rx2 - py) + 0.5 );
+	while (y < 0) {
+		y++;
+		py -= twoRx2;
+		if (p > 0) 
+			p += Rx2 - py;
+		else {
+			x--;
+			px += twoRy2;
+			p += Rx2 - py + px;
+		}
+		
+		// plot two lines
+		// line above bottom
+		curx = x;
+		while(curx!=-x){
+			image_setColor(src, yCenter + y, xCenter + curx, c);
+			curx++;
+		}
+		// line below top
+		curx = x;
+		while(curx!=-x){
+			image_setColor(src, yCenter - y, xCenter + curx, c);
+			curx++;
+		}
+	}
+}
 
 // POLYLINE
 
-/* Returns an allocated Polyline pointer initialized so that 
-* numVertex is 0 and vertex is NULL. */
+// The functions polyline_create and polyline_free manage both the Polyline data
+//  structure and the memory required for the vertex list
+
+/* 
+ * Returns an allocated Polyline pointer initialized so that 
+ * numVertex is 0 and vertex is NULL. 
+ */
 Polyline *polyline_create(int x){
-	Polyline *p = NULL;
+	Polyline *p;
+	
+	// get space for the polyline
+	p = malloc(sizeof(Polyline));
+	if(!p){
+		return(NULL);
+	}
+	
+	// initialize structure
+	p->zBuffer = x;
+	p->numVertex = 0;
+	p->vertex = NULL;	
+	
+	// return pointer
 	return(p);
 }
 
-/* Returns an allocated Polyline pointer with the vertex list initialized 
-* to the points in vlist. */
+/* 
+ * Returns an allocated Polyline pointer with the vertex list initialized 
+ * to the points in vlist. 
+ */
 Polyline *polyline_createp(int numV, Point *vlist){
-	Polyline *p = NULL;
+	Polyline *p;
+	
+	// get space for the polyline
+	p = malloc(sizeof(Polyline));
+	if(!p){
+		return(NULL);
+	}
+	
+	// get space for the vertex list
+	p->vertex = malloc(sizeof(Point) * numV);
+	if(!p->vertex){
+		free(p);
+		return(NULL);
+	}
+	
+	// 
+	
 	return(p);
 }
 
-/* Frees the internal data and the Polyline pointer. */
+/* 
+ * Frees the internal data and the Polyline pointer. 
+ */
 void polyline_free(Polyline *p){}
 
-/* Initializes the pre-existing Polyline to an empty Polyline. */
+// The functions polyline_init, polyline_set, and polyline_clear work on a pre-
+// existing Polyline data structure and manage only the memory required for the 
+// vertex list
+
+/* 
+ * Initializes the pre-existing Polyline to an empty Polyline. 
+ */
 void polyline_init(Polyline *p){}
 
 /* Initializes the vertex list to the points in vlist. De-allocates/allocates
-* the vertex list for p, as necessary. */
+ * the vertex list for p, as necessary. 
+ */
 void polyline_set(Polyline *p, int numV, Point *vlist){}
 
-/* Frees the internal data for a Polyline, if necessary, and sets numVertex
-* to 0 and vertex to NULL. */
+/* 
+ * Frees the internal data for a Polyline, if necessary, and sets numVertex
+ * to 0 and vertex to NULL. 
+ */
 void polyline_clear(Polyline *p){}
 
-/* Sets the z-buffer flag to the given value. */
+/* 
+ * Sets the z-buffer flag to the given value. 
+ */
 void polyline_zBuffer(Polyline *p, int flag){}
 
-/* De-allocates/allocates space as necessary in the destination Polyline data
-* structure and copies the vertex data from the source polyline (from) to the 
-* destination (to). */
+/* 
+ * De-allocates/allocates space as necessary in the destination Polyline data
+ * structure and copies the vertex data from the source polyline (from) to the 
+ * destination (to). 
+ */
 void polyline_copy (Polyline *to, Polyline *from){}
 
-/* Prints Polyline data to the stream designated by the FILE pointer. */
+/* 
+ * Prints Polyline data to the stream designated by the FILE pointer. 
+ */
 void polyline_print(Polyline *p, FILE *fp){}
 
-/* Draw the Polyline using color c. */
+/* 
+ * Draw the Polyline using color c. 
+ */
 void polyline_draw(Polyline *p, Image *src, Color c){}

@@ -45,6 +45,7 @@ void image_filla(Image *src, float a);
 void image_fillz(Image *src, float z);
 
 // fractal noise
+typedef int FPoint[2];
 void image_noise(Image *src, int density);
 
 // color

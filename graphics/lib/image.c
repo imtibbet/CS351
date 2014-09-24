@@ -26,10 +26,13 @@ Image *image_create(int rows, int cols){
 	} 
 	src->data = malloc(sizeof(FPixel *) * rows); 
 	if(!src->data){
+		free(src);
 		return(NULL);
 	} 
 	src->data[0] = malloc(sizeof(FPixel) * rows * cols);
 	if(!src->data[0]){
+		free(src);
+		free(src->data);
 		return(NULL);
 	}
 
@@ -114,6 +117,7 @@ int image_alloc(Image *src, int rows, int cols){
 	}
 	src->data[0] = (FPixel *)malloc(sizeof(FPixel) * rows * cols);
 	if(!src->data[0]){
+		free(src->data);
 		return(1);
 	}
 
@@ -128,7 +132,7 @@ int image_alloc(Image *src, int rows, int cols){
 			src->data[i][j].rgb[0] = 
 			src->data[i][j].rgb[1] = 
 			src->data[i][j].rgb[2] = 
-			src->data[i][j].a = 0.0;
+			src->data[i][j].a = 1.0;
 			src->data[i][j].z = 1.0;
 		}
 	}
@@ -185,6 +189,7 @@ Image *image_read(char *filename){
 
 	src = image_create(rows, cols);
 	if(!src){
+		free(readData);
 		return(NULL);
 	}
 	
@@ -238,36 +243,28 @@ int image_write(Image *src, char *filename){
  * returns the FPixel at (r, c).
  */
 FPixel image_getf(Image *src, int r, int c){
-	FPixel val;
-	val = src->data[r][c];
-	return(val);
+	return(src->data[r][c]);
 } // end image_getf
 
 /*
  * returns the value of band b at pixel (r, c).
  */
 float image_getc(Image *src, int r, int c, int b){
-	float val;
-	val = src->data[r][c].rgb[b];
-	return(val);
+	return(src->data[r][c].rgb[b]);
 } // end image_getf
 
 /*
  * returns the alpha value at pixel (r, c).
  */
 float image_geta(Image *src, int r, int c){
-	float val;
-	val = src->data[r][c].a;
-	return(val);
+	return(src->data[r][c].a);
 } // end image_geta
 
 /*
  * returns the depth value at pixel (r, c).
  */
 float image_getz(Image *src, int r, int c){
-	float val;
-	val = src->data[r][c].z;
-	return(val);
+	return(src->data[r][c].z);
 } // end image_getz
 
 /*
@@ -431,14 +428,17 @@ void image_noise(Image *src, int density){
 
 	// initialize a 2D array of integers, which will be an array of
 	// (row, col) pairs for the feature points
-	featurePoints = malloc(sizeof(int *) * density);
-
+	featurePoints = malloc(sizeof(FPoint) * density);
+	if(!featurePoints){
+		printf("image_noise failed to malloc feaute point space, returning\n");
+		return;
+	}
+	
 	// initialize the seed of the random function with the current time
 	srand(time(NULL));
 	
 	// randomly select density number of feature points from the image region
 	for(i=0;i<density;i++){
-		featurePoints[i] = malloc(sizeof(int) * 2);
 		featurePoints[i][0] = rand() % src->rows;
 		featurePoints[i][1] = rand() % src->cols;
 		printf("feature at row:%d col:%d\n",
@@ -481,10 +481,11 @@ void image_noise(Image *src, int density){
 			src->data[i][j].rgb[0] *= colorVal;
 			src->data[i][j].rgb[1] *= colorVal;
 			src->data[i][j].rgb[2] *= colorVal;
-			src->data[i][j].a = 0.0;
-			src->data[i][j].z = 1.0;
 		}
 	}
+	
+	// prevent memory leak (thanks Bruce)
+	free(featurePoints);
 }
 
 // Colors
