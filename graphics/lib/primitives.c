@@ -777,9 +777,63 @@ void polyline_copy (Polyline *to, Polyline *from){
 /* 
  * Prints Polyline data to the stream designated by the FILE pointer. 
  */
-void polyline_print(Polyline *p, FILE *fp){}
+void polyline_print(Polyline *p, FILE *fp){
+	int i;
+
+	if(p){
+		if(!p->vertex){
+			return;
+		}
+	} else{
+		return;
+	}	
+
+	// make sure the source polyline is correctly set up
+	if( sizeof(p->vertex) < (sizeof(Point) * p->numVertex) ){
+		printf("vertex list of source polyline has fewer Points than its own numVertex\n");
+		return; 
+	}
+
+	// print polyline points as x,y pairs
+	fprintf(fp, "about to print polyline points\n")
+	for(i = 0; i<(p->numVertex); i++){
+		fprintf(fp,"x:%f, y:%f\n", p->vertex[i].val[0], p->vertex[i].val[1]);
+	}
+}
 
 /* 
  * Draw the Polyline using color c. 
  */
-void polyline_draw(Polyline *p, Image *src, Color c){}
+void polyline_draw(Polyline *p, Image *src, Color c){
+	int i;
+	Line *l;
+
+	if(p){
+		if(!p->vertex){
+			return;
+		}
+	} else{
+		return;
+	}
+
+	// make sure the source polyline is correctly set up
+	if( sizeof(p->vertex) < (sizeof(Point) * p->numVertex) ){
+		printf("vertex list of source polyline has fewer Points than its own numVertex\n");
+		return; 
+	}
+
+	if (p->numVertex < 2){
+		printf("can't draw a polyline with less than two points\n")
+	}
+
+	// iterate through polyline
+	for(i=0; i<(p->numVertex-1); i++){
+		// take coordinates for polyline point
+		// create a line
+		line_set(l, p->vertex[i], p->vertex[i +1]);
+		// draw line on src using Color c
+		line_draw(l, src, c);
+	}
+
+
+}
