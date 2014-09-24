@@ -45,8 +45,8 @@ int main(int argc, char *argv[]) {
 
   printf("Drawing poly-lines\n");
   // draw some random lines
-  polyline_drawFrame( &thing1, src, Blue );
-  polyline_drawFrame( thing2, src, Red );
+  polyline_draw( &thing1, src, Blue );
+  polyline_draw( thing2, src, Red );
 
   // draw a box going counter-clockwise, should be ok
   point_set2D( &(p[500]), 50, 300 );
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
   printf("Counter-clockwise box\n");
   polyline_set( thing2, 5, &(p[500]) );
-  polyline_drawFrame( thing2, src, Green );
+  polyline_draw 	( thing2, src, Green );
 
   // draw a box going clockwise, should not be ok
   point_set2D( &(p[500]), 350, 300 );
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
   printf("Clockwise box\n");
   polyline_set( thing2, 5, &(p[500]) );
-  polyline_drawFrame( thing2, src, Green );
+  polyline_draw( thing2, src, Green );
 
   image_write( src, "test3c.ppm");
 

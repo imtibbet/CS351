@@ -14,6 +14,9 @@
  * Sets the third value to 0.0 and the fourth value to 1.0 
  */
 void point_set2D(Point *p, double x, double y){
+	if(!p){
+		return;
+	}
 	p->val[0] = x;
 	p->val[1] = y;
 	p->val[2] = 0.0;
@@ -25,6 +28,9 @@ void point_set2D(Point *p, double x, double y){
  * Sets the homogeneous coordinate to 1.0 
  */
 void point_set3D(Point *p, double x, double y, double z){
+	if(!p){
+		return;
+	}
 	p->val[0] = x;
 	p->val[1] = y;
 	p->val[2] = z;
@@ -35,6 +41,9 @@ void point_set3D(Point *p, double x, double y, double z){
  * Set the four values of the vector to x, y, z, and h, respectively. 
  */
 void point_set(Point *p, double x, double y, double z, double h){
+	if(!p){
+		return;
+	}
 	p->val[0] = x;
 	p->val[1] = y;
 	p->val[2] = z;
@@ -52,6 +61,9 @@ void point_copy(Point *to, Point *from){
  * Draw the point into src using Color c. 
  */
 void point_draw(Point *p, Image *src, Color c){
+	if(!p){
+		return;
+	}
 	image_setColor( src, p->val[1], p->val[0], c );
 }
 
@@ -59,6 +71,10 @@ void point_draw(Point *p, Image *src, Color c){
  * Draw the p into src using FPixel c. 
  */
 void point_drawf(Point *p, Image *src, FPixel c){
+	if(!p){
+		return;
+	}
+	
 	image_setf(src, p->val[1], p->val[0], c);
 }
 
@@ -68,6 +84,10 @@ void point_drawf(Point *p, Image *src, FPixel c){
  * Initialize a 2D line. 
  */
 void line_set2D(Line *l, double x0, double y0, double x1, double y1){
+	if(!l){
+		return;
+	}
+
 	Point a;
 	Point b;
 	point_set2D(&a, x0, y0);
@@ -81,6 +101,10 @@ void line_set2D(Line *l, double x0, double y0, double x1, double y1){
  * Initialze a line to ta and tb. 
  */
 void line_set(Line *l, Point ta, Point tb){
+	if(!l){
+		return;
+	}
+	
 	l->a = ta;
 	l->b = tb;
 }
@@ -89,6 +113,10 @@ void line_set(Line *l, Point ta, Point tb){
  * Set the z-buffer flag to the given value. 
  */
 void line_zBuffer(Line *l, int flag){
+	if(!l){
+		return;
+	}
+	
 	l->zBuffer = flag;
 }
 
@@ -103,7 +131,9 @@ void line_copy(Line *to, Line *from){
  * Draw the line into src using Color c 
  */
 void line_draw(Line *l, Image *src, Color c){
-	
+	if(!l){
+		return;
+	}
 	// Bresenham's line-drawing algorithm
 	int x0, y0, x1, y1;
 	int x, y, dx, dy, e, i;
@@ -228,6 +258,9 @@ void line_draw(Line *l, Image *src, Color c){
  * Initialize to center tc and radius tr. 
  */
 void circle_set(Circle *c, Point tc, double tr){
+	if(!c){
+		return;
+	}
 	c->r = tr;
 	c->c = tc;
 }
@@ -236,6 +269,9 @@ void circle_set(Circle *c, Point tc, double tr){
  * Draw the circle into src using color c. 
  */
 void circle_draw(Circle *circ, Image *src, Color c){
+	if(!circ){
+		return;
+	}
 
 	// template connected with the Hearn and Baker textbook
 	int xCenter = (int)(circ->c.val[0]);
@@ -287,6 +323,9 @@ void circle_draw(Circle *circ, Image *src, Color c){
  * Draw a filled circled into src using color c. 
  */
 void circle_drawFill(Circle *circ, Image *src, Color c){
+	if(!circ){
+		return;
+	}
 
 	// template connected with the Hearn and Baker textbook
 	int xCenter = (int)(circ->c.val[0]);
@@ -377,6 +416,9 @@ void circle_drawFill(Circle *circ, Image *src, Color c){
  * Initialize an ellipse to location tc and radii ta and tb. 
  */
 void ellipse_set(Ellipse *e, Point tc, double ta, double tb){
+	if(!e){
+		return;
+	}
 	e->ra = ta;
 	e->rb = tb;
 	e->c = tc;
@@ -387,6 +429,9 @@ void ellipse_set(Ellipse *e, Point tc, double ta, double tb){
  * Draw a filled ellipse into src using color c.
  */
 void ellipse_draw(Ellipse *e, Image *src, Color c){
+	if(!e){
+		return;
+	}
 
 	// template connected with the Hearn and Baker textbook
 	int xCenter = (int)(e->c.val[0]);
@@ -456,6 +501,9 @@ void ellipse_draw(Ellipse *e, Image *src, Color c){
  * Draw into src using color c. 
  */
 void ellipse_drawFill(Ellipse *e, Image *src, Color c){
+	if(!e){
+		return;
+	}
 
 	// template connected with the Hearn and Baker textbook
 	int xCenter = (int)(e->c.val[0]);
@@ -578,6 +626,7 @@ Polyline *polyline_create(int x){
 	p->vertex = NULL;	
 	
 	// return pointer
+	printf("polyline created\n");
 	return(p);
 }
 
@@ -589,12 +638,6 @@ Polyline *polyline_createp(int numV, Point *vlist){
 
 	Polyline *p;
 	int i;
-	
-	// make sure that numV and vlist match well enough
-	if( sizeof(vlist) < (sizeof(Point) * numV) ){
-		printf("vlist passed to polyline_createp has fewer Points than numV\n");
-		return(NULL); 
-	}
 	
 	// get space for the polyline
 	p = malloc(sizeof(Polyline));
@@ -617,6 +660,7 @@ Polyline *polyline_createp(int numV, Point *vlist){
 	}
 	
 	// return pointer
+	printf("polyline created\n");
 	return(p);
 }
 
@@ -633,6 +677,7 @@ void polyline_free(Polyline *p){
 	} else {
 		printf("null p passed to polyline_free\n");
 	}
+	printf("polyline freed\n");
 }
 
 // The functions polyline_init, polyline_set, and polyline_clear work on a pre-
@@ -650,27 +695,24 @@ void polyline_init(Polyline *p){
 		return;
 	}
 	
-	// free existing vertex list
+	/* free existing vertex list
 	if(p->vertex){
 		free(p->vertex);
-	}
+	}*/
 	
 	// reset structure
 	p->zBuffer = 1;
 	p->numVertex = 0;
 	p->vertex = NULL;
+	
+	printf("polyline initted\n");
 }
 
 /* Initializes the vertex list to the points in vlist. De-allocates/allocates
  * the vertex list for p, as necessary. 
  */
 void polyline_set(Polyline *p, int numV, Point *vlist){
-	
-	// make sure that numV and vlist match well enough
-	if( sizeof(vlist) < (sizeof(Point) * numV) ){
-		printf("vlist passed to polyline_set has fewer Points than numV\n");
-		return; 
-	}
+	int  i;
 	
 	// detect null pointer passed
 	if(!p){
@@ -686,7 +728,7 @@ void polyline_set(Polyline *p, int numV, Point *vlist){
 	// get space for the vertex list
 	p->vertex = malloc(sizeof(Point) * numV);
 	if(!p->vertex){
-		return(NULL);
+		return;
 	}
 	
 	// initialize structure
@@ -695,6 +737,7 @@ void polyline_set(Polyline *p, int numV, Point *vlist){
 	for(i=0;i<numV;i++){
 		p->vertex[i] = vlist[i];
 	}
+	printf("polyline set\n");
 }
 
 /* 
@@ -717,6 +760,7 @@ void polyline_clear(Polyline *p){
 	// reset structure
 	p->numVertex = 0;
 	p->vertex = NULL;
+	printf("polyline cleared\n");
 }
 
 /* 
@@ -739,7 +783,8 @@ void polyline_zBuffer(Polyline *p, int flag){
  * destination (to). 
  */
 void polyline_copy (Polyline *to, Polyline *from){
-
+	int i;
+	
 	// detect null pointer passed
 	if(!to){
 		printf("null to passed to polyline_copy\n");
@@ -756,15 +801,9 @@ void polyline_copy (Polyline *to, Polyline *from){
 	}
 	
 	// allocate new destination space
-	to->vertex = malloc( sizeof(Point) * from->numVertex) );
+	to->vertex = malloc( sizeof(Point) * (from->numVertex) );
 	if(!to->vertex){
 		return;
-	}
-	
-	// make sure the source polyline is correctly set up
-	if( sizeof(from->vertex) < (sizeof(Point) * from->numVertex) ){
-		printf("vertex list of source polyline has fewer Points than its own numVertex\n");
-		return; 
 	}
 	
 	// copy the points to destination
@@ -772,6 +811,7 @@ void polyline_copy (Polyline *to, Polyline *from){
 	for(i=0;i<(to->numVertex);i++){
 		to->vertex[i] = from->vertex[i];
 	}
+	printf("polyline copied\n");
 }
 
 /* 
@@ -788,17 +828,12 @@ void polyline_print(Polyline *p, FILE *fp){
 		return;
 	}	
 
-	// make sure the source polyline is correctly set up
-	if( sizeof(p->vertex) < (sizeof(Point) * p->numVertex) ){
-		printf("vertex list of source polyline has fewer Points than its own numVertex\n");
-		return; 
-	}
-
 	// print polyline points as x,y pairs
-	fprintf(fp, "about to print polyline points\n")
+	fprintf(fp, "about to print polyline points\n");
 	for(i = 0; i<(p->numVertex); i++){
 		fprintf(fp,"x:%f, y:%f\n", p->vertex[i].val[0], p->vertex[i].val[1]);
 	}
+	printf("polyline printed\n");
 }
 
 /* 
@@ -806,7 +841,7 @@ void polyline_print(Polyline *p, FILE *fp){
  */
 void polyline_draw(Polyline *p, Image *src, Color c){
 	int i;
-	Line *l;
+	Line l;
 
 	if(p){
 		if(!p->vertex){
@@ -816,24 +851,17 @@ void polyline_draw(Polyline *p, Image *src, Color c){
 		return;
 	}
 
-	// make sure the source polyline is correctly set up
-	if( sizeof(p->vertex) < (sizeof(Point) * p->numVertex) ){
-		printf("vertex list of source polyline has fewer Points than its own numVertex\n");
-		return; 
-	}
-
 	if (p->numVertex < 2){
-		printf("can't draw a polyline with less than two points\n")
+		printf("can't draw a polyline with less than two points\n");
 	}
 
 	// iterate through polyline
 	for(i=0; i<(p->numVertex-1); i++){
 		// take coordinates for polyline point
 		// create a line
-		line_set(l, p->vertex[i], p->vertex[i +1]);
+		line_set(&l, p->vertex[i], p->vertex[i +1]);
 		// draw line on src using Color c
-		line_draw(l, src, c);
+		line_draw(&l, src, c);
 	}
-
-
+	printf("polyline drawn\n");
 }
