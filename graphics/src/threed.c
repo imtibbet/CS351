@@ -13,10 +13,15 @@ static int flower( Image *src, Color color, int x, int y, int x0, int y0 ) {
 	Circle circ;
 	Point p;
 	Line line;
+	Color Red;
+	Color Yellow;
+	color_set( &Red, 0.9, 0.05, 0.05 );
+	color_set( &Yellow, 1.0, 1.0, 0.4 );
 	
 	point_set2D( &p, x, y );
 	circle_set( &circ, p, 20 );
-	circle_drawFill( &circ, src, color );
+	circle_draw( &circ, src, color );
+	floodfill(src, Red, color, x, y);
 	
 	point_set2D( &p, x-20, y-20 );
 	circle_set( &circ, p, 30 );
@@ -38,6 +43,7 @@ static int flower( Image *src, Color color, int x, int y, int x0, int y0 ) {
 	circle_set( &circ, p, 30 );
 	circle_drawoct( &circ, src, color, 1, 3 );
 	
+	floodfill(src, Yellow, color, x, y+35);
 	line_set2D( &line, x0, y0, x, y+45 );
 	line_draw( &line, src, color );
 	return(0);
@@ -48,6 +54,7 @@ int main(int argc, char *argv[]) {
 	Image *src;
 	Color White;
 	Color Red;
+	Color Green;
 	Point p;
 	Ellipse e;
 	int i;
@@ -55,6 +62,7 @@ int main(int argc, char *argv[]) {
 	
 	color_set( &White, 1.0, 1.0, 1.0 );
 	color_set( &Red, 0.9, 0.05, 0.05 );
+	color_set( &Green, 0.0, 1.0, 0.0 );
 
 	src = image_create( 600, 400 );
 	
@@ -66,12 +74,13 @@ int main(int argc, char *argv[]) {
 	}
 	point_set2D( &p, 200, 500-40*5 );
 	ellipse_set( &e, p, 2+2*40, 1+1*40 );
-	ellipse_drawquad( &e, src, White, 1, 4 );
+	ellipse_draw( &e, src, White );
 	
 	// draw flower
 	flower(src, White, 100, 200, 150, 300);
 	flower(src, White, 200, 150, 200, 300);
 	flower(src, White, 300, 200, 250, 300);
+	
 	
 	image_write( src, "threed.ppm" );
 
