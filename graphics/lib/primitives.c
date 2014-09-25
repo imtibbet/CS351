@@ -574,7 +574,7 @@ void ellipse_drawFill(Ellipse *e, Image *src, Color c){
  */
 void ellipse_drawquad(Ellipse *e, Image *src, Color c, int startQuad, int endQuad){
 
-	if( (startOct<1) || (endOct>4) || (endOct<startOct) ){
+	if( (startQuad<1) || (endQuad>4) || (endQuad<startQuad) ){
 		printf("bad start and end quadrant, must be between 1 and 4\n");
 		return;
 	}
