@@ -161,7 +161,7 @@ void line_draw(Line *l, Image *src, Color c){
 
 	// 1st and 2nd octants (right half)
 	if(dx>0) {
-
+	
 		if(dy==0){
 			while(x!=x1){
 				point_set2D(&curp, (double)x, (double)y);
@@ -174,6 +174,7 @@ void line_draw(Line *l, Image *src, Color c){
 
 		// 1st octant
 		if(dx>=dy) {
+			printf("first\n");
 			for(i=0; i<=dx; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -187,6 +188,7 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 2nd octant
 		else if(dy>dx){
+			printf("second\n");
 			for(i=0; i<=dy; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -202,7 +204,7 @@ void line_draw(Line *l, Image *src, Color c){
 	}
 	// 3rd and 4th octants (left half)
 	else if(dx<0){
-
+		dx=-dx;
 		if(dy==0){
 			while(x!=x1){
 				point_set2D(&curp, (double)x, (double)y);
@@ -215,6 +217,7 @@ void line_draw(Line *l, Image *src, Color c){
 
 		// 4th octant
 		if(dx>=dy) {
+			printf("fourth\n");
 			for(i=0; i<=dx; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -228,6 +231,7 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 3rd octant
 		else if(dy>dx){
+			printf("third\n");
 			for(i=0; i<=dy; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -294,36 +298,26 @@ void circle_drawFill(Circle *circ, Image *src, Color c){
 	image_setColor(src, yCenter - tr, xCenter - 0, c);
 	//middle line
 	curx = -tr;
-	while(curx!=tr){
-		image_setColor(src, yCenter, xCenter + curx, c);
-		curx++;
-	}
+	while(curx!=tr)
+		image_setColor(src, yCenter, xCenter + curx++, c);
 
 	// circle draw here - plot first set of lines
 	// line above bottom
 	curx = x;
-	while(curx!=-x){
-		image_setColor(src, yCenter + y, xCenter + curx, c);
-		curx++;
-	}
+	while(curx!=-x)
+		image_setColor(src, yCenter + y, xCenter + curx++, c);
 	// line below top
 	curx = x;
-	while(curx!=-x){
-		image_setColor(src, yCenter - y, xCenter + curx, c);
-		curx++;
-	}
+	while(curx!=-x)
+		image_setColor(src, yCenter - y, xCenter + curx++, c);
 	// line below middle
 	curx = y;
-	while(curx!=-y){
-		image_setColor(src, yCenter + x, xCenter + curx, c);
-		curx++;
-	}
+	while(curx!=-y)
+		image_setColor(src, yCenter + x, xCenter + curx++, c);
 	// line above middle
 	curx = y;
-	while(curx!=-y){
-		image_setColor(src, yCenter - x, xCenter + curx, c);
-		curx++;
-	}
+	while(curx!=-y)
+		image_setColor(src, yCenter - x, xCenter + curx++, c);
 
 	// sixth octant
 	while(x>y){
@@ -338,28 +332,20 @@ void circle_drawFill(Circle *circ, Image *src, Color c){
 		// draw in all 8 octants
 		// line above bottom
 		curx = x;
-		while(curx!=-x){
-			image_setColor(src, yCenter + y, xCenter + curx, c);
-			curx++;
-		}
+		while(curx!=-x)
+			image_setColor(src, yCenter + y, xCenter + curx++, c);
 		// line below top
 		curx = x;
-		while(curx!=-x){
-			image_setColor(src, yCenter - y, xCenter + curx, c);
-			curx++;
-		}
+		while(curx!=-x)
+			image_setColor(src, yCenter - y, xCenter + curx++, c);
 		// line below middle
 		curx = y;
-		while(curx!=-y){
-			image_setColor(src, yCenter + x, xCenter + curx, c);
-			curx++;
-		}
+		while(curx!=-y)
+			image_setColor(src, yCenter + x, xCenter + curx++, c);
 		// line above middle
 		curx = y;
-		while(curx!=-y){
-			image_setColor(src, yCenter - x, xCenter + curx, c);
-			curx++;
-		}
+		while(curx!=-y)
+			image_setColor(src, yCenter - x, xCenter + curx++, c);
 	}
 }
 
@@ -461,7 +447,7 @@ void ellipse_set(Ellipse *e, Point tc, double ta, double tb){
  * Draw a filled ellipse into src using color c.
  */
 void ellipse_draw(Ellipse *e, Image *src, Color c){
-	ellipse_drawquad(e, src, c, 2, 4);
+	ellipse_drawquad(e, src, c, 1, 4);
 }
 
 /*
@@ -493,24 +479,18 @@ void ellipse_drawFill(Ellipse *e, Image *src, Color c){
 	image_setColor(src, yCenter - Ry, xCenter - 0, c);
 	//middle line
 	curx = -Rx;
-	while(curx!=Rx){
-		image_setColor(src, yCenter, xCenter + curx, c);
-		curx++;
-	}
+	while(curx!=Rx)
+		image_setColor(src, yCenter, xCenter + curx++, c);
 
 	// circle draw here - plot first set of lines
 	// line above bottom
 	curx = x;
-	while(curx!=-x){
-		image_setColor(src, yCenter + y, xCenter + curx, c);
-		curx++;
-	}
+	while(curx!=-x)
+		image_setColor(src, yCenter + y, xCenter + curx++, c);
 	// line below top
 	curx = x;
-	while(curx!=-x){
-		image_setColor(src, yCenter - y, xCenter + curx, c);
-		curx++;
-	}
+	while(curx!=-x)
+		image_setColor(src, yCenter - y, xCenter + curx++, c);
 
 	/* Region 1 */
 	p = (int)( (Ry2 - (Rx2 * Ry) + (0.25 * Rx2)) + Ry2 + px + 0.5 );
@@ -528,16 +508,12 @@ void ellipse_drawFill(Ellipse *e, Image *src, Color c){
 		// plot two lines
 		// line above bottom
 		curx = x;
-		while(curx!=-x){
-			image_setColor(src, yCenter + y, xCenter + curx, c);
-			curx++;
-		}
+		while(curx!=-x)
+			image_setColor(src, yCenter + y, xCenter + curx++, c);
 		// line below top
 		curx = x;
-		while(curx!=-x){
-			image_setColor(src, yCenter - y, xCenter + curx, c);
-			curx++;
-		}
+		while(curx!=-x)
+			image_setColor(src, yCenter - y, xCenter + curx++, c);
 	}
 
 	/* Region 2 */
@@ -556,16 +532,12 @@ void ellipse_drawFill(Ellipse *e, Image *src, Color c){
 		// plot two lines
 		// line above bottom
 		curx = x;
-		while(curx!=-x){
-			image_setColor(src, yCenter + y, xCenter + curx, c);
-			curx++;
-		}
+		while(curx!=-x)
+			image_setColor(src, yCenter + y, xCenter + curx++, c);
 		// line below top
 		curx = x;
-		while(curx!=-x){
-			image_setColor(src, yCenter - y, xCenter + curx, c);
-			curx++;
-		}
+		while(curx!=-x)
+			image_setColor(src, yCenter - y, xCenter + curx++, c);
 	}
 }
 
