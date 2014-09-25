@@ -28,14 +28,27 @@ void floodfill(Image *src, Color fillc, Color borderc, int xSeed, int ySeed){
 	while(stacksize){
 		// pop pixel off the stack
 		curp = stack[--stacksize];
-        //for each neighbor N of P
+        //for each neighbor N of pixel
+        if(image_getColor(src, xSeed+1, ySeed) == borderc){
+            return;
+        }else{
+            image_setColor(src, xSeed+1, ySeed, fillc);
+        }
+        
+        
+        if( == borderc){
+            
+        
+        }
             //color N
             //push N on the stack
+           
+        stacksize--;
 	}
     
 	
 	
 	
 	free(stack)
-	
 }
+
