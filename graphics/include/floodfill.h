@@ -3,9 +3,10 @@
 #define FLOODFILL_H
 
 typedef struct {
-    Pixel pix;
-    Pixel push;
-    Color color;
-}
+	FPixel *p;
+	int r;
+	int c;
+} FPixelStackItem;
 
-void floodfill(Point *vlist, Image *src, Color c);
+void floodfill(Image *src, Color c, int xSeed, int ySeed);
+#endif
