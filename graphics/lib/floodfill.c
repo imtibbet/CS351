@@ -26,11 +26,13 @@ void floodfill(Image *src, Color fillc, Color borderc, int xSeed, int ySeed){
 	
 	// while the stack is not empty
 	while(stacksize){
-		
 		// pop pixel off the stack
 		curp = stack[--stacksize];
+        //for each neighbor N of P
+            //color N
+            //push N on the stack
 	}
-	
+    
 	
 	
 	
