@@ -35,10 +35,22 @@ void floodfill(Image *src, Color fillc, Color borderc, int xSeed, int ySeed){
             image_setColor(src, xSeed+1, ySeed, fillc);
         }
         
+        if(image_getColor(src, xSeed+1, ySeed) == borderc){
+            return;
+        }else{
+            image_setColor(src, xSeed+1, ySeed, fillc);
+        }
         
-        if( == borderc){
-            
+        if(image_getColor(src, xSeed+1, ySeed) == borderc){
+            return;
+        }else{
+            image_setColor(src, xSeed+1, ySeed, fillc);
+        }
         
+        if(image_getColor(src, xSeed+1, ySeed) == borderc){
+            return;
+        }else{
+            image_setColor(src, xSeed+1, ySeed, fillc);
         }
             //color N
             //push N on the stack
