@@ -9,6 +9,9 @@ Flood fills a shape, like a paint can tool.
 #include "graphics.h"
 
 void floodfill(Point *vlist, Image *src, Color c){
+    Polyline p1;
+    polyline_init(&p1);
+    polyline_set(&p1, sizeof(vlist));
     //make the boundary using a selected Color c
     
     
