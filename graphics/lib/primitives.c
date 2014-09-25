@@ -461,7 +461,7 @@ void ellipse_set(Ellipse *e, Point tc, double ta, double tb){
  * Draw a filled ellipse into src using color c.
  */
 void ellipse_draw(Ellipse *e, Image *src, Color c){
-	ellipse_drawquad(r, src, c, 2, 4);
+	ellipse_drawquad(e, src, c, 2, 4);
 }
 
 /*
