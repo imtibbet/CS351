@@ -13,15 +13,13 @@ void floodfill(Image *src, Color fillc, Color borderc, int x){
     int curx, cury;
 
     // reserve worst case amount of space (size of image)
-    stack = malloc(sizeof(FPixelStackItem) * src->rows * src->cols);            
-
+    stack = malloc(sizeof(FPixelStackItem) * src->rows * src->cols);
 
     if(!stack){
         printf("no space for the flood fill stack\n");
         return;
     }
     // add seed pixel to the stack
-
 
     curp.x = xSeed;
     curp.y = ySeed;
