@@ -7,9 +7,9 @@
 
 #include "graphics.h"
 
-// draw a box
-static int clover( Image *src, Color color, int x, int y, int x0, int y0 );
-static int clover( Image *src, Color color, int x, int y, int x0, int y0 ) {
+// draw a flower
+static int flower( Image *src, Color color, int x, int y, int x0, int y0 );
+static int flower( Image *src, Color color, int x, int y, int x0, int y0 ) {
 	Circle circ;
 	Point p;
 	Line line;
@@ -69,9 +69,9 @@ int main(int argc, char *argv[]) {
 	ellipse_drawquad( &e, src, White, 1, 4 );
 	
 	// draw flower
-	clover(src, White, 100, 200, 150, 300);
-	clover(src, White, 200, 150, 200, 300);
-	clover(src, White, 300, 200, 250, 300);
+	flower(src, White, 100, 200, 150, 300);
+	flower(src, White, 200, 150, 200, 300);
+	flower(src, White, 300, 200, 250, 300);
 	
 	image_write( src, "threed.ppm" );
 

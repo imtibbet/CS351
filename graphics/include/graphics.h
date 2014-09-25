@@ -11,5 +11,6 @@
 #include "image.h"
 #include "fractals.h"
 #include "primitives.h"
+#include "floodfill.h"
 
 #endif
