@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
   box( src, White, 160, 180, 10, 20 );
 
   point_set2D( &p, 260, 160 );
-  ellipse_set( &e, p, 60 );
+  ellipse_set( &e, p, 60, 30 );
   ellipse_draw( &e, src, White );
 
   line_set2D( &line, 290, 210, 470, 300);
