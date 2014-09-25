@@ -391,7 +391,7 @@ void circle_drawoct(Circle *circ, Image *src, Color c, int startOct, int endOct)
 		image_setColor(src, yCenter + tr, xCenter + 0, c);
 	if( (startOct<6) && (endOct>3) )
 		image_setColor(src, yCenter - 0, xCenter - tr, c);
-	if( !((startOct==8) && (endOct==8)) )
+	if( (startOct<8) && (endOct>5) )
 		image_setColor(src, yCenter - tr, xCenter - 0, c);
 
 	// circle draw here - plot first set of points
@@ -461,72 +461,7 @@ void ellipse_set(Ellipse *e, Point tc, double ta, double tb){
  * Draw a filled ellipse into src using color c.
  */
 void ellipse_draw(Ellipse *e, Image *src, Color c){
-	if(!e){
-		return;
-	}
-
-	// template connected with the Hearn and Baker textbook
-	int xCenter = (int)(e->c.val[0]);
-	int yCenter = (int)(e->c.val[1]);
-	int Rx = (int)(e->ra);
-	int Ry = (int)(e->rb);
-	int Rx2 = Rx*Rx;
-	int Ry2 = Ry*Ry;
-	int twoRx2 = 2*Rx2;
-	int twoRy2 = 2*Ry2;
-	int p;
-	int x = -1;
-	int y = -Ry;
-	int px = twoRy2;
-	int py = twoRx2 * (-y);
-
-	// draw the edge cases not handled by the algorithm b/cause x=-1
-	image_setColor(src, yCenter + Ry, xCenter + 0, c);
-	image_setColor(src, yCenter + 0, xCenter + Rx, c);
-	image_setColor(src, yCenter - Ry, xCenter - 0, c);
-	image_setColor(src, yCenter - 0, xCenter - Rx, c);
-	
-	/* Plot the first set of points */
-	image_setColor(src, yCenter + y, xCenter + x, c);
-	image_setColor(src, yCenter + y, xCenter - x, c);
-	image_setColor(src, yCenter - y, xCenter + x, c);
-	image_setColor(src, yCenter - y, xCenter - x, c);
-
-	/* Region 1 */
-	p = (int)( (Ry2 - (Rx2 * Ry) + (0.25 * Rx2)) + Ry2 + px + 0.5 );
-	while (px < py) {
-		x--;
-		px += twoRy2;
-		if (p < 0)
-			p += Ry2 + px;
-		else {
-			y++;
-			py -= twoRx2;
-			p += Ry2 + px - py;
-		}
-		image_setColor(src, yCenter + y, xCenter + x, c);
-		image_setColor(src, yCenter - y, xCenter + x, c);
-		image_setColor(src, yCenter + y, xCenter - x, c);
-		image_setColor(src, yCenter - y, xCenter - x, c);
-	}
-
-	/* Region 2 */
-	p = (int)( (Ry2*(x+0.5)*(x+0.5) + Rx2*(y-1)*(y-1) - Rx2*Ry2) + (Rx2 - py) + 0.5 );
-	while (y < 0) {
-		y++;
-		py -= twoRx2;
-		if (p > 0) 
-			p += Rx2 - py;
-		else {
-			x--;
-			px += twoRy2;
-			p += Rx2 - py + px;
-		}
-		image_setColor(src, yCenter + y, xCenter + x, c);
-		image_setColor(src, yCenter - y, xCenter + x, c);
-		image_setColor(src, yCenter + y, xCenter - x, c);
-		image_setColor(src, yCenter - y, xCenter - x, c);
-	}
+	ellipse_drawquad(r, src, c, 2, 4);
 }
 
 /*
@@ -637,7 +572,96 @@ void ellipse_drawFill(Ellipse *e, Image *src, Color c){
 /*
  * Draw the specified octant range of a circle into src using color c. 
  */
-void ellipse_drawquad(Ellipse *e, Image *src, Color c, int startQuad, int endQuad){}
+void ellipse_drawquad(Ellipse *e, Image *src, Color c, int startQuad, int endQuad){
+
+	if( (startOct<1) || (endOct>4) || (endOct<startOct) ){
+		printf("bad start and end quadrant, must be between 1 and 4\n");
+		return;
+	}
+	
+	if(!e){
+		return;
+	}
+
+	// template connected with the Hearn and Baker textbook
+	int xCenter = (int)(e->c.val[0]);
+	int yCenter = (int)(e->c.val[1]);
+	int Rx = (int)(e->ra);
+	int Ry = (int)(e->rb);
+	int Rx2 = Rx*Rx;
+	int Ry2 = Ry*Ry;
+	int twoRx2 = 2*Rx2;
+	int twoRy2 = 2*Ry2;
+	int p;
+	int x = -1;
+	int y = -Ry;
+	int px = twoRy2;
+	int py = twoRx2 * (-y);
+
+	// draw the edge cases not handled by the algorithm b/cause x=-1
+	if( (startQuad==1) || (endQuad==4) )
+		image_setColor(src, yCenter + 0, xCenter + Rx, c);
+	if( startQuad<3 )
+		image_setColor(src, yCenter + Ry, xCenter + 0, c);
+	if( (startQuad>4) && (endQuad>1) )
+		image_setColor(src, yCenter - 0, xCenter - Rx, c);
+	if( endQuad>2 )
+		image_setColor(src, yCenter - Ry, xCenter - 0, c);
+	
+	/* Plot the first set of points */
+	if( (startQuad<4) && (endQuad>2) )
+		image_setColor(src, yCenter + y, xCenter + x, c); // third
+	if( endQuad==4 )
+		image_setColor(src, yCenter + y, xCenter - x, c); // fourth
+	if( (startQuad<3) && (endQuad>1) )
+		image_setColor(src, yCenter - y, xCenter + x, c); // second
+	if( startQuad==1 )
+		image_setColor(src, yCenter - y, xCenter - x, c); // first
+
+	/* Region 1 */
+	p = (int)( (Ry2 - (Rx2 * Ry) + (0.25 * Rx2)) + Ry2 + px + 0.5 );
+	while (px < py) {
+		x--;
+		px += twoRy2;
+		if (p < 0)
+			p += Ry2 + px;
+		else {
+			y++;
+			py -= twoRx2;
+			p += Ry2 + px - py;
+		}
+		if( (startQuad<4) && (endQuad>2) )
+			image_setColor(src, yCenter + y, xCenter + x, c); // third
+		if( endQuad==4 )
+			image_setColor(src, yCenter + y, xCenter - x, c); // fourth
+		if( (startQuad<3) && (endQuad>1) )
+			image_setColor(src, yCenter - y, xCenter + x, c); // second
+		if( startQuad==1 )
+			image_setColor(src, yCenter - y, xCenter - x, c); // first
+	}
+
+	/* Region 2 */
+	p = (int)( (Ry2*(x+0.5)*(x+0.5) + Rx2*(y-1)*(y-1) - Rx2*Ry2) + (Rx2 - py) + 0.5 );
+	while (y < 0) {
+		y++;
+		py -= twoRx2;
+		if (p > 0) 
+			p += Rx2 - py;
+		else {
+			x--;
+			px += twoRy2;
+			p += Rx2 - py + px;
+		}
+		if( (startQuad<4) && (endQuad>2) )
+			image_setColor(src, yCenter + y, xCenter + x, c); // third
+		if( endQuad==4 )
+			image_setColor(src, yCenter + y, xCenter - x, c); // fourth
+		if( (startQuad<3) && (endQuad>1) )
+			image_setColor(src, yCenter - y, xCenter + x, c); // second
+		if( startQuad==1 )
+			image_setColor(src, yCenter - y, xCenter - x, c); // first
+	}
+}
 
 // POLYLINE
 
