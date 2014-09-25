@@ -78,6 +78,10 @@ void circle_draw(Circle *circ, Image *src, Color c);
 /** Draw a filled circled into src using color c. **/
 void circle_drawFill(Circle *circ, Image *src, Color c);
 
+/** Draw the specified octant range of a circle into src using color c. **/
+void circle_drawoct(Circle *circ, Image *src, Color c, int startOct, int endOct);
+
+
 // Elipse functions
 
 /** Initialize an ellipse to location tc and radii ta and tb. **/
@@ -88,6 +92,9 @@ void ellipse_draw(Ellipse *e, Image *src, Color c);
 
 /** Draw a filled ellipse into src using color c. **/
 void ellipse_drawFill(Ellipse *e, Image *src, Color c);
+
+/** Draw the specified octant range of a circle into src using color c. **/
+void ellipse_drawquad(Ellipse *e, Image *src, Color c, int startQuad, int endQuad);
 
 // Polyline functions
 

@@ -269,54 +269,7 @@ void circle_set(Circle *c, Point tc, double tr){
  * Draw the circle into src using color c. 
  */
 void circle_draw(Circle *circ, Image *src, Color c){
-	if(!circ){
-		return;
-	}
-
-	// template connected with the Hearn and Baker textbook
-	int xCenter = (int)(circ->c.val[0]);
-	int yCenter = (int)(circ->c.val[1]);
-	int tr = (int)(circ->r);
-	int x = -1;
-	int y = -tr;
-	int p = 1 - tr;
-
-	// draw the edge cases not handled by the algorithm b/cause x=-1
-	image_setColor(src, yCenter + tr, xCenter + 0, c);
-	image_setColor(src, yCenter + 0, xCenter + tr, c);
-	image_setColor(src, yCenter - tr, xCenter - 0, c);
-	image_setColor(src, yCenter - 0, xCenter - tr, c);
-
-	// circle draw here - plot first set of points
-	image_setColor(src, yCenter + y, xCenter + x, c);
-	image_setColor(src, yCenter - y, xCenter + x, c);
-	image_setColor(src, yCenter + y, xCenter - x, c);
-	image_setColor(src, yCenter - y, xCenter - x, c);
-	image_setColor(src, yCenter + x, xCenter + y, c);
-	image_setColor(src, yCenter - x, xCenter + y, c);
-	image_setColor(src, yCenter + x, xCenter - y, c);
-	image_setColor(src, yCenter - x, xCenter - y, c);
-
-	// sixth octant
-	while(x>y){
-		x--;
-		if(p<0)
-			p += 1 - 2*x;
-		else{
-			y++;
-			p += 1 - 2*(x-y);
-		}
-
-		// draw in all 8 octants
-		image_setColor(src, yCenter + y, xCenter + x, c);
-		image_setColor(src, yCenter - y, xCenter + x, c);
-		image_setColor(src, yCenter + y, xCenter - x, c);
-		image_setColor(src, yCenter - y, xCenter - x, c);
-		image_setColor(src, yCenter + x, xCenter + y, c);
-		image_setColor(src, yCenter - x, xCenter + y, c);
-		image_setColor(src, yCenter + x, xCenter - y, c);
-		image_setColor(src, yCenter - x, xCenter - y, c);
-	}
+	circle_drawoct(circ, src, c, 1, 8);
 }
 
 /*
@@ -407,6 +360,85 @@ void circle_drawFill(Circle *circ, Image *src, Color c){
 			image_setColor(src, yCenter - x, xCenter + curx, c);
 			curx++;
 		}
+	}
+}
+
+/*
+ * Draw the specified octant range of a circle into src using color c. 
+ */
+void circle_drawoct(Circle *circ, Image *src, Color c, int startOct, int endOct){
+	if( (startOct<1) || (endOct>8) || (endOct<startOct) ){
+		printf("bad start and end octant, must be between 1 and 8\n");
+		return;
+	}
+	
+	if(!circ){
+		return;
+	}
+
+	// template connected with the Hearn and Baker textbook
+	int xCenter = (int)(circ->c.val[0]);
+	int yCenter = (int)(circ->c.val[1]);
+	int tr = (int)(circ->r);
+	int x = -1;
+	int y = -tr;
+	int p = 1 - tr;
+
+	// draw the edge cases not handled by the algorithm b/cause x=-1
+	if( (startOct==1) || (endOct==1) )
+		image_setColor(src, yCenter + 0, xCenter + tr, c);
+	if( (startOct<4) && (endOct>1) )
+		image_setColor(src, yCenter + tr, xCenter + 0, c);
+	if( (startOct<6) && (endOct>3) )
+		image_setColor(src, yCenter - 0, xCenter - tr, c);
+	if( !((startOct==8) && (endOct==8)) )
+		image_setColor(src, yCenter - tr, xCenter - 0, c);
+
+	// circle draw here - plot first set of points
+	if( (startOct<7) && (endOct>5) )
+		image_setColor(src, yCenter + y, xCenter + x, c); // sixth
+	if( (startOct<4) && (endOct>2) )
+		image_setColor(src, yCenter - y, xCenter + x, c); // third
+	if( (startOct<8) && (endOct>6) )
+		image_setColor(src, yCenter + y, xCenter - x, c); // seventh
+	if( (startOct<3) && (endOct>1) )
+		image_setColor(src, yCenter - y, xCenter - x, c); // second
+	if( (startOct<6) && (endOct>4) )
+		image_setColor(src, yCenter + x, xCenter + y, c); // fifth
+	if( (startOct<5) && (endOct>3) )
+		image_setColor(src, yCenter - x, xCenter + y, c); // fourth
+	if( endOct==8 )
+		image_setColor(src, yCenter + x, xCenter - y, c); // eigth
+	if( startOct==1 )
+		image_setColor(src, yCenter - x, xCenter - y, c); // first
+
+	// sixth octant, moving clockwise
+	while(x>y){
+		x--;
+		if(p<0)
+			p += 1 - 2*x;
+		else{
+			y++;
+			p += 1 - 2*(x-y);
+		}
+
+		// draw in all 8 octants
+		if( (startOct<7) && (endOct>5) )
+			image_setColor(src, yCenter + y, xCenter + x, c); // sixth
+		if( (startOct<4) && (endOct>2) )
+			image_setColor(src, yCenter - y, xCenter + x, c); // third
+		if( (startOct<8) && (endOct>6) )
+			image_setColor(src, yCenter + y, xCenter - x, c); // seventh
+		if( (startOct<3) && (endOct>1) )
+			image_setColor(src, yCenter - y, xCenter - x, c); // second
+		if( (startOct<6) && (endOct>4) )
+			image_setColor(src, yCenter + x, xCenter + y, c); // fifth
+		if( (startOct<5) && (endOct>3) )
+			image_setColor(src, yCenter - x, xCenter + y, c); // fourth
+		if( endOct==8 )
+			image_setColor(src, yCenter + x, xCenter - y, c); // eigth
+		if( startOct==1 )
+			image_setColor(src, yCenter - x, xCenter - y, c); // first
 	}
 }
 
@@ -601,6 +633,11 @@ void ellipse_drawFill(Ellipse *e, Image *src, Color c){
 		}
 	}
 }
+
+/*
+ * Draw the specified octant range of a circle into src using color c. 
+ */
+void ellipse_drawquad(Ellipse *e, Image *src, Color c, int startQuad, int endQuad){}
 
 // POLYLINE
 
