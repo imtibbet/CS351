@@ -174,6 +174,7 @@ void line_draw(Line *l, Image *src, Color c){
 
 		// 1st octant
 		if(dx>=dy) {
+			printf("first\n");
 			for(i=0; i<=dx; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -187,6 +188,7 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 2nd octant
 		else if(dy>dx){
+			printf("second\n");
 			for(i=0; i<=dy; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -215,6 +217,7 @@ void line_draw(Line *l, Image *src, Color c){
 
 		// 4th octant
 		if(dx>=dy) {
+			printf("fourth\n");
 			for(i=0; i<=dx; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -228,6 +231,7 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 3rd octant
 		else if(dy>dx){
+			printf("third\n");
 			for(i=0; i<=dy; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);

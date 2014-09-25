@@ -13,8 +13,6 @@
 static int box( Image *src, Color color, int x, int y, int dx, int dy );
 static int box( Image *src, Color color, int x, int y, int dx, int dy ) {
   Line l;
-  Color Red;
-  color_set( &Red, 0.9, 0.05, 0.05 );
   
   line_set2D( &l, x, y, x, y+dy );
   line_draw( &l, src, color );
@@ -28,8 +26,6 @@ static int box( Image *src, Color color, int x, int y, int dx, int dy ) {
   line_set2D( &l, x+dx, y, x, y );
   line_draw( &l, src, color );
   printf("box drawn\n");
-  
-  floodfill(src, Red, color, x+(dx/2), y+(dy/2));
   return(0);
 }
 
