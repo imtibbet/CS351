@@ -51,5 +51,6 @@ void image_noise(Image *src, int density);
 // color
 void image_setColor( Image *src, int r, int c, Color val );
 Color image_getColor( Image *src, int r, int c );
+void image_fillColor(Image *src, Color c);
 
 #endif

@@ -26,21 +26,25 @@ void floodfill(Image *src, Color fillc, Color borderc, int xSeed, int ySeed){
     curp.y = ySeed;
     stack[stacksize++] = curp;
 
-    printf("start loop\n");
+    printf("start flood fill loop\n");
     // while the stack is not empty
     while(stacksize){
         
         // pop pixel off the stack
         curp = stack[--stacksize];
-        printf("got pixel, stack size=%d, x=%d, y=%d\n", stacksize,curp.x,curp.y);
+        //printf("got pixel, stack size=%d, x=%d, y=%d\n", stacksize,curp.x,curp.y);
         
         // find the far left pixel in the row that is not a boundary color
         curx = (curp.x)-1;
         cury = curp.y;
     	curc = image_getColor(src, cury, curx);
         while( !color_compare(curc, borderc) ){
+        	if(curx==0)
+        		break;
     		curc = image_getColor(src, cury, --curx);
         }
+        if(!color_compare(curc, borderc) && (curx==0))
+        	continue;
         curx++;
         
     	curc = 			image_getColor(src, cury, curx);
@@ -97,7 +101,7 @@ void floodfill(Image *src, Color fillc, Color borderc, int xSeed, int ySeed){
             curp.y = cury-1;
             stack[stacksize++] = curp;
         }
-        printf("at end of loop, stack size = %d\n", stacksize);
+        //printf("at end of loop, stack size = %d\n", stacksize);
     }
 
     printf("flood fill done\n");

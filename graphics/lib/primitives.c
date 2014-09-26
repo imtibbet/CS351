@@ -168,13 +168,11 @@ void line_draw(Line *l, Image *src, Color c){
 				point_draw(&curp, src, c);
 				x++;
 			}
-			//printf("horizontal line drawn\n");
 			return;
 		}
 
 		// 1st octant
 		if(dx>=dy) {
-			printf("first\n");
 			for(i=0; i<=dx; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -188,7 +186,6 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 2nd octant
 		else if(dy>dx){
-			printf("second\n");
 			for(i=0; i<=dy; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -217,7 +214,6 @@ void line_draw(Line *l, Image *src, Color c){
 
 		// 4th octant
 		if(dx>=dy) {
-			printf("fourth\n");
 			for(i=0; i<=dx; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -231,7 +227,6 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 3rd octant
 		else if(dy>dx){
-			printf("third\n");
 			for(i=0; i<=dy; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -243,7 +238,6 @@ void line_draw(Line *l, Image *src, Color c){
 				e+=(2*dx);
 			} 
 		}
-		//printf("left half line drawn\n");
 	}
 	// special case of vertical lines
 	else {//dx==0
@@ -252,7 +246,6 @@ void line_draw(Line *l, Image *src, Color c){
 			point_draw(&curp, src, c);
 			y++;
 		}
-		//printf("vertical line drawn\n");
 	}
 }
 
@@ -727,11 +720,6 @@ void polyline_init(Polyline *p){
 		printf("null p passed to polyline_init\n");
 		return;
 	}
-	
-	/* free existing vertex list
-	if(p->vertex){
-		free(p->vertex);
-	}*/
 	
 	// reset structure
 	p->zBuffer = 1;

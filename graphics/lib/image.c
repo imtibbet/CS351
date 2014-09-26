@@ -271,28 +271,36 @@ float image_getz(Image *src, int r, int c){
  * sets the values of pixel (r, c) to the FPixel val.
  */
 void image_setf(Image *src, int r, int c, FPixel val){
-	src->data[r][c] = val;
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) )
+		src->data[r][c] = val;
 } // end image_setf
 
 /*
  * sets the value of pixel (r, c) band b to val.
  */
 void image_setc(Image *src, int r, int c, int b, float val){
-	src->data[r][c].rgb[b] = val;
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) )
+		src->data[r][c].rgb[b] = val;
 } // end image_setc
 
 /*
  * sets the alpha value of pixel (r, c) to val.
  */
 void image_seta(Image *src, int r, int c, float val){
-	src->data[r][c].a = val;
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) )
+		src->data[r][c].a = val;
 } // end image_seta
 
 /*
  * sets the depth value of pixel (r, c) to val.
  */
 void image_setz(Image *src, int r, int c, float val){
-	src->data[r][c].z = val;
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) )
+		src->data[r][c].z = val;
 } // end image_setz
 
 // Utility
@@ -492,9 +500,12 @@ void image_noise(Image *src, int density){
 
 // copies the Color data to the proper pixel.
 void image_setColor( Image *src, int r, int c, Color val ){
-	src->data[r][c].rgb[0] = val.c[0];
-	src->data[r][c].rgb[1] = val.c[1];
-	src->data[r][c].rgb[2] = val.c[2];
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) ){
+		src->data[r][c].rgb[0] = val.c[0];
+		src->data[r][c].rgb[1] = val.c[1];
+		src->data[r][c].rgb[2] = val.c[2];
+	}
 }
 
 // returns a Color structure built from the pixel values
@@ -505,6 +516,28 @@ Color image_getColor( Image *src, int r, int c ){
 	val.c[2] = src->data[r][c].rgb[2];
 	return(val);
 }
+
+/*
+ * sets the (r, g, b) values of each pixel to the given color.
+ */
+void image_fillColor(Image *src, Color c){
+
+	int i, j;
+
+	if(!src){
+		printf("null src given to fillrgb\n");
+		return;
+	}
+
+	for(i=0;i<src->rows;i++){
+		for(j=0;j<src->cols;j++){
+			src->data[i][j].rgb[0] = c.c[0];
+			src->data[i][j].rgb[1] = c.c[1];
+			src->data[i][j].rgb[2] = c.c[2];
+		}
+	}
+
+} // end image_fillrgb
 
 
 
