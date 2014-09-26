@@ -4,9 +4,9 @@
 
 typedef struct {
 	FPixel *p;
-	int r;
-	int c;
+	int x;
+	int y;
 } FPixelStackItem;
 
-void floodfill(Image *src, Color c, int xSeed, int ySeed);
+void floodfill(Image *src, Color borderc, Color fillc, int xSeed, int ySeed);
 #endif

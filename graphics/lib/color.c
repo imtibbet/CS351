@@ -23,3 +23,10 @@ void color_set(Color *to, float r, float g, float b){
 	printf("color set\n");
 }
 
+// return 1 if they are equal, 0 otherwise
+int color_compare(Color a, Color b){
+	return ((a.c[0] == b.c[0]) &&
+			(a.c[1] == b.c[1]) &&
+			(a.c[2] == b.c[2]));
+}
+

@@ -8,5 +8,6 @@ typedef struct {
 
 void color_copy(Color *to, Color *from);
 void color_set(Color *to, float r, float g, float b);
+int color_compare(Color a, Color b);
 
 #endif

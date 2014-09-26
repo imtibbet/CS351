@@ -6,11 +6,12 @@
 */
 #include "graphics.h"
 
-void floodfill(Image *src, Color fillc, Color borderc, int x){
+void floodfill(Image *src, Color fillc, Color borderc, int xSeed, int ySeed){
     FPixelStackItem *stack;
     FPixelStackItem curp;
     int stacksize = 0;
     int curx, cury;
+    Color curc, abovec, belowc, aboverightc, belowrightc;
 
     // reserve worst case amount of space (size of image)
     stack = malloc(sizeof(FPixelStackItem) * src->rows * src->cols);
@@ -19,8 +20,8 @@ void floodfill(Image *src, Color fillc, Color borderc, int x){
         printf("no space for the flood fill stack\n");
         return;
     }
+    
     // add seed pixel to the stack
-
     curp.x = xSeed;
     curp.y = ySeed;
     stack[stacksize++] = curp;
@@ -36,72 +37,63 @@ void floodfill(Image *src, Color fillc, Color borderc, int x){
         // find the far left pixel in the row that is not a boundary color
         curx = (curp.x)-1;
         cury = curp.y;
-        while( 	(src->data[cury][curx].rgb[0] != borderc.c[0]) &&
-              (src->data[cury][curx].rgb[1] != borderc.c[1]) &&
-              (src->data[cury][curx].rgb[2] != borderc.c[2]) ){
-            curx--;
+    	curc = image_getColor(src, cury, curx);
+        while( !color_compare(curc, borderc) ){
+    		curc = image_getColor(src, cury, --curx);
         }
         curx++;
         
+    	curc = 			image_getColor(src, cury, curx);
+    	abovec = 		image_getColor(src, cury+1, curx);
+    	belowc = 		image_getColor(src, cury-1, curx);
+    	aboverightc = 	image_getColor(src, cury+1, curx+1);
+    	belowrightc = 	image_getColor(src, cury-1, curx+1);
+        
         // traverse the row, coloring until a boundary pixel is reached
-        while( 	(src->data[cury][curx].rgb[0] != borderc.c[0]) &&
-              (src->data[cury][curx].rgb[1] != borderc.c[1]) &&
-              (src->data[cury][curx].rgb[2] != borderc.c[2]) ){
+        while( !color_compare(curc, borderc) ){
             
             // color active pixel
             image_setColor(src, cury, curx, fillc);
             
             // add pixels to the stack if above is clear and above right is not
-            if( (src->data[cury+1][curx].rgb[0] != borderc.c[0]) &&
-               (src->data[cury+1][curx].rgb[1] != borderc.c[1]) &&
-               (src->data[cury+1][curx].rgb[2] != borderc.c[2]) &&
-               (src->data[cury+1][curx].rgb[0] != fillc.c[0]) &&
-               (src->data[cury+1][curx].rgb[1] != fillc.c[1]) &&
-               (src->data[cury+1][curx].rgb[2] != fillc.c[2]) &&
-               (src->data[cury+1][curx+1].rgb[0] == borderc.c[0]) &&
-               (src->data[cury+1][curx+1].rgb[1] == borderc.c[1]) &&
-               (src->data[cury+1][curx+1].rgb[2] == borderc.c[2]) ){
+            if( (!color_compare(abovec, borderc)) &&
+               	(!color_compare(abovec, fillc)) &&
+               	(color_compare(aboverightc, borderc)) ){
                 curp.x = curx;
                 curp.y = cury+1;
                 stack[stacksize++] = curp;
             }
             // add pixels to the stack if below is clear and below right is not
-            if( (src->data[cury-1][curx].rgb[0] != borderc.c[0]) &&
-               (src->data[cury-1][curx].rgb[1] != borderc.c[1]) &&
-               (src->data[cury-1][curx].rgb[2] != borderc.c[2]) &&
-               (src->data[cury-1][curx].rgb[0] != fillc.c[0]) &&
-               (src->data[cury-1][curx].rgb[1] != fillc.c[1]) &&
-               (src->data[cury-1][curx].rgb[2] != fillc.c[2]) &&
-               (src->data[cury-1][curx+1].rgb[0] == borderc.c[0]) &&
-               (src->data[cury-1][curx+1].rgb[1] == borderc.c[1]) &&
-               (src->data[cury-1][curx+1].rgb[2] == borderc.c[2]) ){
+            if( (!color_compare(belowc, borderc)) &&
+               	(!color_compare(belowc, fillc)) &&
+               	(color_compare(belowrightc, borderc)) ){
                 curp.x = curx;
                 curp.y = cury-1;
                 stack[stacksize++] = curp;
             }
             // advance
             curx++;
+			curc = 			image_getColor(src, cury, curx);
+			abovec = 		image_getColor(src, cury+1, curx);
+			belowc = 		image_getColor(src, cury-1, curx);
+			aboverightc = 	image_getColor(src, cury+1, curx+1);
+			belowrightc = 	image_getColor(src, cury-1, curx+1);
         }
-        
+        curx--;
+		abovec = image_getColor(src, cury+1, curx);
+		belowc = image_getColor(src, cury-1, curx);
+
         // when a bounday ends the traversal, add above if clear
-        if( (src->data[cury+1][curx-1].rgb[0] != borderc.c[0]) &&
-           (src->data[cury+1][curx-1].rgb[1] != borderc.c[1]) &&
-           (src->data[cury+1][curx-1].rgb[2] != borderc.c[2]) &&
-           (src->data[cury+1][curx-1].rgb[0] != fillc.c[0]) &&
-           (src->data[cury+1][curx-1].rgb[1] != fillc.c[1]) &&
-           (src->data[cury+1][curx-1].rgb[2] != fillc.c[2]) ){
-            curp.x = curx-1;
+        if( (!color_compare(abovec, fillc)) &&
+           	(!color_compare(abovec, borderc)) ){
+            curp.x = curx;
             curp.y = cury+1;
             stack[stacksize++] = curp;
         }
         // when a bounday ends the traversal, add below if clear
-        if( (src->data[cury-1][curx-1].rgb[0] != borderc.c[0]) &&
-           (src->data[cury-1][curx-1].rgb[1] != borderc.c[1]) &&
-           (src->data[cury-1][curx-1].rgb[2] != borderc.c[2]) &&
-           (src->data[cury-1][curx-1].rgb[0] != fillc.c[0]) &&
-           (src->data[cury-1][curx-1].rgb[1] != fillc.c[1]) &&
-           (src->data[cury-1][curx-1].rgb[2] != fillc.c[2]) ){
-            curp.x = curx-1;
+        if( (!color_compare(belowc, fillc)) &&
+           	(!color_compare(belowc, borderc)) ){
+            curp.x = curx;
             curp.y = cury-1;
             stack[stacksize++] = curp;
         }
@@ -111,3 +103,4 @@ void floodfill(Image *src, Color fillc, Color borderc, int x){
     printf("flood fill done\n");
     free(stack);
 }
+
