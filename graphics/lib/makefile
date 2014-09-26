@@ -28,7 +28,7 @@ LIBDIR =.
 BINDIR =../bin
 
 # put all of the relevant include files here
-_DEPS = graphics.h
+_DEPS = graphics.h ppmIO.h image.h fractals.h primitives.h color.h floodfill.h
 
 # convert them to point to the right place
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
