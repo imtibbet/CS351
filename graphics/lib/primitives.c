@@ -1207,7 +1207,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	Edge *edge;
 	float dscan = end.val[1] - start.val[1];
 	float dwidth = end.val[0] - start.val[0];
-	float xadjust,vyMinusFloor, floorMinusVy;
+	float xAdjust,vyMinusFloor, floorMinusVy;
 
 	/******
 				 Your code starts here
@@ -1216,7 +1216,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	// Check if the starting row is below the image or the end row is
 	// above the image and skip the edge if either is true
 	if( (start.val[1] < epsilon) || (start.val[1] > ((float)(src->rows-1))) ){
-		printf("row clipping, no edge\n");
+		printf("row clipping, no edge returned\n");
 		return(NULL);
 	}
 
@@ -1259,11 +1259,11 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	floorMinusVy = ((float)((int)(edge->y0))) - (edge->y0);
 	vyMinusFloor = (edge->y0)-((float)((int)(edge->y0)));
 	if(0.5 < vyMinusFloor){
-		xadjust = 1.5 - floorMinusVy;
+		xAdjust = 1.5 - floorMinusVy;
 	} else {
-		xadjust = 0.5 - floorMinusVy;
+		xAdjust = 0.5 - floorMinusVy;
 	}
-	edge->xIntersect = edge->x0 + xadjust*edge->dxPerScan;
+	edge->xIntersect = edge->x0 + xAdjust*edge->dxPerScan;
 	
 	// adjust if the edge starts above the image??????????????????????
 	// move the intersections down to scanline zero
@@ -1470,7 +1470,6 @@ static int processEdgeList( LinkedList *edges, Image *src, Color c ) {
 /****************************************
 End Scanline Fill
 *****************************************/
-
 
 /*
 	Draws a filled polygon of the specified color into the image src.
