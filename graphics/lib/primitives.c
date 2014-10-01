@@ -6,7 +6,7 @@
  */
 
 #include "graphics.h"
-const float epsilon = 0.00001;
+const float epsilon = 0.000001;
 
 // POINT
 
@@ -1207,7 +1207,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	Edge *edge;
 	float dscan = end.val[1] - start.val[1];
 	float dwidth = end.val[0] - start.val[0];
-	float adjust;
+	float xadjust,vyMinusFloor, floorMinusVy;
 
 	/******
 				 Your code starts here
@@ -1247,21 +1247,23 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	}
 
 	// Calculate the slope, dxPerScan
-	if(dwidth<epsilon || dwidth>-epsilon){
+	if(dwidth<epsilon && dwidth>-epsilon){
 		edge->dxPerScan = 0.0;
+	} else {
+		edge->dxPerScan = dscan/dwidth;
 	}
-	edge->dxPerScan = dscan/dwidth;
-
+	
 	// Calculate xIntersect, adjusting for the fraction of the point in the pixel.
 	// Scanlines go through the middle of pixels
 	// Move the edge to the first scanline it crosses
-	adjust = (edge->y0)-((int)(edge->y0));
-	if(0.5<adjust){
-		adjust = 0.5 - adjust;
+	floorMinusVy = ((float)((int)(edge->y0))) - (edge->y0);
+	vyMinusFloor = (edge->y0)-((float)((int)(edge->y0)));
+	if(0.5 < vyMinusFloor){
+		xadjust = 1.5 - floorMinusVy;
 	} else {
-		adjust = 1.5 - adjust;
+		xadjust = 0.5 - floorMinusVy;
 	}
-	edge->xIntersect = edge->x0 + adjust*edge->dxPerScan;
+	edge->xIntersect = edge->x0 + xadjust*edge->dxPerScan;
 	
 	// adjust if the edge starts above the image??????????????????????
 	// move the intersections down to scanline zero
@@ -1382,8 +1384,8 @@ static void fillScan( int scan, LinkedList *active, Image *src, Color c ) {
 		}
 		
 		// loop from start to end and color in the pixels
-		while(i!=f){
-			image_setColor(src, scan, i++, c);
+		for(;i<f;i++){
+			image_setColor(src, scan, i, c);
 		}
 		
 		// move ahead to the next pair of edges
