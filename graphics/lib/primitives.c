@@ -1282,7 +1282,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 
 	// check for really bad cases with steep slopes where xIntersect 
 	// has gone beyond the end of the edge
-	if(edge->xIntersect>(edge->x1)){
+	if(edge->xIntersect>(edge->y1)){
 		printf("bad bad xIntersect has gone beyond the end of the edge\n");
 		//return(NULL);
 	}
