@@ -1495,5 +1495,65 @@ void polygon_drawFill(Polygon *p, Image *src, Color c ) {
  * draw the filled polygon using color c with the Barycentric coordinates algorithm.
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
+    
+    if(!(p->nVertex > 3)){
+        polygon_drawFill(p, src, c);
+        return;
+    }
+    
+    double ax, ay;
+    double bx, by;
+    double cx, cy;
+    double x, y;
+    double alpha, beta, gamma;
+    int i, j, f, g;
+     
+    ax = p->vertex[0].val[0];
+    ay = p->vertex[0].val[1];
 
+    bx = p->vertex[0].val[0];
+    by = p->vertex[0].val[1];
+
+    cx = p->vertex[0].val[0];
+    cy = p->vertex[0].val[1];
+
+    //bounding box
+    //identify the starting row
+    j = (int)(fmin(fmin(ay, by), cy) + 0.5);
+    if (j < 0){
+    	j = 0;
+    }
+    //identify the ending row
+    g = (int)(fmax(fmax(ay, by), cy) + 0.5);
+    if (g >= src->cols){
+    	g = (src->cols - 1);
+    }
+	// identify the starting column
+	i = (int)(fmin(fmin(ax, bx), cx) + 0.5);
+	if(i < 0){
+		i = 0;
+	}
+	// identify the ending column
+	f = (int)(fmax(fmax(ax, bx), cx) + 0.5);
+	if(f > (src->cols - 1)){
+		f = src->cols - 1;
+	}
+
+    for (y = j; y <= g; y++){
+		for(x = i; x < f; x++){
+			beta = ((ay - cy) * x + (cx - ax) * y + ax * cy - cx * ay)/
+			((ay - cy) * bx + (cx - ax) * by + ax * cy - cx * ay);
+
+			gamma = ((ay - by) * x + (cx - ax) * y + ax * by + bx * ay)/
+			((ay - by) * cx + (bx - ax) * cy + ax * by - bx * ay);
+
+			alpha = 1.0 - beta - gamma;
+		
+			// only set color if the alpha, beta, gamma are all positive
+			if(alpha>0 && beta>0 && gamma>0){
+				image_setColor(src, x, y, c);
+			}
+		}
+
+    }    
 }
