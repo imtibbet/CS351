@@ -12,5 +12,6 @@
 #include "fractals.h"
 #include "primitives.h"
 #include "floodfill.h"
+#include "list.h"
 
 #endif

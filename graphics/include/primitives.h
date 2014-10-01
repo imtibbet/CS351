@@ -30,6 +30,12 @@ typedef struct {
 	Point *vertex; // vertex information
 } Polyline;
 
+typedef struct {
+	int nVertex; // Number of vertices
+	Point *vertex; // vertex information
+	int zBuffer; // whether to use the z-buffer; should default to true (1)
+} Polygon;
+
 // Point functions
 
 /** Sets the first two values of the vector to x and y. Sets the third value to 0.0 and the fourth value to 1.0 **/
@@ -100,7 +106,7 @@ void ellipse_drawquad(Ellipse *e, Image *src, Color c, int startQuad, int endQua
 
 /* Returns an allocated Polyline pointer initialized so that 
 * numVertex is 0 and vertex is NULL. */
-Polyline *polyline_create(int x);
+Polyline *polyline_create(void);
 
 /* Returns an allocated Polyline pointer with the vertex list initialized 
 * to the points in vlist. */
@@ -133,5 +139,76 @@ void polyline_print(Polyline *p, FILE *fp);
 
 /* Draw the Polyline using color c. */
 void polyline_draw(Polyline *p, Image *src, Color c);
+
+// Polygon
+
+/*
+ * returns an allocated Polygon pointer initialized so that
+ * numVertex is 0 and vertex is NULL.
+ */
+Polygon *polygon_create(void);
+
+/*
+ * returns an allocated Polygon pointer with the vertex list
+ * initialized to a copy of the points in vlist.
+ */
+Polygon *polygon_createp(int numV, Point *vlist);
+
+/*
+ * frees the internal data for a Polygon and the Polygon pointer.
+ * The functions polygon init, polygon set, and polygon
+ * clear work on a pre-existing Polygon data structure
+ * and manage only the memory required for the vertex list.
+ */
+void polygon_free(Polygon *p);
+
+/*
+ * initializes the existing Polygon to an empty Polygon.
+ */
+void polygon_init(Polygon *p);
+
+/*
+ * initializes the vertex array to the points in vlist.
+ */
+void polygon_set(Polygon *p, int numV, Point *vlist);
+
+/*
+ * frees the internal data and resets the fields.
+ */
+void polygon_clear(Polygon *p);
+
+/*
+ * sets the z-buffer flag to the given value.
+ */
+void polygon_zBuffer(Polygon *p, int flag);
+
+/*
+ * De-allocates/allocates space and copies the vertex and 
+ * color data from one polygon to the other.
+ */
+void polygon_copy(Polygon *to, Polygon *from);
+
+/*
+ * prints polygon data to the stream designated by the FILE pointer.
+ */
+void polygon_print(Polygon *p, FILE *fp);
+
+/*
+ * draw the outline of the polygon using color c.
+ */
+void polygon_draw(Polygon *p, Image *src, Color c);
+
+/*
+ * draw the filled polygon using color c with the scanline rendering algorithm.
+ */
+void polygon_drawFill(Polygon *p, Image *src, Color c);
+
+/*
+ * draw the filled polygon using color c with the Barycentric coordinates algorithm.
+ */
+void polygon_drawFillB(Polygon *p, Image *src, Color c);
+
+
+
 
 #endif

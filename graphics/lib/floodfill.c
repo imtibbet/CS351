@@ -6,7 +6,7 @@
 */
 #include "graphics.h"
 
-void polygon_drawFill(Image *src, Color fillc, Color borderc, int xSeed, int ySeed){
+void floodfill(Image *src, Color fillc, Color borderc, int xSeed, int ySeed){
     FPixelStackItem *stack;
     FPixelStackItem curp;
     int stacksize = 0;

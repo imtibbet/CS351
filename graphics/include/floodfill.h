@@ -8,5 +8,5 @@ typedef struct {
 	int y;
 } FPixelStackItem;
 
-void polygon_drawFill(Image *src, Color borderc, Color fillc, int xSeed, int ySeed);
+void floodfill(Image *src, Color borderc, Color fillc, int xSeed, int ySeed);
 #endif

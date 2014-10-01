@@ -637,7 +637,7 @@ void ellipse_drawquad(Ellipse *e, Image *src, Color c, int startQuad, int endQua
  * Returns an allocated Polyline pointer initialized so that 
  * numVertex is 0 and vertex is NULL. 
  */
-Polyline *polyline_create(int x){
+Polyline *polyline_create(){
 	Polyline *p;
 	
 	// get space for the polyline
@@ -647,7 +647,7 @@ Polyline *polyline_create(int x){
 	}
 	
 	// initialize structure
-	p->zBuffer = x;
+	p->zBuffer = 1;
 	p->numVertex = 0;
 	p->vertex = NULL;	
 	
@@ -885,4 +885,271 @@ void polyline_draw(Polyline *p, Image *src, Color c){
 		line_draw(&l, src, c);
 	}
 	printf("polyline drawn\n");
+}
+
+// Polygon
+
+/*
+ * returns an allocated Polygon pointer initialized so that
+ * nVertex is 0 and vertex is NULL.
+ */
+Polygon *polygon_create(){
+	Polygon *p;
+	
+	// get space for the polyline
+	p = malloc(sizeof(Polygon));
+	if(!p){
+		return(NULL);
+	}
+	
+	// initialize structure
+	p->zBuffer = 1;
+	p->nVertex = 0;
+	p->vertex = NULL;	
+	
+	// return pointer
+	printf("polygon created\n");
+	return(p);
+}
+
+/*
+ * returns an allocated Polygon pointer with the vertex list
+ * initialized to a copy of the points in vlist.
+ */
+Polygon *polygon_createp(int numV, Point *vlist){
+
+	Polygon *p;
+	int i;
+	
+	// get space for the polyline
+	p = malloc(sizeof(Polygon));
+	if(!p){
+		return(NULL);
+	}
+	
+	// get space for the vertex list
+	p->vertex = malloc(sizeof(Point) * numV);
+	if(!p->vertex){
+		free(p);
+		return(NULL);
+	}
+	
+	// initialize structure
+	p->zBuffer = 1;
+	p->nVertex = numV;
+	for(i=0;i<numV;i++){
+		p->vertex[i] = vlist[i];
+	}
+	
+	// return pointer
+	printf("Polygon created\n");
+	return(p);
+}
+
+/*
+ * frees the internal data for a Polygon and the Polygon pointer.
+ * The functions polygon init, polygon set, and polygon
+ * clear work on a pre-existing Polygon data structure
+ * and manage only the memory required for the vertex list.
+ */
+void polygon_free(Polygon *p){
+	if(p){
+		if(p->vertex){
+			free(p->vertex);
+		}
+		free(p);
+	} else {
+		printf("null p passed to polygon_free\n");
+	}
+	printf("polygon freed\n");
+}
+
+/*
+ * initializes the existing Polygon to an empty Polygon.
+ */
+void polygon_init(Polygon *p){
+
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polygon_init\n");
+		return;
+	}
+	
+	// reset structure
+	p->zBuffer = 1;
+	p->nVertex = 0;
+	p->vertex = NULL;
+	
+	printf("polygon initted\n");
+}
+
+/*
+ * initializes the vertex array to the points in vlist.
+ */
+void polygon_set(Polygon *p, int numV, Point *vlist){
+	int  i;
+	
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polygon_set\n");
+		return;
+	}	
+	
+	// free existing vertex list
+	if(p->vertex){
+		free(p->vertex);
+	}
+	
+	// get space for the vertex list
+	p->vertex = malloc(sizeof(Point) * numV);
+	if(!p->vertex){
+		return;
+	}
+	
+	// initialize structure
+	p->zBuffer = 1;
+	p->nVertex = numV;
+	for(i=0;i<numV;i++){
+		p->vertex[i] = vlist[i];
+	}
+	printf("polygon set\n");
+}
+
+/*
+ * frees the internal data and resets the fields.
+ */
+void polygon_clear(Polygon *p){
+
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polygon_clear\n");
+		return;
+	}
+	
+	// free internal data
+	if(p->vertex){
+		free(p->vertex);
+	}
+	
+	// reset structure
+	p->nVertex = 0;
+	p->vertex = NULL;
+	printf("polygon cleared\n");
+}
+
+/*
+ * sets the z-buffer flag to the given value.
+ */
+void polygon_zBuffer(Polygon *p, int flag){
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polygon_zBuffer\n");
+		return;
+	}
+	p->zBuffer = flag;
+}
+
+/*
+ * De-allocates/allocates space and copies the vertex and 
+ * color data from one polygon to the other.
+ */
+void polygon_copy(Polygon *to, Polygon *from){
+	int i;
+	
+	// detect null pointer passed
+	if(!to){
+		printf("null to passed to polygon_copy\n");
+		return;
+	}
+	if(!from){
+		printf("null from passed to polygon_copy\n");
+		return;
+	}
+	
+	// free internal data in destination
+	if(to->vertex){
+		free(to->vertex);
+	}
+	
+	// allocate new destination space
+	to->vertex = malloc( sizeof(Point) * (from->nVertex) );
+	if(!to->vertex){
+		return;
+	}
+	
+	// copy the points to destination
+	to->nVertex = from->nVertex;
+	for(i=0;i<(to->nVertex);i++){
+		to->vertex[i] = from->vertex[i];
+	}
+	printf("polygon copied\n");
+}
+
+/*
+ * prints polygon data to the stream designated by the FILE pointer.
+ */
+void polygon_print(Polygon *p, FILE *fp){
+	int i;
+
+	if(p){
+		if(!p->vertex){
+			return;
+		}
+	} else{
+		return;
+	}	
+
+	// print polyline points as x,y pairs
+	fprintf(fp, "about to print polygon points\n");
+	for(i = 0; i<(p->nVertex); i++){
+		fprintf(fp,"x:%f, y:%f\n", p->vertex[i].val[0], p->vertex[i].val[1]);
+	}
+	printf("polygon printed\n");
+}
+
+/*
+ * draw the outline of the polygon using color c.
+ */
+void polygon_draw(Polygon *p, Image *src, Color c){
+	int i;
+	Line l;
+
+	if(p){
+		if(!p->vertex){
+			return;
+		}
+	} else{
+		return;
+	}
+
+	if (p->nVertex < 3){
+		printf("can't draw a polygon with less than three points\n");
+	}
+
+	// iterate through polyline
+	for(i=0; i<(p->nVertex-1); i++){
+		// take coordinates for polyline point
+		// create a line
+		line_set(&l, p->vertex[i], p->vertex[i+1]);
+		// draw line on src using Color c
+		line_draw(&l, src, c);
+	}
+	//draw from last to first vertex at the end
+	line_set(&l, p->vertex[p->nVertex-1], p->vertex[0]);
+	line_draw(&l, src, c);
+	printf("polygon drawn\n");
+}
+
+/*
+ * draw the filled polygon using color c with the scanline rendering algorithm.
+ */
+void polygon_drawFill(Polygon *p, Image *src, Color c){
+
+}
+
+/*
+ * draw the filled polygon using color c with the Barycentric coordinates algorithm.
+ */
+void polygon_drawFillB(Polygon *p, Image *src, Color c){
+
 }
