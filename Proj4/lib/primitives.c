@@ -1497,11 +1497,6 @@ void polygon_drawFill(Polygon *p, Image *src, Color c ) {
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
     
-    if(!(p->nVertex > 3)){
-        polygon_drawFill(p, src, c);
-        return;
-    }
-    
     double ax, ay;
     double bx, by;
     double cx, cy;
@@ -1563,6 +1558,8 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
 			image_setColor(src, x, y, c);
 		}
 
-    }    
+    }
+    
+    image_free(src);
 
 }
