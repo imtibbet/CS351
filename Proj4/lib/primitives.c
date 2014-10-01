@@ -1498,7 +1498,7 @@ void polygon_drawFill(Polygon *p, Image *src, Color c ) {
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
     
     if(!(p->nVertex > 3)){
-        polyline_drawFill(p, src, c);
+        polygon_drawFill(p, src, c);
         return;
     }
     
@@ -1508,40 +1508,39 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
     double x, y;
     double alpha, beta, gamma;
     int i, j, f, g;
-    double x_max, y_max, x_min, y_min, x_diff, y_diff;
      
-    ax = p->vertex[0];
-    ay = p->vertex[1];
+    ax = p->vertex[0].val[0];
+    ay = p->vertex[0].val[1];
 
-    bx = p->vertex[0];
-    by = p->vertex[1];
+    bx = p->vertex[0].val[0];
+    by = p->vertex[0].val[1];
 
-    cx = p->vertex[0];
-    cy = p->vertex[1];
+    cx = p->vertex[0].val[0];
+    cy = p->vertex[0].val[1];
 
     //identify the starting row
-    j = (int)(fmin(ay, by, cy));
+    j = (int)(fmin(fmin(ay, by), cy) + 0.5);
     if (j < 0){
     	j = 0;
     }
 
     //identify the ending row
-    g = (int)(fmax(ay, by, cy));
+    g = (int)(fmax(fmax(ay, by), cy) + 0.5);
     if (g >= src->cols){
     	g = (src->cols - 1);
     }
 
     for (y = j; y <= g; y++){
-		beta = ((ay - cy)*x + (cx - ax)*y + ax*cy - cx*ay)/
-		((ay - cy)*bx + (cx - ax)*by + ax*cy - cx*ay);
+		beta = ((ay - cy) * x + (cx - ax) * y + ax * cy - cx * ay)/
+		((ay - cy) * bx + (cx - ax) * by + ax * cy - cx * ay);
 
-		gamma = ((ay - by)*x + (cx - ax)*y + ax*by + bx*ay)/
-		((ay - by)*cx + (bx - ax)*cy + ax*by - bx*ay);
+		gamma = ((ay - by) * x + (cx - ax) * y + ax * by + bx * ay)/
+		((ay - by) * cx + (bx - ax) * cy + ax * by - bx * ay);
 
 		alpha = 1.0 - beta - gamma;
 
 		// identify the starting column
-		i = (int)(fmin(ax, bx, cx) + 0.5);
+		i = (int)(fmin(fmin(ax, bx), cx) + 0.5);
 		//printf("i=%d",i);
 		// clip to the left side of the image
 		if(i < 0){
@@ -1550,7 +1549,7 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
 		}
 		
 		// identify the ending column
-		f = (int)(fmax(ax, bx, cx) + 0.5);
+		f = (int)(fmax(fmax(ax, bx), cx) + 0.5);
 		//printf("f=%d\n",f);
 		
 		// clip to the right side of the image
