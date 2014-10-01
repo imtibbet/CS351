@@ -1207,7 +1207,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	Edge *edge;
 	float dscan = end.val[1] - start.val[1];
 	float dwidth = end.val[0] - start.val[0];
-	float xAdjust,vyMinusFloor, floorMinusVy;
+	float xAdjust, vyMinusFloor, floorMinusVy;
 
 	/******
 				 Your code starts here
@@ -1271,7 +1271,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	if(edge->y0<epsilon){
 		printf("row clipping top\n");
 		//   update xIntersect
-		edge->xIntersect += (0-edge->y0)*edge->dxPerScan;
+		edge->xIntersect += (-edge->y0)*edge->dxPerScan;
 		//   update y0
 		edge->y0 = 0.0;
 		//   update x0
