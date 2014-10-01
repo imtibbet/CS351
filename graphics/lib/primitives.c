@@ -1257,7 +1257,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	// Scanlines go through the middle of pixels
 	// Move the edge to the first scanline it crosses
 	floorMinusVy = ((float)((int)(edge->y0))) - (edge->y0);
-	vyMinusFloor = (edge->y0)-((float)((int)(edge->y0)));
+	vyMinusFloor = (edge->y0) - ((float)((int)(edge->y0)));
 	if(0.5 < vyMinusFloor){
 		xAdjust = 1.5 - floorMinusVy;
 	} else {
