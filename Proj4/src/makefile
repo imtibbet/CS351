@@ -26,16 +26,16 @@ LIBS = -lm -limageIO
 LFLAGS = -L$(LIBDIR)
 
 # put all of the relevant include files here
-_DEPS = graphics.h
+_DEPS = ppmIO.h color.h fractals.h image.h primitives.h floodfill.h graphics.h
 
 # convert them to point to the right place
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = 3d test4a test4b
+EXECUTABLES = 3d test4a
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = 3d.o test4a.o test4b.o
+_OBJ = 3d.o test4a.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -84,8 +84,6 @@ threed: $(ODIR)/threed.o
 test4a: $(ODIR)/test4a.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 test4aNoFill: $(ODIR)/test4aNoFill.o
-	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
-test4b: $(ODIR)/test4b.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
