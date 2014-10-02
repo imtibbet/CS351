@@ -88,14 +88,16 @@ void line_set2D(Line *l, double x0, double y0, double x1, double y1){
 	if(!l){
 		return;
 	}
-
-	Point a;
-	Point b;
-	point_set2D(&a, x0, y0);
-	point_set2D(&b, x1, y1);
-
-	l->a = a;
-	l->b = b;
+	
+	l->a.val[0] = x0;
+	l->a.val[1] = y0;
+	l->a.val[2] = 0.0;
+	l->a.val[3] = 1.0;
+	
+	l->b.val[0] = x1;
+	l->b.val[1] = y1;
+	l->b.val[2] = 0.0;
+	l->b.val[3] = 1.0;
 }
 
 /*
@@ -138,7 +140,6 @@ void line_draw(Line *l, Image *src, Color c){
 	// Bresenham's line-drawing algorithm
 	int x0, y0, x1, y1;
 	int x, y, dx, dy, e, i;
-	Point curp;
 
 	x = x0 = l->a.val[0];
 	y = y0 = l->a.val[1];
@@ -148,6 +149,8 @@ void line_draw(Line *l, Image *src, Color c){
 	dx = x1 - x0;
 	dy = y1 - y0;
 
+	// swap endpoints so fifth through eighth octants
+	// can be handled as first through fourth octants
 	if(dy<0){
 		x = x0 = l->b.val[0];
 		y = y0 = l->b.val[1];
@@ -165,8 +168,9 @@ void line_draw(Line *l, Image *src, Color c){
 	
 		if(dy==0){
 			while(x!=x1){
-				point_set2D(&curp, (double)x, (double)y);
-				point_draw(&curp, src, c);
+				src->data[y][x].rgb[0] = c.c[0];
+				src->data[y][x].rgb[1] = c.c[1];
+				src->data[y][x].rgb[2] = c.c[2];
 				x++;
 			}
 			return;
@@ -174,9 +178,11 @@ void line_draw(Line *l, Image *src, Color c){
 
 		// 1st octant
 		if(dx>=dy) {
+			e = 3*dy-2*dx;
 			for(i=0; i<=dx; i++){
-				point_set2D(&curp, (double)x, (double)y);
-				point_draw(&curp, src, c);
+				src->data[y][x].rgb[0] = c.c[0];
+				src->data[y][x].rgb[1] = c.c[1];
+				src->data[y][x].rgb[2] = c.c[2];
 				if(e>0){
 					y++;
 					e-=(2*dx);
@@ -187,9 +193,11 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 2nd octant
 		else if(dy>dx){
+			e = 3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				point_set2D(&curp, (double)x, (double)y);
-				point_draw(&curp, src, c);
+				src->data[y][x].rgb[0] = c.c[0];
+				src->data[y][x].rgb[1] = c.c[1];
+				src->data[y][x].rgb[2] = c.c[2];
 				if(e>0){
 					x++;
 					e-=(2*dy);
@@ -205,8 +213,9 @@ void line_draw(Line *l, Image *src, Color c){
 		dx=-dx;
 		if(dy==0){
 			while(x!=x1){
-				point_set2D(&curp, (double)x, (double)y);
-				point_draw(&curp, src, c);
+				src->data[y][x].rgb[0] = c.c[0];
+				src->data[y][x].rgb[1] = c.c[1];
+				src->data[y][x].rgb[2] = c.c[2];
 				x--;
 			}
 			//printf("horizontal line drawn\n");
@@ -215,9 +224,11 @@ void line_draw(Line *l, Image *src, Color c){
 
 		// 4th octant
 		if(dx>=dy) {
+			e = 3*dy+2*dx;
 			for(i=0; i<=dx; i++){
-				point_set2D(&curp, (double)x, (double)y);
-				point_draw(&curp, src, c);
+				src->data[y][x].rgb[0] = c.c[0];
+				src->data[y][x].rgb[1] = c.c[1];
+				src->data[y][x].rgb[2] = c.c[2];
 				if(e>0){
 					y++;
 					e-=(2*dx);
@@ -228,9 +239,11 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 3rd octant
 		else if(dy>dx){
+			e = -3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				point_set2D(&curp, (double)x, (double)y);
-				point_draw(&curp, src, c);
+				src->data[y][x].rgb[0] = c.c[0];
+				src->data[y][x].rgb[1] = c.c[1];
+				src->data[y][x].rgb[2] = c.c[2];
 				if(e>0){
 					x--;
 					e-=(2*dy);
@@ -243,8 +256,9 @@ void line_draw(Line *l, Image *src, Color c){
 	// special case of vertical lines
 	else {//dx==0
 		while(y!=y1){
-			point_set2D(&curp, (double)x, (double)y);
-			point_draw(&curp, src, c);
+			src->data[y][x].rgb[0] = c.c[0];
+			src->data[y][x].rgb[1] = c.c[1];
+			src->data[y][x].rgb[2] = c.c[2];
 			y++;
 		}
 	}
@@ -750,6 +764,7 @@ void polyline_set(Polyline *p, int numV, Point *vlist){
 	// get space for the vertex list
 	p->vertex = malloc(sizeof(Point) * numV);
 	if(!p->vertex){
+		p->numVertex = 0;
 		return;
 	}
 	
@@ -825,6 +840,7 @@ void polyline_copy (Polyline *to, Polyline *from){
 	// allocate new destination space
 	to->vertex = malloc( sizeof(Point) * (from->numVertex) );
 	if(!to->vertex){
+		to->numVertex = 0;
 		return;
 	}
 	
@@ -1004,6 +1020,7 @@ void polygon_set(Polygon *p, int numV, Point *vlist){
 	// get space for the vertex list
 	p->vertex = malloc(sizeof(Point) * numV);
 	if(!p->vertex){
+		p->nVertex = 0;
 		return;
 	}
 	
@@ -1075,6 +1092,7 @@ void polygon_copy(Polygon *to, Polygon *from){
 	// allocate new destination space
 	to->vertex = malloc( sizeof(Point) * (from->nVertex) );
 	if(!to->vertex){
+		to->nVertex = 0;
 		return;
 	}
 	
@@ -1215,8 +1233,8 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 
 	// Check if the starting row is below the image or the end row is
 	// above the image and skip the edge if either is true
-	if( (start.val[1] < epsilon) || (start.val[1] > ((float)(src->rows-1))) ){
-		printf("row clipping, no edge returned\n");
+	if( (start.val[1] > ((float)(src->rows-1))) || (start.val[1] < epsilon) ){
+		printf("whole edge outside image\n");
 		return(NULL);
 	}
 
@@ -1240,7 +1258,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	// edge->yEnd.
 	edge->yEnd = (int)(edge->y1+0.5)-1;
 
-	// Clip yEnd to the number of rows-1.????????????
+	// Clip yEnd to the number of rows-1.
 	if(edge->yEnd > (src->rows-1)){
 		printf("row clipping bottom\n");
 		edge->yEnd = src->rows-1;
@@ -1260,10 +1278,10 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	}
 	edge->xIntersect = edge->x0 + xAdjust*edge->dxPerScan;
 	
-	// adjust if the edge starts above the image??????????????????????
+	// adjust if the edge starts above the image
 	// move the intersections down to scanline zero
 	// if edge->y0 < 0
-	if(edge->y0<epsilon){
+	if(edge->y0 < epsilon){
 		printf("row clipping top\n");
 		//   update xIntersect
 		edge->xIntersect += (-edge->y0)*edge->dxPerScan;
@@ -1276,10 +1294,10 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	}
 
 	// check for really bad cases with steep slopes where xIntersect 
-	// has gone beyond the end of the edge
+	// has gone beyond the end of the edge ??????????????????????????
 	if(edge->dxPerScan>(edge->x1)){
 		printf("bad bad xIntersect has gone beyond the end of the edge\n");
-		edge->dxPerScan = edge->x1-edge->x0;
+		edge->dxPerScan = dwidth;
 	}
 
 	// return the newly created edge data structure
@@ -1499,6 +1517,7 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
     double ax, ay;
     double bx, by;
     double cx, cy;
+    double ay_m_cy, cx_m_ax, axcy_m_cxay, ay_m_by, bx_m_ax, axby_m_bxay;
     double x, y;
     double alpha, beta, gamma;
     int i, j, f, g;
@@ -1506,12 +1525,20 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
     ax = p->vertex[0].val[0];
     ay = p->vertex[0].val[1];
 
-    bx = p->vertex[0].val[0];
-    by = p->vertex[0].val[1];
+    bx = p->vertex[1].val[0];
+    by = p->vertex[1].val[1];
 
-    cx = p->vertex[0].val[0];
-    cy = p->vertex[0].val[1];
-
+    cx = p->vertex[2].val[0];
+    cy = p->vertex[2].val[1];
+    
+    // keep these out of the tight loop
+    ay_m_cy = ay - cy;
+    cx_m_ax = cx - ax;
+    axcy_m_cxay = ax * cy - cx * ay;
+    ay_m_by = ay - cy;
+    bx_m_ax = cx - ax;
+    axby_m_bxay = ax * cy - cx * ay;
+    
     //bounding box
     //identify the starting row
     j = (int)(fmin(fmin(ay, by), cy) + 0.5);
@@ -1534,21 +1561,23 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
 		f = src->cols - 1;
 	}
 
-    for (y = j; y <= g; y++){
-		for(x = i; x < f; x++){
-			beta = ((ay - cy) * x + (cx - ax) * y + ax * cy - cx * ay)/
-			((ay - cy) * bx + (cx - ax) * by + ax * cy - cx * ay);
+	for(; i < f; i++){
+    	for (; j <= g; j++){
+    		y = ((double)i)+0.5;
+    		x = ((double)j)+0.5;
+    		
+			beta = 	(ay_m_cy * x + cx_m_ax * y + axcy_m_cxay)/
+					(ay_m_cy * bx + cx_m_ax * by + axcy_m_cxay);
 
-			gamma = ((ay - by) * x + (cx - ax) * y + ax * by + bx * ay)/
-			((ay - by) * cx + (bx - ax) * cy + ax * by - bx * ay);
+			gamma = (ay_m_by * x + bx_m_ax * y + axby_m_bxay)/
+					(ay_m_by * bx + bx_m_ax * by + axby_m_bxay);
 
 			alpha = 1.0 - beta - gamma;
 		
 			// only set color if the alpha, beta, gamma are all positive
-			if(alpha>0 && beta>0 && gamma>0){
-				image_setColor(src, x, y, c);
+			if(alpha>epsilon && beta>epsilon && gamma>epsilon){
+				image_setColor(src, i, j, c);
 			}
 		}
-
     }    
 }
