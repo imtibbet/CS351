@@ -1247,11 +1247,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	}
 
 	// Calculate the slope, dxPerScan
-	if(dwidth<epsilon && dwidth>-epsilon){
-		edge->dxPerScan = 0.0;
-	} else {
-		edge->dxPerScan = dscan/dwidth;
-	}
+	edge->dxPerScan = dwidth/dscan;
 	
 	// Calculate xIntersect, adjusting for the fraction of the point in the pixel.
 	// Scanlines go through the middle of pixels
@@ -1282,7 +1278,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 
 	// check for really bad cases with steep slopes where xIntersect 
 	// has gone beyond the end of the edge
-	if(edge->xIntersect>(edge->y1)){
+	if(edge->xIntersect>(edge->x1)){
 		printf("bad bad xIntersect has gone beyond the end of the edge\n");
 		//return(NULL);
 	}
@@ -1365,7 +1361,7 @@ static void fillScan( int scan, LinkedList *active, Image *src, Color c ) {
 
 		/**** Your code goes here ****/
 		// identify the starting column
-		i=(int)(fmin(p1->xIntersect,p2->xIntersect)+0.5);
+		i=(int)(p1->xIntersect+0.5);
 		//printf("i=%d",i);
 		// clip to the left side of the image
 		if(i<0){
@@ -1374,7 +1370,7 @@ static void fillScan( int scan, LinkedList *active, Image *src, Color c ) {
 		}
 		
 		// identify the ending column
-		f=(int)(fmax(p1->xIntersect,p2->xIntersect)+0.5);
+		f=(int)(p2->xIntersect+0.5);
 		//printf("f=%d\n",f);
 		
 		// clip to the right side of the image
