@@ -1207,7 +1207,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	Edge *edge;
 	float dscan = end.val[1] - start.val[1];
 	float dwidth = end.val[0] - start.val[0];
-	float xadjust,vyMinusFloor, floorMinusVy;
+	float xAdjust, vyMinusFloor;
 
 	/******
 				 Your code starts here
@@ -1216,7 +1216,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	// Check if the starting row is below the image or the end row is
 	// above the image and skip the edge if either is true
 	if( (start.val[1] < epsilon) || (start.val[1] > ((float)(src->rows-1))) ){
-		printf("row clipping, no edge\n");
+		printf("row clipping, no edge returned\n");
 		return(NULL);
 	}
 
@@ -1247,23 +1247,18 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	}
 
 	// Calculate the slope, dxPerScan
-	if(dwidth<epsilon && dwidth>-epsilon){
-		edge->dxPerScan = 0.0;
-	} else {
-		edge->dxPerScan = dscan/dwidth;
-	}
+	edge->dxPerScan = dwidth/dscan;
 	
 	// Calculate xIntersect, adjusting for the fraction of the point in the pixel.
 	// Scanlines go through the middle of pixels
 	// Move the edge to the first scanline it crosses
-	floorMinusVy = ((float)((int)(edge->y0))) - (edge->y0);
-	vyMinusFloor = (edge->y0)-((float)((int)(edge->y0)));
-	if(0.5 < vyMinusFloor){
-		xadjust = 1.5 - floorMinusVy;
+	vyMinusFloor = (edge->y0) - ((float)((int)(edge->y0)));
+	if(0.5 <= vyMinusFloor){
+		xAdjust = 1.5 - vyMinusFloor;
 	} else {
-		xadjust = 0.5 - floorMinusVy;
+		xAdjust = 0.5 - vyMinusFloor;
 	}
-	edge->xIntersect = edge->x0 + xadjust*edge->dxPerScan;
+	edge->xIntersect = edge->x0 + xAdjust*edge->dxPerScan;
 	
 	// adjust if the edge starts above the image??????????????????????
 	// move the intersections down to scanline zero
@@ -1271,7 +1266,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	if(edge->y0<epsilon){
 		printf("row clipping top\n");
 		//   update xIntersect
-		edge->xIntersect += (0-edge->y0)*edge->dxPerScan;
+		edge->xIntersect += (-edge->y0)*edge->dxPerScan;
 		//   update y0
 		edge->y0 = 0.0;
 		//   update x0
@@ -1282,9 +1277,9 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 
 	// check for really bad cases with steep slopes where xIntersect 
 	// has gone beyond the end of the edge
-	if(edge->xIntersect>(edge->x1)){
+	if(edge->dxPerScan>(edge->x1)){
 		printf("bad bad xIntersect has gone beyond the end of the edge\n");
-		//return(NULL);
+		edge->dxPerScan = edge->x1-edge->x0;
 	}
 
 	// return the newly created edge data structure
@@ -1365,7 +1360,7 @@ static void fillScan( int scan, LinkedList *active, Image *src, Color c ) {
 
 		/**** Your code goes here ****/
 		// identify the starting column
-		i=(int)(fmin(p1->xIntersect,p2->xIntersect)+0.5);
+		i=(int)(p1->xIntersect);
 		//printf("i=%d",i);
 		// clip to the left side of the image
 		if(i<0){
@@ -1374,7 +1369,7 @@ static void fillScan( int scan, LinkedList *active, Image *src, Color c ) {
 		}
 		
 		// identify the ending column
-		f=(int)(fmax(p1->xIntersect,p2->xIntersect)+0.5);
+		f=(int)(p2->xIntersect);
 		//printf("f=%d\n",f);
 		
 		// clip to the right side of the image
@@ -1471,7 +1466,6 @@ static int processEdgeList( LinkedList *edges, Image *src, Color c ) {
 End Scanline Fill
 *****************************************/
 
-
 /*
 	Draws a filled polygon of the specified color into the image src.
  */
@@ -1497,8 +1491,8 @@ void polygon_drawFill(Polygon *p, Image *src, Color c ) {
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
     
-    if (p->nVertex > 3){
-        polygon_drawFillB(p, src, c);
+    if(!(p->nVertex > 3)){
+        polygon_drawFill(p, src, c);
         return;
     }
     
@@ -1507,7 +1501,7 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
     double cx, cy;
     double x, y;
     double alpha, beta, gamma;
-    int i, j;
+    int i, j, f, g;
      
     ax = p->vertex[0].val[0];
     ay = p->vertex[0].val[1];
@@ -1518,37 +1512,43 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
     cx = p->vertex[0].val[0];
     cy = p->vertex[0].val[1];
 
+    //bounding box
     //identify the starting row
     j = (int)(fmin(fmin(ay, by), cy) + 0.5);
-    printf("j=%i\n", j);
-    
     if (j < 0){
     	j = 0;
     }
-    
-    for (y = 0; y < src->rows; y++){
-        // identify the starting column
-        i = (int)(fmin(fmin(ax, bx), cx) + 0.5);
-        printf("i=%d\n",i);
-        
-        // clip to the left side of the image
-        if(i < src->cols){
-            i = (src->cols - 1);
-        }
-        
-        // loop from start to end and color in the pixels
-        for(x = 0; x < src->cols; x++){
-            beta = ((ay - cy) * x + (cx - ax) * y + ax * cy - cx * ay)/
-            ((ay - cy) * bx + (cx - ax) * by + ax * cy - cx * ay);
-            
-            gamma = ((ay - by) * x + (cx - ax) * y + ax * by + bx * ay)/
-            ((ay - by) * cx + (bx - ax) * cy + ax * by - bx * ay);
-            
-            alpha = 1.0 - beta - gamma;
-            
-            if ((alpha && beta && gamma) != 0){
-                image_setColor(src, x, y, c);
-            }
-        }
+    //identify the ending row
+    g = (int)(fmax(fmax(ay, by), cy) + 0.5);
+    if (g >= src->cols){
+    	g = (src->cols - 1);
     }
+	// identify the starting column
+	i = (int)(fmin(fmin(ax, bx), cx) + 0.5);
+	if(i < 0){
+		i = 0;
+	}
+	// identify the ending column
+	f = (int)(fmax(fmax(ax, bx), cx) + 0.5);
+	if(f > (src->cols - 1)){
+		f = src->cols - 1;
+	}
+
+    for (y = j; y <= g; y++){
+		for(x = i; x < f; x++){
+			beta = ((ay - cy) * x + (cx - ax) * y + ax * cy - cx * ay)/
+			((ay - cy) * bx + (cx - ax) * by + ax * cy - cx * ay);
+
+			gamma = ((ay - by) * x + (cx - ax) * y + ax * by + bx * ay)/
+			((ay - by) * cx + (bx - ax) * cy + ax * by - bx * ay);
+
+			alpha = 1.0 - beta - gamma;
+		
+			// only set color if the alpha, beta, gamma are all positive
+			if(alpha>0 && beta>0 && gamma>0){
+				image_setColor(src, x, y, c);
+			}
+		}
+
+    }    
 }
