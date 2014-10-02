@@ -1497,12 +1497,17 @@ void polygon_drawFill(Polygon *p, Image *src, Color c ) {
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
     
+    if (p->nVertex > 3){
+        polygon_drawFillB(p, src, c);
+        return;
+    }
+    
     double ax, ay;
     double bx, by;
     double cx, cy;
     double x, y;
     double alpha, beta, gamma;
-    int i, j, f, g;
+    int i, j;
      
     ax = p->vertex[0].val[0];
     ay = p->vertex[0].val[1];
@@ -1515,51 +1520,35 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
 
     //identify the starting row
     j = (int)(fmin(fmin(ay, by), cy) + 0.5);
+    printf("j=%i\n", j);
+    
     if (j < 0){
     	j = 0;
     }
-
-    //identify the ending row
-    g = (int)(fmax(fmax(ay, by), cy) + 0.5);
-    if (g >= src->cols){
-    	g = (src->cols - 1);
-    }
-
-    for (y = j; y <= g; y++){
-		beta = ((ay - cy) * x + (cx - ax) * y + ax * cy - cx * ay)/
-		((ay - cy) * bx + (cx - ax) * by + ax * cy - cx * ay);
-
-		gamma = ((ay - by) * x + (cx - ax) * y + ax * by + bx * ay)/
-		((ay - by) * cx + (bx - ax) * cy + ax * by - bx * ay);
-
-		alpha = 1.0 - beta - gamma;
-
-		// identify the starting column
-		i = (int)(fmin(fmin(ax, bx), cx) + 0.5);
-		//printf("i=%d",i);
-		// clip to the left side of the image
-		if(i < 0){
-			//printf(" clipping left ");
-			i = 0;
-		}
-		
-		// identify the ending column
-		f = (int)(fmax(fmax(ax, bx), cx) + 0.5);
-		//printf("f=%d\n",f);
-		
-		// clip to the right side of the image
-		if(f > (src->cols - 1)){
-			//printf("clipping right\n");
-			f = src->cols - 1;
-		}
-		
-		// loop from start to end and color in the pixels
-		for(x = i; x < f; x++){
-			image_setColor(src, x, y, c);
-		}
-
-    }
     
-    image_free(src);
-
+    for (y = 0; y < src->rows; y++){
+        // identify the starting column
+        i = (int)(fmin(fmin(ax, bx), cx) + 0.5);
+        printf("i=%d\n",i);
+        
+        // clip to the left side of the image
+        if(i < src->cols){
+            i = (src->cols - 1);
+        }
+        
+        // loop from start to end and color in the pixels
+        for(x = 0; x < src->cols; x++){
+            beta = ((ay - cy) * x + (cx - ax) * y + ax * cy - cx * ay)/
+            ((ay - cy) * bx + (cx - ax) * by + ax * cy - cx * ay);
+            
+            gamma = ((ay - by) * x + (cx - ax) * y + ax * by + bx * ay)/
+            ((ay - by) * cx + (bx - ax) * cy + ax * by - bx * ay);
+            
+            alpha = 1.0 - beta - gamma;
+            
+            if ((alpha && beta && gamma) != 0){
+                image_setColor(src, x, y, c);
+            }
+        }
+    }
 }

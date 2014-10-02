@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     // the square ought to be 20x20, include pixel (30,30) and exclude pixel (50, 50)
     point_set2D(&(pt[0]), 30, 30);
     point_set2D(&(pt[1]), 50, 30);
-//    point_set2D(&(pt[2]), 50, 50);
+    point_set2D(&(pt[2]), 50, 50);
     point_set2D(&(pt[3]), 30, 50);
     point_set2D(&(pt[4]), 30, 30);
     
@@ -68,7 +68,6 @@ int main(int argc, char *argv[]) {
     
     printf("drawing polygon 5\n");
     polygon_drawFillB(p, src, Blue);
-    
     
     printf("writing output\n");
     image_write(src, "test4b.ppm");
