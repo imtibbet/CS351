@@ -537,7 +537,7 @@ void image_fillColor(Image *src, Color c){
 		}
 	}
 
-} // end image_fillrgb
+} // end image_fillColor
 
 
 

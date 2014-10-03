@@ -57,6 +57,7 @@ all:
 
 
 # put the specific executable rules here
+# proj 1
 ppmtest: $(ODIR)/ppmmain.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 lab1: $(ODIR)/lab1.o
@@ -65,10 +66,12 @@ alphablend: $(ODIR)/alphablend.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 imagetest: $(ODIR)/imagetest.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+# proj 2
 mandeltest: $(ODIR)/mandeltest.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 testbench: $(ODIR)/testbench.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+# proj 3
 test3a: $(ODIR)/test3a.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 testEll: $(ODIR)/testEll.o
@@ -83,6 +86,7 @@ threed: $(ODIR)/threed.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 3d: $(ODIR)/3d.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+# proj 4
 test4a: $(ODIR)/test4a.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 test4aNoFill: $(ODIR)/test4aNoFill.o
@@ -94,6 +98,8 @@ test4c: $(ODIR)/test4c.o
 test4c-loop: $(ODIR)/test4c-loop.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 polyspeed: $(ODIR)/polyspeed.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+threedGrow: $(ODIR)/threedGrow.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean

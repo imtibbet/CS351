@@ -1227,13 +1227,9 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	float dwidth = end.val[0] - start.val[0];
 	float xAdjust, vyMinusFloor;
 
-	/******
-				 Your code starts here
-	******/
-
 	// Check if the starting row is below the image or the end row is
 	// above the image and skip the edge if either is true
-	if( (start.val[1] > ((float)(src->rows-1))) || (start.val[1] < epsilon) ){
+	if( (start.val[1] > ((float)(src->rows-1))) || (end.val[1] < 0.0) ){
 		printf("whole edge outside image\n");
 		return(NULL);
 	}
@@ -1283,21 +1279,22 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	// if edge->y0 < 0
 	if(edge->y0 < epsilon){
 		printf("row clipping top\n");
-		//   update xIntersect
+		// update xIntersect
 		edge->xIntersect += (-edge->y0)*edge->dxPerScan;
-		//   update y0
+		// update y0
 		edge->y0 = 0.0;
-		//   update x0
+		// update x0
 		edge->x0 = edge->xIntersect;
-		//   update yStart
+		// update yStart
 		edge->yStart = 0;
 	}
 
 	// check for really bad cases with steep slopes where xIntersect 
-	// has gone beyond the end of the edge ??????????????????????????
-	if(edge->dxPerScan>(edge->x1)){
-		printf("bad bad xIntersect has gone beyond the end of the edge\n");
-		edge->dxPerScan = dwidth;
+	// has gone beyond the end of the edge	
+	if( ( (edge->dxPerScan > epsilon) && (edge->xIntersect>(edge->x1)) ) || 
+		( (edge->dxPerScan < epsilon) && (edge->xIntersect<(edge->x1)) ) ){
+		printf("xIntersect has gone beyond the end of the edge\n");
+		edge->xIntersect = edge->x1;
 	}
 
 	// return the newly created edge data structure
@@ -1509,18 +1506,22 @@ void polygon_drawFill(Polygon *p, Image *src, Color c ) {
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
     
-    if(!(p->nVertex > 3)){
+    // only works for triangles, use scanline for other polygons
+    if(p->nVertex != 3){
+    	printf("barycentric is only for triangles\n");
         polygon_drawFill(p, src, c);
         return;
     }
+    printf("using barycentric\n");
     
     double ax, ay;
     double bx, by;
     double cx, cy;
     double ay_m_cy, cx_m_ax, axcy_m_cxay, ay_m_by, bx_m_ax, axby_m_bxay;
+    double betaDenom, gammaDenom;
     double x, y;
     double alpha, beta, gamma;
-    int i, j, f, g;
+    int i, j, startCol, startRow, endCol, endRow;
      
     ax = p->vertex[0].val[0];
     ay = p->vertex[0].val[1];
@@ -1535,48 +1536,51 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
     ay_m_cy = ay - cy;
     cx_m_ax = cx - ax;
     axcy_m_cxay = ax * cy - cx * ay;
-    ay_m_by = ay - cy;
-    bx_m_ax = cx - ax;
-    axby_m_bxay = ax * cy - cx * ay;
+    ay_m_by = ay - by;
+    bx_m_ax = bx - ax;
+    axby_m_bxay = ax * by - bx * ay;
+    betaDenom = ay_m_cy * bx + cx_m_ax * by + axcy_m_cxay;
+    gammaDenom = ay_m_by * cx + bx_m_ax * cy + axby_m_bxay;
     
     //bounding box
     //identify the starting row
-    j = (int)(fmin(fmin(ay, by), cy) + 0.5);
-    if (j < 0){
-    	j = 0;
+    startRow = (int)(fmin(fmin(ay, by), cy) + 0.5);
+    if (startRow < 0){
+    	startRow = 0;
     }
     //identify the ending row
-    g = (int)(fmax(fmax(ay, by), cy) + 0.5);
-    if (g >= src->cols){
-    	g = (src->cols - 1);
+    endRow = (int)(fmax(fmax(ay, by), cy) + 0.5);
+    if (endRow >= src->cols){
+    	endRow = (src->cols - 1);
     }
 	// identify the starting column
-	i = (int)(fmin(fmin(ax, bx), cx) + 0.5);
-	if(i < 0){
-		i = 0;
+	startCol = (int)(fmin(fmin(ax, bx), cx) + 0.5);
+	if(startCol < 0){
+		startCol = 0;
 	}
 	// identify the ending column
-	f = (int)(fmax(fmax(ax, bx), cx) + 0.5);
-	if(f > (src->cols - 1)){
-		f = src->cols - 1;
+	endCol = (int)(fmax(fmax(ax, bx), cx) + 0.5);
+	if(endCol > (src->cols - 1)){
+		endCol = src->cols - 1;
 	}
 
-	for(; i < f; i++){
-    	for (; j <= g; j++){
+	for (i=startRow; i < endRow; i++){
+		for(j=startCol; j < endCol; j++){
     		y = ((double)i)+0.5;
     		x = ((double)j)+0.5;
     		
-			beta = 	(ay_m_cy * x + cx_m_ax * y + axcy_m_cxay)/
-					(ay_m_cy * bx + cx_m_ax * by + axcy_m_cxay);
-
-			gamma = (ay_m_by * x + bx_m_ax * y + axby_m_bxay)/
-					(ay_m_by * bx + bx_m_ax * by + axby_m_bxay);
-
-			alpha = 1.0 - beta - gamma;
-		
-			// only set color if the alpha, beta, gamma are all positive
-			if(alpha>epsilon && beta>epsilon && gamma>epsilon){
-				image_setColor(src, i, j, c);
+			beta = 	(ay_m_cy * x + cx_m_ax * y + axcy_m_cxay)/(betaDenom);
+			if(beta > epsilon){
+				gamma = (ay_m_by * x + bx_m_ax * y + axby_m_bxay)/(gammaDenom);
+				if(gamma > epsilon){
+					alpha = 1.0 - beta - gamma;
+					if(alpha > epsilon){
+						/*src->data[i][j].rgb[0] = c.c[0];
+						src->data[i][j].rgb[1] = c.c[1];
+						src->data[i][j].rgb[2] = c.c[2];*/
+						image_setColor(src,i,j,c);
+					}
+				}
 			}
 		}
     }    
