@@ -32,10 +32,10 @@ _DEPS = ppmIO.h color.h fractals.h image.h primitives.h floodfill.h graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = 3d test4a
+EXECUTABLES = 3d test4a test4b req1
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = 3d.o test4a.o
+_OBJ = 3d.o test4a.o test4b.o req1.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -86,6 +86,8 @@ test4a: $(ODIR)/test4a.o
 test4aNoFill: $(ODIR)/test4aNoFill.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 test4b: $(ODIR)/test4b.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+req1: $(ODIR)/req1.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
