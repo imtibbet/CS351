@@ -103,6 +103,8 @@ threedGrow: $(ODIR)/threedGrow.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 batman: $(ODIR)/batman.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+jackolantern: $(ODIR)/jackolantern.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
 
