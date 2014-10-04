@@ -101,13 +101,10 @@ polyspeed: $(ODIR)/polyspeed.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 threedGrow: $(ODIR)/threedGrow.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
-<<<<<<< HEAD
 batman: $(ODIR)/batman.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 jackolantern: $(ODIR)/jackolantern.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
-=======
->>>>>>> a25209bbfa32e463bc107327750766b8a0eed5cb
 
 .PHONY: clean
 

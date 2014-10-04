@@ -47,7 +47,7 @@ static int flower( Image *src, Color stemColor, Color pedalColor, Color centerCo
 	return(0);
 }
 
-// draw a 3D object
+// draw flowers growing
 int main(int argc, char *argv[]) {
 	Image src;
 	Color White;
@@ -73,9 +73,15 @@ int main(int argc, char *argv[]) {
 	image_init( &src );
 	
 	frames = 50;
+	image_alloc( &src, 600, 400 );
+	
+	// growing up
 	for(frame=0;frame<frames;frame++){
-		image_alloc( &src, 600, 400 );
+		image_reset(&src);
 		//draw cone
+		point_set2D( &p, 200, 500-40*5 );
+		ellipse_set( &e, p, 2+2*40, 1+1*40 );
+		ellipse_drawFill( &e, &src, Green );
 		for(i=1;i<=40;i++){
 			point_set2D( &p, 200, 500-i*5 );
 			ellipse_set( &e, p, 2+2*i, 1+1*i );
@@ -84,9 +90,6 @@ int main(int argc, char *argv[]) {
 		for(i=1;i<=40;i+=2){
 			floodfill(&src, Green, Brown, 200, 500-i*4);
 		}
-		point_set2D( &p, 200, 500-40*5 );
-		ellipse_set( &e, p, 2+2*40, 1+1*40 );
-		ellipse_drawFill( &e, &src, Green );
 	
 		// draw flowers
 		flower(&src, Brown, Yellow, Brown, 10+2*frame, 150, 300, 150-2*frame, 300-5*frame);
@@ -95,10 +98,38 @@ int main(int argc, char *argv[]) {
 	
 		sprintf(filename,"%03dthreedGrow.ppm",frame);
 		image_write( &src, filename );
-		image_dealloc( &src );
+	}	
+	
+	// shrinking back down to give continuous loop
+	for(frame=48;frame>-1;frame--){
+		image_reset(&src);
+		//draw cone
+		point_set2D( &p, 200, 500-40*5 );
+		ellipse_set( &e, p, 2+2*40, 1+1*40 );
+		ellipse_drawFill( &e, &src, Green );
+		for(i=1;i<=40;i++){
+			point_set2D( &p, 200, 500-i*5 );
+			ellipse_set( &e, p, 2+2*i, 1+1*i );
+			ellipse_drawquad( &e, &src, Brown, 1, 2 );
+		}
+		for(i=1;i<=40;i+=2){
+			floodfill(&src, Green, Brown, 200, 500-i*4);
+		}
+	
+		// draw flowers
+		flower(&src, Brown, Yellow, Brown, 10+2*frame, 150, 300, 150-2*frame, 300-5*frame);
+		flower(&src, Brown, Yellow, Brown, 10+2*frame, 200, 300, 200, 300-5*frame);
+		flower(&src, Brown, Yellow, Brown, 10+2*frame, 250, 300, 250+2*frame, 300-5*frame);
+	
+		sprintf(filename,"%03dthreedGrow.ppm",100-frame);
+		image_write( &src, filename );
 	}
+	
+	// clean up
+	image_dealloc( &src );
 	printf("converting to gif...\n");
 	system("convert -delay 10 -loop 0 *threedGrow.ppm threedGrow.gif");
 	system("rm *threedGrow.ppm");
+	system("animate threedGrow.gif");
 	return(0);
 }
