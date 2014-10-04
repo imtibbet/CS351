@@ -203,7 +203,7 @@ void line_draw(Line *l, Image *src, Color c){
 	// 3rd and 4th octants (left half)
 	else if(dx<0){
 		dx=-dx;
-		if(dy==0){
+		if(dy == 0){
 			while(x!=x1){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
@@ -214,24 +214,24 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 
 		// 4th octant
-		if(dx>=dy) {
-			for(i=0; i<=dx; i++){
+		if(dx >= dy) {
+			for(i = 0; i <= dx; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
-				if(e>0){
+				if(e > 0){
 					y++;
-					e-=(2*dx);
+					e -= (2 * dx);
 				}
 				x--;
-				e+=(2*dy);
+				e += (2 * dy);
 			}
 		}
 		// 3rd octant
-		else if(dy>dx){
-			for(i=0; i<=dy; i++){
+		else if(dy > dx){
+			for(i = 0; i <= dy; i++){
 				point_set2D(&curp, (double)x, (double)y);
 				point_draw(&curp, src, c);
-				if(e>0){
+				if(e > 0){
 					x--;
 					e-=(2*dy);
 				}
@@ -428,9 +428,7 @@ void circle_drawoct(Circle *circ, Image *src, Color c, int startOct, int endOct)
  * Initialize an ellipse to location tc and radii ta and tb. 
  */
 void ellipse_set(Ellipse *e, Point tc, double ta, double tb){
-	if(!e){
-		return;
-	}
+
 	e->ra = ta;
 	e->rb = tb;
 	e->c = tc;
@@ -1487,7 +1485,7 @@ void polygon_drawFill(Polygon *p, Image *src, Color c ) {
 }
 
 /*
- * draw the filled polygon using color c with the Barycentric coordinates algorithm.
+ * Draws the filled polygon using Color c with the Barycentric coordinates algorithm.
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
     
