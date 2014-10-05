@@ -51,7 +51,7 @@ void matrix_clear(Matrix *m);
 /*
  * Set the matrix to the identity matrix
  */
-void matrix_identity(Matrix *m)
+void matrix_identity(Matrix *m);
  
 /*
  * Return the element of the matrix at row r, column c. 
@@ -131,7 +131,6 @@ void matrix_shear2D(Matrix *m, double shx, double shy);
  
 // 3D matrix
 
-
 /*
  * Premultiply the matrix by a translation matrix parameterized by tx,ty,tz
  */
@@ -169,42 +168,6 @@ void matrix_shearZ(Matrix *m, double shx, double shy);
  * premultiply the matrix by a perspective matrix parameterized by d
  */
 void matrix_perspective(Matrix *m, double d);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

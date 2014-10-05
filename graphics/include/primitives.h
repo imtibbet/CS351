@@ -31,9 +31,9 @@ typedef struct {
 } Polyline;
 
 typedef struct {
+	int zBuffer; // whether to use the z-buffer; should default to true (1)
 	int nVertex; // Number of vertices
 	Point *vertex; // vertex information
-	int zBuffer; // whether to use the z-buffer; should default to true (1)
 } Polygon;
 
 // Point functions
