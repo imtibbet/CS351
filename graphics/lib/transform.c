@@ -13,6 +13,37 @@ typedef struct {
 
 typedef Point Vector;
 
+typedef struct {
+
+	// 3-D vector indicating the origin of the view reference coordinates
+	Point vrp; 
+	
+	//// 3-D vector indicating the direction in which the viewer is looking
+	Vector vpn;
+	 
+	// 3-D vector indicating the UP direction on the view plane. 
+	//The only restriction is that it cannot be parallel to the view plane normal.
+	Vector vup;  
+	
+	// distance in the negative VPN direction at which 
+	// the center of projection is located
+	double d;
+	
+	// extent of view plane around the VRP, 
+	// expressed in world coordinate distances
+	double du;
+	double dv;
+	
+	// font and back clip planes expressed as distances along the positive
+	// VPN F>0 and F<B
+	double f;
+	double b;
+	
+	// Size of the desired image in pixels
+	int screenx;
+	int screeny;
+} View3D;
+
 // vector
 
 /*
@@ -237,7 +268,11 @@ void matrix_xformLine(Matrix *m, Line *line){
  * Premultiply the matrix by a scale matrix parameterized by sx and sy
  */
 void matrix_scale2D(Matrix *m, double sx, double sy){
-
+	Matrix sm;
+	matrix_identity(&sm);
+	sm.m[0][0] = sx;
+	sm.m[1][1] = sy;
+	matrix_multiply(&sm, m, m);
 }
 
 /*
@@ -245,21 +280,35 @@ void matrix_scale2D(Matrix *m, double sx, double sy){
  * cos(t) and sin(t), where t is the angle of rotation about the Z-axis
  */
 void matrix_rotateZ(Matrix *m, double cth, double sth){
-
+	Matrix rm;
+	matrix_identity(&rm);
+	rm.m[0][0] = cth;
+	rm.m[0][1] = -sth;
+	rm.m[1][0] = sth;
+	rm.m[1][1] = cth;
+	matrix_multiply(&rm, m, m);
 }
 
 /*
  * Premultiply the matrix by a 2D translation matrix parameterized by tx, ty
  */
 void matrix_translate2D(Matrix *m, double tx, double ty){
-
+	Matrix tm;
+	matrix_identity(&tm);
+	tm.m[0][3] = tx;
+	tm.m[1][3] = ty;
+	matrix_multiply(&tm, m, m);
 }
 
 /*
  * Premultiply the matrix by a 2D shear matrix parameterized by shx, shy
  */
 void matrix_shear2D(Matrix *m, double shx, double shy){
-
+	Matrix shm;
+	matrix_identity(&shm);
+	shm.m[0][1] = shx;
+	shm.m[1][0] = shy;
+	matrix_multiply(&shm, m, m);
 }
 
 // 3D matrix
@@ -268,14 +317,24 @@ void matrix_shear2D(Matrix *m, double shx, double shy){
  * Premultiply the matrix by a translation matrix parameterized by tx,ty,tz
  */
 void matrix_translate(Matrix *m, double tx, double ty, double tz){
-
+	Matrix tm;
+	matrix_identity(&tm);
+	tm.m[0][3] = tx;
+	tm.m[1][3] = ty;
+	tm.m[2][3] = tz;
+	matrix_multiply(&tm, m, m);
 }
 
 /*
  * Premultiply the matrix by a scale matrix parameterized by sx,sy,sz
  */
 void matrix_scale(Matrix *m, double sx, double sy, double sz){
-
+	Matrix sm;
+	matrix_identity(&sm);
+	sm.m[0][0] = sx;
+	sm.m[1][1] = sy;
+	sm.m[2][2] = sz;
+	matrix_multiply(&sm, m, m);
 }
 
 /*
@@ -283,7 +342,13 @@ void matrix_scale(Matrix *m, double sx, double sy, double sz){
  * cos(t) and sin(t), where t is the angle of rotation about the x axis
  */
 void matrix_rotateX(Matrix *m, double cth, double sth){
-
+	Matrix rm;
+	matrix_identity(&rm);
+	rm.m[1][1] = cth;
+	rm.m[1][2] = -sth;
+	rm.m[2][1] = sth;
+	rm.m[2][2] = cth;
+	matrix_multiply(&rm, m, m);
 }
 
 /*
@@ -291,7 +356,13 @@ void matrix_rotateX(Matrix *m, double cth, double sth){
  * cos(t) and sin(t), where t is the angle of rotation about the y axis
  */
 void matrix_rotateY(Matrix *m, double cth, double sth){
-
+	Matrix rm;
+	matrix_identity(&rm);
+	rm.m[0][0] = cth;
+	rm.m[0][2] = sth;
+	rm.m[2][0] = -sth;
+	rm.m[2][2] = cth;
+	matrix_multiply(&rm, m, m);
 }
 
 /*
@@ -299,6 +370,15 @@ void matrix_rotateY(Matrix *m, double cth, double sth){
  * u,v,w where the three vectors represent an orthonormal 3D basis
  */
 void matrix_rotateXYZ(Matrix *m, Vector *u, Vector *v, Vector *w){
+	int j;
+	Matrix rm;
+	matrix_identity(&rm);
+	for(j=0;j<3;j++){
+		rm.m[0][j] = u->val[j];
+		rm.m[1][j] = v->val[j];
+		rm.m[2][j] = w->val[j];
+	}
+	matrix_multiply(&rm, m, m);
 
 }
 
@@ -306,13 +386,24 @@ void matrix_rotateXYZ(Matrix *m, Vector *u, Vector *v, Vector *w){
  * Premultiply the matrix by a shear Z matrix parameterized by shx,shy
  */
 void matrix_shearZ(Matrix *m, double shx, double shy){
-
+	Matrix shm;
+	matrix_identity(&shm);
+	shm.m[0][2] = shx;
+	shm.m[1][2] = shy;
+	matrix_multiply(&shm, m, m);
 }
 
 /*
  * premultiply the matrix by a perspective matrix parameterized by d
  */
 void matrix_perspective(Matrix *m, double d){
-
+	Matrix pm;
+	matrix_identity(&pm);
+	pm.m[3][2] = 1.0/d;
+	matrix_multiply(&pm, m, m);
 }
+
+
+
+
 
