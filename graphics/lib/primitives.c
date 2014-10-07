@@ -161,24 +161,12 @@ void line_draw(Line *l, Image *src, Color c){
 		dy = y1 - y0;
 	}
 
-	// clip line to be in the image
-	x = x0 = (x0 < 0) ? 0 : x0;
-	x = x0 = (x0 > src->cols-1) ? src->cols-1 : x0;
-	y = y0 = (y0 < 0) ? 0 : y0;
-	y = y0 = (y0 > src->rows-1) ? src->rows-1 : y0;
-	x1 = (x1 < 0) ? 0 : x1;
-	x1 = (x1 > src->cols-1) ? src->cols-1 : x1;
-	y1 = (y1 < 0) ? 0 : y1;
-	y1 = (y1 > src->rows-1) ? src->rows-1 : y1;
-
 	// 1st and 2nd octants (right half)
 	if(dx>0) {
 	
 		if(dy==0){
 			while(x!=x1){
-				src->data[y][x].rgb[0] = c.c[0];
-				src->data[y][x].rgb[1] = c.c[1];
-				src->data[y][x].rgb[2] = c.c[2];
+				image_setColor(src,y,x,c);
 				x++;
 			}
 			return;
@@ -188,9 +176,7 @@ void line_draw(Line *l, Image *src, Color c){
 		if(dx>=dy) {
 			e = 3*dy-2*dx;
 			for(i=0; i<=dx; i++){
-				src->data[y][x].rgb[0] = c.c[0];
-				src->data[y][x].rgb[1] = c.c[1];
-				src->data[y][x].rgb[2] = c.c[2];
+				image_setColor(src,y,x,c);
 				if(e>0){
 					y++;
 					e-=(2*dx);
@@ -203,9 +189,7 @@ void line_draw(Line *l, Image *src, Color c){
 		else if(dy>dx){
 			e = 3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				src->data[y][x].rgb[0] = c.c[0];
-				src->data[y][x].rgb[1] = c.c[1];
-				src->data[y][x].rgb[2] = c.c[2];
+				image_setColor(src,y,x,c);
 				if(e>0){
 					x++;
 					e-=(2*dy);
@@ -222,9 +206,7 @@ void line_draw(Line *l, Image *src, Color c){
 		dx=-dx; // to make conditionals easier
 		if(dy==0){
 			while(x!=x1){
-				src->data[y][x].rgb[0] = c.c[0];
-				src->data[y][x].rgb[1] = c.c[1];
-				src->data[y][x].rgb[2] = c.c[2];
+				image_setColor(src,y,x,c);
 				x--;
 			}
 			//printf("horizontal line drawn\n");
@@ -235,9 +217,7 @@ void line_draw(Line *l, Image *src, Color c){
 		if(dx>=dy) {
 			e = 3*dy-2*dx;
 			for(i=0; i<=dx; i++){
-				src->data[y][x].rgb[0] = c.c[0];
-				src->data[y][x].rgb[1] = c.c[1];
-				src->data[y][x].rgb[2] = c.c[2];
+				image_setColor(src,y,x,c);
 				if(e>0){
 					y++;
 					e-=(2*dx);
@@ -250,9 +230,7 @@ void line_draw(Line *l, Image *src, Color c){
 		else if(dy>dx){
 			e = 3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				src->data[y][x].rgb[0] = c.c[0];
-				src->data[y][x].rgb[1] = c.c[1];
-				src->data[y][x].rgb[2] = c.c[2];
+				image_setColor(src,y,x,c);
 				if(e>0){
 					x--;
 					e-=(2*dy);
@@ -265,9 +243,7 @@ void line_draw(Line *l, Image *src, Color c){
 	// special case of vertical lines
 	else {//dx==0
 		while(y!=y1){
-			src->data[y][x].rgb[0] = c.c[0];
-			src->data[y][x].rgb[1] = c.c[1];
-			src->data[y][x].rgb[2] = c.c[2];
+			image_setColor(src,y,x,c);
 			y++;
 		}
 	}

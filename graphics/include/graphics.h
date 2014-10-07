@@ -13,5 +13,6 @@
 #include "primitives.h"
 #include "floodfill.h"
 #include "list.h"
+#include "transform.h"
 
 #endif

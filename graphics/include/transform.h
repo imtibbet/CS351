@@ -8,6 +8,37 @@ typedef struct {
 
 typedef Point Vector;
 
+typedef struct {
+
+	// 3-D vector indicating the origin of the view reference coordinates
+	Point vrp; 
+	
+	//// 3-D vector indicating the direction in which the viewer is looking
+	Vector vpn;
+	 
+	// 3-D vector indicating the UP direction on the view plane. 
+	//The only restriction is that it cannot be parallel to the view plane normal.
+	Vector vup;  
+	
+	// distance in the negative VPN direction at which 
+	// the center of projection is located
+	double d;
+	
+	// extent of view plane around the VRP, 
+	// expressed in world coordinate distances
+	double du;
+	double dv;
+	
+	// font and back clip planes expressed as distances along the positive
+	// VPN F>0 and F<B
+	double f;
+	double b;
+	
+	// Size of the desired image in pixels
+	int screenx;
+	int screeny;
+} View3D;
+
 // vector
 
 /*

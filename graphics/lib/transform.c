@@ -7,43 +7,6 @@
 
 #include "graphics.h"
 
-typedef struct {
-	float m[4][4];
-} Matrix;
-
-typedef Point Vector;
-
-typedef struct {
-
-	// 3-D vector indicating the origin of the view reference coordinates
-	Point vrp; 
-	
-	//// 3-D vector indicating the direction in which the viewer is looking
-	Vector vpn;
-	 
-	// 3-D vector indicating the UP direction on the view plane. 
-	//The only restriction is that it cannot be parallel to the view plane normal.
-	Vector vup;  
-	
-	// distance in the negative VPN direction at which 
-	// the center of projection is located
-	double d;
-	
-	// extent of view plane around the VRP, 
-	// expressed in world coordinate distances
-	double du;
-	double dv;
-	
-	// font and back clip planes expressed as distances along the positive
-	// VPN F>0 and F<B
-	double f;
-	double b;
-	
-	// Size of the desired image in pixels
-	int screenx;
-	int screeny;
-} View3D;
-
 // vector
 
 /*
@@ -113,28 +76,21 @@ void matrix_print(Matrix *m, FILE *fp){
  * Set the matrix to all zeros.
  */
 void matrix_clear(Matrix *m){
-	int i, j;
-	for(i=0;i<4;i++){
-		for(j=0;j<4;j++){
-			m->m[i][j] = 0.0;
-		}
-	}
+	m->m[0][0] = m->m[0][1] = m->m[0][2] = m->m[0][3] = 
+	m->m[1][0] = m->m[1][1] = m->m[1][2] = m->m[1][3] = 
+	m->m[2][0] = m->m[2][1] = m->m[2][2] = m->m[2][3] = 
+	m->m[3][0] = m->m[3][1] = m->m[3][2] = m->m[3][3] = 0.0;
 }
 
 /*
  * Set the matrix to the identity matrix
  */
 void matrix_identity(Matrix *m){
-	int i, j;
-	for(i=0;i<4;i++){
-		for(j=0;j<4;j++){
-			if(i==j){
-				m->m[i][j] = 1.0;
-			} else {
-				m->m[i][j] = 0.0;
-			}
-		}
-	}
+	m->m[0][1] = m->m[0][2] = m->m[0][3] = 
+	m->m[1][0] = m->m[1][2] = m->m[1][3] = 
+	m->m[2][0] = m->m[2][1] = m->m[2][3] = 
+	m->m[3][0] = m->m[3][1] = m->m[3][2] =  0.0;
+	m->m[0][0] = m->m[1][1] = m->m[2][2] = m->m[3][3] = 1.0;
 }
  
 /*
@@ -186,14 +142,21 @@ void matrix_transpose(Matrix *m){
  * can also be the left or right matrix
  */
 void matrix_multiply(Matrix *left, Matrix *right, Matrix *m){
-	int i, j, k, sum;
+	int i, j;
+	Matrix temp; // use a temp matrix so the destination can also be an argument
 	for(i=0;i<4;i++){
-		sum = 0;
 		for(j=0;j<4;j++){
-			for(k=0;k<4;k++){
-				sum += left->m[i][k] * right->m[k][j];
-			}
-			m->m[i][j] = sum;
+			temp[i][j] = 	left->m[i][0] * right->m[0][j] +
+							left->m[i][1] * right->m[1][j] + 
+							left->m[i][2] * right->m[2][j] + 
+							left->m[i][3] * right->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
 		}
 	}
 }
@@ -203,13 +166,12 @@ void matrix_multiply(Matrix *left, Matrix *right, Matrix *m){
  * For this function, p and q need to be different variables.
  */
 void matrix_xformPoint(Matrix *m, Point *p, Point *q){
-	int i, j, k, sum;
+	int i;
 	for(i=0;i<4;i++){
-		sum = 0;
-		for(j=0;j<4;j++){
-			sum += m->m[i][j] * p->val[j];
-		}
-		q->val[i] = sum;
+		q->val[i] =	m->m[i][0] * p->val[0] +
+					m->m[i][1] * p->val[1] + 
+					m->m[i][2] * p->val[2] + 
+					m->m[i][3] * p->val[3];
 	}
 }
 
@@ -218,13 +180,12 @@ void matrix_xformPoint(Matrix *m, Point *p, Point *q){
  * For this function, p and q need to be different variables.
  */
 void matrix_xformVector(Matrix *m, Vector *p, Vector *q){
-	int i, j, k, sum;
+	int i;
 	for(i=0;i<4;i++){
-		sum = 0;
-		for(j=0;j<4;j++){
-			sum += m->m[i][j] * p->val[j];
-		}
-		q->val[i] = sum;
+		q->val[i] =	m->m[i][0] * p->val[0] +
+					m->m[i][1] * p->val[1] + 
+					m->m[i][2] * p->val[2] + 
+					m->m[i][3] * p->val[3];
 	}
 }
 
