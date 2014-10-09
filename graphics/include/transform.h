@@ -52,6 +52,11 @@ void vector_set(Vector *v, double x, double y, double z);
 void vector_print(Vector *v, FILE *fp);
 
 /*
+ * Returns the Euclidean length of the vector, assuming the homogeneous coordinate is 1.0
+ */
+double vector_length(Vector *v);
+
+/*
  * Normalize the Vector to unit length. Do not modify the homogeneous coordinate.
  */
 void vector_normalize(Vector *v);

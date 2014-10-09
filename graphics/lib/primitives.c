@@ -79,6 +79,14 @@ void point_drawf(Point *p, Image *src, FPixel c){
 	image_setf(src, p->val[1], p->val[0], c);
 }
 
+/*
+ * Print the point to the stream designated by FILE pointer 
+ */
+void point_print(Point *p, FILE *fp){
+	fprintf(fp,"(%.3f, %.3f, %.3f, %.3f)\n", 
+				p->val[0], p->val[1], p->val[2], p->val[3]);
+}
+
 // LINE
 
 /*
@@ -854,7 +862,7 @@ void polyline_print(Polyline *p, FILE *fp){
 	// print polyline points as x,y pairs
 	fprintf(fp, "about to print polyline points\n");
 	for(i = 0; i<(p->numVertex); i++){
-		fprintf(fp,"x:%f, y:%f\n", p->vertex[i].val[0], p->vertex[i].val[1]);
+		fprintf(fp,"x:%.3f, y:%.3f\n", p->vertex[i].val[0], p->vertex[i].val[1]);
 	}
 	printf("polyline printed\n");
 }
@@ -1106,7 +1114,7 @@ void polygon_print(Polygon *p, FILE *fp){
 	// print polyline points as x,y pairs
 	fprintf(fp, "about to print polygon points\n");
 	for(i = 0; i<(p->nVertex); i++){
-		fprintf(fp,"x:%f, y:%f\n", p->vertex[i].val[0], p->vertex[i].val[1]);
+		fprintf(fp,"x:%.3f, y:%.3f\n", p->vertex[i].val[0], p->vertex[i].val[1]);
 	}
 	printf("polygon printed\n");
 }

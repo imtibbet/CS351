@@ -23,7 +23,14 @@ void vector_set(Vector *v, double x, double y, double z){
  * Print out the Vector to stream fp in a pretty form
  */
 void vector_print(Vector *v, FILE *fp){
-	fprintf(fp,"[%f, %f, %f, %f]\n",v->val[0],v->val[1],v->val[2],v->val[3]);
+	fprintf(fp,"[%.3f, %.3f, %.3f, %.3f]\n",v->val[0],v->val[1],v->val[2],v->val[3]);
+}
+
+/*
+ * Returns the Euclidean length of the vector, assuming the homogeneous coordinate is 1.0
+ */
+double vector_length(Vector *v){
+	return sqrt( v->val[0]*v->val[0] + v->val[1]*v->val[1] + v->val[2]*v->val[2] );
 }
 
 /*
@@ -62,10 +69,10 @@ void vector_cross(Vector *a, Vector *b, Vector *c){
  * Print out the matrix in a nice 4x4 arrangement with a blank line below.
  */
 void matrix_print(Matrix *m, FILE *fp){
-	fprintf(fp,	"|%f, %f, %f, %f|\n" +
-				"|%f, %f, %f, %f|\n" +
-				"|%f, %f, %f, %f|\n" +
-				"|%f, %f, %f, %f|\n\n",
+	fprintf(fp,	"|%.3f, %.3f, %.3f, %.3f|\n" 
+				"|%.3f, %.3f, %.3f, %.3f|\n" 
+				"|%.3f, %.3f, %.3f, %.3f|\n" 
+				"|%.3f, %.3f, %.3f, %.3f|\n\n",
 				m->m[0][0],m->m[0][1],m->m[0][2],m->m[0][3],
 				m->m[1][0],m->m[1][1],m->m[1][2],m->m[1][3],
 				m->m[2][0],m->m[2][1],m->m[2][2],m->m[2][3],
@@ -114,7 +121,7 @@ void matrix_copy(Matrix *dest, Matrix *src){
 	int i, j;
 	for(i=0;i<4;i++){
 		for(j=0;j<4;j++){
-			dest->m[i][j] = src->m[i][j]
+			dest->m[i][j] = src->m[i][j];
 		}
 	}
 }
@@ -126,7 +133,7 @@ void matrix_transpose(Matrix *m){
 	int i, j;
 	float temp;
 	for(i=0;i<4;i++){
-		for(j=0;j<4;j++){
+		for(j=0;j<i;j++){
 			if(i!=j){
 				temp = m->m[i][j];
 				m->m[i][j] = m->m[j][i];
@@ -146,7 +153,7 @@ void matrix_multiply(Matrix *left, Matrix *right, Matrix *m){
 	Matrix temp; // use a temp matrix so the destination can also be an argument
 	for(i=0;i<4;i++){
 		for(j=0;j<4;j++){
-			temp[i][j] = 	left->m[i][0] * right->m[0][j] +
+			temp.m[i][j] = 	left->m[i][0] * right->m[0][j] +
 							left->m[i][1] * right->m[1][j] + 
 							left->m[i][2] * right->m[2][j] + 
 							left->m[i][3] * right->m[3][j];
@@ -198,7 +205,7 @@ void matrix_xformPolygon(Matrix *m, Polygon *p){
 	Point temp;
 	for(i=0;i<p->nVertex;i++){
 		matrix_xformPoint(m, &(p->vertex[i]), &temp);
-		point_copy(&(p->vertex[i]), temp);
+		point_copy(&(p->vertex[i]), &temp);
 	}
 }
 
@@ -219,10 +226,10 @@ void matrix_xformPolyline(Matrix *m, Polyline *p){
  */
 void matrix_xformLine(Matrix *m, Line *line){
 	Point temp;
-	matrix_xformPoint(m, &(l->a), &temp);
-	point_copy(&(l->a), &temp);
-	matrix_xformPoint(m, &(l->b), &temp);
-	point_copy(&(l->b), &temp);
+	matrix_xformPoint(m, &(line->a), &temp);
+	point_copy(&(line->a), &temp);
+	matrix_xformPoint(m, &(line->b), &temp);
+	point_copy(&(line->b), &temp);
 }
 
 /*

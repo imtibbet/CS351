@@ -56,6 +56,9 @@ void point_draw(Point *p, Image *src, Color c);
 /** Draw the p into src using FPixel c. **/
 void point_drawf(Point *p, Image *src, FPixel c);
 
+/** Print the point to the stream designated by FILE pointer **/
+void point_print(Point *p, FILE *fp);
+
 // Line functions
 
 /** Initialize a 2D line. **/
