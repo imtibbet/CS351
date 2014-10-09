@@ -201,21 +201,21 @@ void matrix_xformVector(Matrix *m, Vector *p, Vector *q){
  * in the Polygon p by the matrix m.
  */
 void matrix_xformPolygon(Matrix *m, Polygon *p){
-	int i;
+	int i, j;
 	Point temp;
 	for(i=0;i<p->nVertex;i++){
 		
-		//matrix_xformPoint(m, &(p->vertex[i]), &temp);
+		// matrix_xformPoint(m, &(p->vertex[i]), &temp);
 		for(j=0;j<4;j++){
-			temp->val[j] =	m->m[j][0] * p->vertex[i].val[0] +
+			temp.val[j] =	m->m[j][0] * p->vertex[i].val[0] +
 							m->m[j][1] * p->vertex[i].val[1] + 
 							m->m[j][2] * p->vertex[i].val[2] + 
 							m->m[j][3] * p->vertex[i].val[3];
 		}
 	
-		//point_copy(&(p->vertex[i]), &temp);
+		// point_copy(&(p->vertex[i]), &temp);
 		for(j=0;j<4;j++){
-			p->vertex[i].val[j] = temp->val[j];
+			p->vertex[i].val[j] = temp.val[j];
 		}
 	}
 }
@@ -228,17 +228,17 @@ void matrix_xformPolyline(Matrix *m, Polyline *p){
 	Point temp;
 	for(i=0;i<p->numVertex;i++){
 		
-		//matrix_xformPoint(m, &(p->vertex[i]), &temp);
+		// matrix_xformPoint(m, &(p->vertex[i]), &temp);
 		for(j=0;j<4;j++){
-			temp->val[j] =	m->m[j][0] * p->vertex[i].val[0] +
+			temp.val[j] =	m->m[j][0] * p->vertex[i].val[0] +
 							m->m[j][1] * p->vertex[i].val[1] + 
 							m->m[j][2] * p->vertex[i].val[2] + 
 							m->m[j][3] * p->vertex[i].val[3];
 		}
 	
-		//point_copy(&(p->vertex[i]), &temp);
+		// point_copy(&(p->vertex[i]), &temp);
 		for(j=0;j<4;j++){
-			p->vertex[i].val[j] = temp->val[j];
+			p->vertex[i].val[j] = temp.val[j];
 		}
 	}
 }
@@ -252,7 +252,7 @@ void matrix_xformLine(Matrix *m, Line *line){
 
 	// matrix_xformPoint(m, &(line->a), &temp);
 	for(i=0;i<4;i++){
-		temp->val[i] =	m->m[i][0] * line->a.val[0] +
+		temp.val[i] =	m->m[i][0] * line->a.val[0] +
 						m->m[i][1] * line->a.val[1] + 
 						m->m[i][2] * line->a.val[2] + 
 						m->m[i][3] * line->a.val[3];
@@ -260,12 +260,12 @@ void matrix_xformLine(Matrix *m, Line *line){
 	
 	// point_copy(&(line->a), &temp);
 	for(i=0;i<4;i++){
-		line->a.val[i] = temp->val[i];
+		line->a.val[i] = temp.val[i];
 	}
 
 	// matrix_xformPoint(m, &(line->b), &temp);
 	for(i=0;i<4;i++){
-		temp->val[i] =	m->m[i][0] * line->b.val[0] +
+		temp.val[i] =	m->m[i][0] * line->b.val[0] +
 						m->m[i][1] * line->b.val[1] + 
 						m->m[i][2] * line->b.val[2] + 
 						m->m[i][3] * line->b.val[3];
@@ -273,7 +273,7 @@ void matrix_xformLine(Matrix *m, Line *line){
 	
 	// point_copy(&(line->b), &temp);
 	for(i=0;i<4;i++){
-		line->b.val[i] = temp->val[i];
+		line->b.val[i] = temp.val[i];
 	}
 }
 
