@@ -12,7 +12,7 @@ void color_copy(Color *to, Color *from){
 	to->c[0] = from->c[0];
 	to->c[1] = from->c[1];
 	to->c[2] = from->c[2];
-	printf("color copied\n");
+	// printf("color copied\n");
 }
 
 // sets the Color data.
@@ -20,7 +20,7 @@ void color_set(Color *to, float r, float g, float b){
 	to->c[0] = r;
 	to->c[1] = g;
 	to->c[2] = b;
-	printf("color set\n");
+	// printf("color set\n");
 }
 
 // return 1 if they are equal, 0 otherwise

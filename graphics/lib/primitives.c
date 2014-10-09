@@ -660,7 +660,7 @@ Polyline *polyline_create(){
 	p->vertex = NULL;	
 	
 	// return pointer
-	printf("polyline created\n");
+	// printf("polyline created\n");
 	return(p);
 }
 
@@ -694,7 +694,7 @@ Polyline *polyline_createp(int numV, Point *vlist){
 	}
 	
 	// return pointer
-	printf("polyline created\n");
+	// printf("polyline created\n");
 	return(p);
 }
 
@@ -711,7 +711,7 @@ void polyline_free(Polyline *p){
 	} else {
 		printf("null p passed to polyline_free\n");
 	}
-	printf("polyline freed\n");
+	// printf("polyline freed\n");
 }
 
 // The functions polyline_init, polyline_set, and polyline_clear work on a pre-
@@ -734,7 +734,7 @@ void polyline_init(Polyline *p){
 	p->numVertex = 0;
 	p->vertex = NULL;
 	
-	printf("polyline initted\n");
+	// printf("polyline initted\n");
 }
 
 /* Initializes the vertex list to the points in vlist. De-allocates/allocates
@@ -767,7 +767,7 @@ void polyline_set(Polyline *p, int numV, Point *vlist){
 	for(i=0;i<numV;i++){
 		p->vertex[i] = vlist[i];
 	}
-	printf("polyline set\n");
+	// printf("polyline set\n");
 }
 
 /* 
@@ -790,7 +790,7 @@ void polyline_clear(Polyline *p){
 	// reset structure
 	p->numVertex = 0;
 	p->vertex = NULL;
-	printf("polyline cleared\n");
+	// printf("polyline cleared\n");
 }
 
 /* 
@@ -842,7 +842,7 @@ void polyline_copy (Polyline *to, Polyline *from){
 	for(i=0;i<(to->numVertex);i++){
 		to->vertex[i] = from->vertex[i];
 	}
-	printf("polyline copied\n");
+	// printf("polyline copied\n");
 }
 
 /* 
@@ -859,12 +859,12 @@ void polyline_print(Polyline *p, FILE *fp){
 		return;
 	}	
 
-	// print polyline points as x,y pairs
-	fprintf(fp, "about to print polyline points\n");
+	// print polyline points
+	fprintf(fp, "Polyline: %d vertices\n",p->numVertex);
 	for(i = 0; i<(p->numVertex); i++){
-		fprintf(fp,"x:%.3f, y:%.3f\n", p->vertex[i].val[0], p->vertex[i].val[1]);
+		fprintf(fp,"\t( %.3f, %.3f, %.3f )\n", 
+				p->vertex[i].val[0], p->vertex[i].val[1], p->vertex[i].val[2]);
 	}
-	printf("polyline printed\n");
 }
 
 /* 
@@ -894,7 +894,7 @@ void polyline_draw(Polyline *p, Image *src, Color c){
 		// draw line on src using Color c
 		line_draw(&l, src, c);
 	}
-	printf("polyline drawn\n");
+	// printf("polyline drawn\n");
 }
 
 // Polygon
@@ -918,7 +918,7 @@ Polygon *polygon_create(){
 	p->vertex = NULL;	
 	
 	// return pointer
-	printf("polygon created\n");
+	// printf("polygon created\n");
 	return(p);
 }
 
@@ -952,7 +952,7 @@ Polygon *polygon_createp(int numV, Point *vlist){
 	}
 	
 	// return pointer
-	printf("Polygon created\n");
+	// printf("Polygon created\n");
 	return(p);
 }
 
@@ -971,7 +971,7 @@ void polygon_free(Polygon *p){
 	} else {
 		printf("null p passed to polygon_free\n");
 	}
-	printf("polygon freed\n");
+	// printf("polygon freed\n");
 }
 
 /*
@@ -990,7 +990,7 @@ void polygon_init(Polygon *p){
 	p->nVertex = 0;
 	p->vertex = NULL;
 	
-	printf("polygon initted\n");
+	// printf("polygon initted\n");
 }
 
 /*
@@ -1023,7 +1023,7 @@ void polygon_set(Polygon *p, int numV, Point *vlist){
 	for(i=0;i<numV;i++){
 		p->vertex[i] = vlist[i];
 	}
-	printf("polygon set\n");
+	// printf("polygon set\n");
 }
 
 /*
@@ -1045,7 +1045,7 @@ void polygon_clear(Polygon *p){
 	// reset structure
 	p->nVertex = 0;
 	p->vertex = NULL;
-	printf("polygon cleared\n");
+	// printf("polygon cleared\n");
 }
 
 /*
@@ -1094,7 +1094,7 @@ void polygon_copy(Polygon *to, Polygon *from){
 	for(i=0;i<(to->nVertex);i++){
 		to->vertex[i] = from->vertex[i];
 	}
-	printf("polygon copied\n");
+	//printf("polygon copied\n");
 }
 
 /*
@@ -1112,11 +1112,22 @@ void polygon_print(Polygon *p, FILE *fp){
 	}	
 
 	// print polyline points as x,y pairs
-	fprintf(fp, "about to print polygon points\n");
+	fprintf(fp, "Polygon: %d vertices\n",p->nVertex);
 	for(i = 0; i<(p->nVertex); i++){
-		fprintf(fp,"x:%.3f, y:%.3f\n", p->vertex[i].val[0], p->vertex[i].val[1]);
+		fprintf(fp,"\t( %.3f, %.3f, %.3f )\n", 
+				p->vertex[i].val[0], p->vertex[i].val[1], p->vertex[i].val[2]);
 	}
-	printf("polygon printed\n");
+}
+
+/*
+ * normalize the x and y values of each vertex by the homogeneous coord
+ */
+void polygon_normalize( Polygon *p){
+	int i;
+	for(i=0;i<p->nVertex;i++){
+		p->vertex[i].val[0] = p->vertex[i].val[0] / p->vertex[i].val[3];
+		p->vertex[i].val[1] = p->vertex[i].val[1] / p->vertex[i].val[3];
+	}
 }
 
 /*
@@ -1149,7 +1160,7 @@ void polygon_draw(Polygon *p, Image *src, Color c){
 	//draw from last to first vertex at the end
 	line_set(&l, p->vertex[p->nVertex-1], p->vertex[0]);
 	line_draw(&l, src, c);
-	printf("polygon drawn\n");
+	// printf("polygon drawn\n");
 }
 
 /*
@@ -1505,7 +1516,7 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
         polygon_drawFill(p, src, c);
         return;
     }
-    printf("using barycentric\n");
+    // printf("using barycentric\n");
     
     double ax, ay;
     double bx, by;

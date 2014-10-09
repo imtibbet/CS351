@@ -197,6 +197,11 @@ void polygon_copy(Polygon *to, Polygon *from);
 void polygon_print(Polygon *p, FILE *fp);
 
 /*
+ * normalize the x and y values of each vertex by the homogeneous coord
+ */
+void polygon_normalize( Polygon *p);
+
+/*
  * draw the outline of the polygon using color c.
  */
 void polygon_draw(Polygon *p, Image *src, Color c);

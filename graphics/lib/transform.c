@@ -23,7 +23,7 @@ void vector_set(Vector *v, double x, double y, double z){
  * Print out the Vector to stream fp in a pretty form
  */
 void vector_print(Vector *v, FILE *fp){
-	fprintf(fp,"[%.3f, %.3f, %.3f, %.3f]\n",v->val[0],v->val[1],v->val[2],v->val[3]);
+	fprintf(fp,"[ %.3f, %.3f, %.3f, %.3f ]\n",v->val[0],v->val[1],v->val[2],v->val[3]);
 }
 
 /*
@@ -69,10 +69,10 @@ void vector_cross(Vector *a, Vector *b, Vector *c){
  * Print out the matrix in a nice 4x4 arrangement with a blank line below.
  */
 void matrix_print(Matrix *m, FILE *fp){
-	fprintf(fp,	"|%.3f, %.3f, %.3f, %.3f|\n" 
-				"|%.3f, %.3f, %.3f, %.3f|\n" 
-				"|%.3f, %.3f, %.3f, %.3f|\n" 
-				"|%.3f, %.3f, %.3f, %.3f|\n\n",
+	fprintf(fp,	"| %.3f, %.3f, %.3f, %.3f |\n" 
+				"| %.3f, %.3f, %.3f, %.3f |\n" 
+				"| %.3f, %.3f, %.3f, %.3f |\n" 
+				"| %.3f, %.3f, %.3f, %.3f |\n\n",
 				m->m[0][0],m->m[0][1],m->m[0][2],m->m[0][3],
 				m->m[1][0],m->m[1][1],m->m[1][2],m->m[1][3],
 				m->m[2][0],m->m[2][1],m->m[2][2],m->m[2][3],
@@ -667,8 +667,8 @@ void matrix_perspective(Matrix *m, double d){
 	pm.m[0][1] = pm.m[0][2] = pm.m[0][3] = 
 	pm.m[1][0] = pm.m[1][2] = pm.m[1][3] = 
 	pm.m[2][0] = pm.m[2][1] = pm.m[2][3] = 
-	pm.m[3][0] = pm.m[3][1] = 0.0;
-	pm.m[0][0] = pm.m[1][1] = pm.m[2][2] = pm.m[3][3] = 1.0;
+	pm.m[3][0] = pm.m[3][1] = pm.m[3][3] = 0.0;
+	pm.m[0][0] = pm.m[1][1] = pm.m[2][2] = 1.0;
 
 	pm.m[3][2] = 1.0/d;
 
@@ -690,7 +690,113 @@ void matrix_perspective(Matrix *m, double d){
 	}
 }
 
+// View
 
+/*
+ * Sets vtm to be the view transformation defined by the 2DView structure.
+ */
+ void matrix_setView2D(Matrix *vtm, View2D *view){
+ 
+ 	// set height of view to match aspect ratio of image
+ 	double dy = (view->dx) * (view->screeny) / (view->screenx);
+ 	
+ 	// initialize vtm to the identity
+ 	matrix_identity(vtm); 	
+ 	
+ 	// translating the origin of the view window to the origin, 
+ 	matrix_translate2D(vtm, -1*(view->vrp.val[0]), -1*(view->vrp.val[1]));
+ 	
+ 	// orienting the view window with the x-axis, sca
+ 	matrix_rotateZ(vtm, view->x.val[0], -1*(view->x.val[1]));
+ 	
+ 	// scaling the view window and flipping the y-axis, 
+ 	matrix_scale2D(vtm, (view->screenx)/(view->dx), -1*(view->screeny)/(dy));
+ 	
+ 	// then shifting the range of y-values back to [0,R]
+ 	matrix_translate2D(vtm, (view->screenx)/2, (view->screeny)/2);
+ }
+ 
+ 
+/*
+ * Implement the 3D perspective pipeline.
+ * When the function returns, the vtm should contain the complete view matrix. 
+ * Inside the function, begin by initializing VTM to the identity. 
+ * Do not modify any of the values in the PerspectiveView structure inside the
+ * function (no side-effects)
+ */
+ void matrix_setView3D(Matrix *vtm, View3D *view){
+ 	
+ 	Vector u, nvup, nvpn; // all new vectors to prevent modifying view values
+ 	double bp, dp, fp;
+ 	
+ 	// set height of view to match aspect ratio of image
+ 	double dv = (view->du) * (view->screeny) / (view->screenx);
+ 	
+ 	// initialize vtm to the identity
+ 	matrix_identity(vtm);
+ 	
+ 	// 1 calculate the U vector for the view reference coordinate system
+ 	vector_cross(&(view->vup), &(view->vpn), &u);
+ 	
+ 	// 2 Recalculate the VUP so that the view reference coordinates are orthogonal
+ 	vector_cross(&(view->vpn), &u, &nvup);
+ 	
+ 	// 3 Translate the VRP to the origin
+ 	matrix_translate(vtm, -view->vrp.val[0], -view->vrp.val[1], -view->vrp.val[2]);
+ 	printf("After VRP transltion\n");
+ 	matrix_print(vtm, stdout);
+ 	
+ 	// 4 Normalize U, VUP and VPN and use the Rxyz rotation method to align the axes
+ 	vector_normalize(&u);
+ 	vector_normalize(&nvup);
+ 	vector_set(&nvpn, view->vpn.val[0], view->vpn.val[1], view->vpn.val[2]);
+ 	vector_normalize(&nvpn);
+ 	printf("View reference axes\n");
+ 	vector_print(&u, stdout);
+ 	vector_print(&nvup, stdout);
+ 	vector_print(&nvpn, stdout);
+ 	printf("\n");
+ 	matrix_rotateXYZ(vtm, &u, &nvup, &nvpn);
+  	printf("After Rxyz\n");	
+ 	matrix_print(vtm, stdout);
+	
+	// 5 Translate COP to origin
+	matrix_translate(vtm, 0.0, 0.0, view->d);
+  	printf("After translating to origin\n");	
+ 	matrix_print(vtm, stdout);
+ 	
+ 	// 6 calculate DOP
+ 	//dopx = 
+ 	//dopy = 
+ 	//dopz = -copz
+ 	
+ 	// 7 Shear so the DOP is aligned with the positive z-axis
+	//matrix_shearZ(vtm, dopx/dopz, dopy/dopz);
+	
+	// Scale to the canonical view volume, which is a pyramid.
+	
+	// Scale to the cannonical view volume CVV
+	bp = view->b + view->d;
+	dp = (view->d)/bp;
+	fp = ((view->f)+(view->d))/bp;
+	matrix_scale(vtm, 2*(view->d)/(bp*(view->du)), 2*(view->d)/(bp*dv), 1/bp);
+  	printf("After scaling to CVV\n");	
+ 	matrix_print(vtm, stdout);
+	
+	
+	// project the scene onto the view plane
+	matrix_perspective(vtm, dp);
+  	printf("After perspective\n");	
+ 	matrix_print(vtm, stdout);
+	
+	// get to screen coordinates
+	matrix_scale2D(vtm, -1*(view->screenx)/(2*dp), -1*(view->screeny)/(2*dp));
+  	printf("After scale to image coords\n");	
+ 	matrix_print(vtm, stdout);
+	matrix_translate2D(vtm, (view->screenx)/2, (view->screeny)/2);
+  	printf("After final translation to image\n");	
+ 	matrix_print(vtm, stdout);
+ }
 
 
 

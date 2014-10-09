@@ -37,14 +37,14 @@ int main(int argc, char *argv[]) {
   }
 
   // corners of a cube, centered at (0, 0, 0)
-  point_set( &v[0], -1, -1, -1 );
-  point_set( &v[1],  1, -1, -1 );
-  point_set( &v[2],  1,  1, -1 );
-  point_set( &v[3], -1,  1, -1 );
-  point_set( &v[4], -1, -1,  1 );
-  point_set( &v[5],  1, -1,  1 );
-  point_set( &v[6],  1,  1,  1 );
-  point_set( &v[7], -1,  1,  1 );
+  point_set3D( &v[0], -1, -1, -1 );
+  point_set3D( &v[1],  1, -1, -1 );
+  point_set3D( &v[2],  1,  1, -1 );
+  point_set3D( &v[3], -1,  1, -1 );
+  point_set3D( &v[4], -1, -1,  1 );
+  point_set3D( &v[5],  1, -1,  1 );
+  point_set3D( &v[6],  1,  1,  1 );
+  point_set3D( &v[7], -1,  1,  1 );
 
   // front side
   polygon_set( &side[0], 4, &(v[0]) );
@@ -91,10 +91,10 @@ int main(int argc, char *argv[]) {
     if( alpha < 0.0 || alpha > 1.0 )
       alpha = 0.0;
 
-    point_set( &(view.vrp), 3*alpha, 2*alpha, -2*alpha - (1.0-alpha)*3 );
+    point_set3D( &(view.vrp), 3*alpha, 2*alpha, -2*alpha - (1.0-alpha)*3 );
   }
   else {
-    point_set( &(view.vrp), 3, 2, -2 );
+    point_set3D( &(view.vrp), 3, 2, -2 );
   }
   vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
     // normalize by homogeneous coordinate before drawing
     polygon_normalize( &tpoly );
 
-    polygon_drawFrame( &tpoly, src, color[i] );
+    polygon_draw( &tpoly, src, color[i] );
     polygon_print( &tpoly, stdout );
   }
 

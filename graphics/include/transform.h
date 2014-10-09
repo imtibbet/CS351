@@ -10,7 +10,23 @@ typedef Point Vector;
 
 typedef struct {
 
-	// 3-D vector indicating the origin of the view reference coordinates
+	// 2-D point indicating the center of the view rectangle in world coordinates
+	Point vrp;
+	
+	// orientation angle up from +x in degrees
+	Vector x;
+	
+	// width of the view
+	double dx;
+	
+	// Size of the desired image in pixels
+	int screenx;
+	int screeny;
+} View2D;
+
+typedef struct {
+
+	// 3-D point indicating the origin of the view reference coordinates
 	Point vrp; 
 	
 	//// 3-D vector indicating the direction in which the viewer is looking
@@ -27,10 +43,10 @@ typedef struct {
 	// extent of view plane around the VRP, 
 	// expressed in world coordinate distances
 	double du;
-	double dv;
+	double dv; // compute this to ensure ratio with screen x and y correct
 	
-	// font and back clip planes expressed as distances along the positive
-	// VPN F>0 and F<B
+	// front and back clip planes expressed as distances along the positive VPN
+	// F>=0 and F<B
 	double f;
 	double b;
 	
@@ -205,6 +221,19 @@ void matrix_shearZ(Matrix *m, double shx, double shy);
  */
 void matrix_perspective(Matrix *m, double d);
 
+/*
+ * Sets vtm to be the view transformation defined by the 2DView structure.
+ */
+ void matrix_setView2D(Matrix *vtm, View2D *view);
+ 
+/*
+ * Implement the 3D perspective pipeline.
+ * When the function returns, the vtm should contain the complete view matrix. 
+ * Inside the function, begin by initializing VTM to the identity. 
+ * Do not modify any of the values in the PerspectiveView structure inside the
+ * function (no side-effects)
+ */
+ void matrix_setView3D(Matrix *vtm, View3D *view);
 
 
 #endif

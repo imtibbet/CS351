@@ -44,7 +44,7 @@ Image *image_create(int rows, int cols){
 	// assign image data fields to parameter and return pointer to image
 	src->rows = rows;
 	src->cols = cols;
-	printf("image created\n");
+	// printf("image created\n");
 	return(src);
 	
 } // end image_create
@@ -66,7 +66,7 @@ void image_free(Image *src){
 		printf("null image given to free\n");
 		return;
 	}
-	printf("image freed\n");
+	// printf("image freed\n");
 
 } // end image_free
 
@@ -82,7 +82,7 @@ void image_init(Image *src){
 	}
 	src->data = NULL;
 	src->rows = src->cols = 0;
-	printf("image initted\n");
+	// printf("image initted\n");
 
 } // end image_init
 
@@ -138,7 +138,7 @@ int image_alloc(Image *src, int rows, int cols){
 	}
 	src->rows = rows;
 	src->cols = cols;
-	printf("image allocated\n");
+	// printf("image allocated\n");
 	return(0);
 	
 } // end image_alloc
@@ -162,7 +162,7 @@ void image_dealloc(Image *src){
 	}
 	src->rows = src->cols = 0;
 	src->data = NULL;
-	printf("image deallocated\n");
+	// printf("image deallocated\n");
 
 } // end image_dealloc
 
@@ -232,7 +232,7 @@ int image_write(Image *src, char *filename){
 	}
 	writePPM(image, src->rows, src->cols, 255 /* s/b 255 */, filename);
 	free(image);
-	printf("image written\n");
+	// printf("image written\n");
 	return(0);
 
 } // end image_write
