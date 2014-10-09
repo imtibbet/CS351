@@ -204,8 +204,19 @@ void matrix_xformPolygon(Matrix *m, Polygon *p){
 	int i;
 	Point temp;
 	for(i=0;i<p->nVertex;i++){
-		matrix_xformPoint(m, &(p->vertex[i]), &temp);
-		point_copy(&(p->vertex[i]), &temp);
+		
+		//matrix_xformPoint(m, &(p->vertex[i]), &temp);
+		for(j=0;j<4;j++){
+			temp->val[j] =	m->m[j][0] * p->vertex[i].val[0] +
+							m->m[j][1] * p->vertex[i].val[1] + 
+							m->m[j][2] * p->vertex[i].val[2] + 
+							m->m[j][3] * p->vertex[i].val[3];
+		}
+	
+		//point_copy(&(p->vertex[i]), &temp);
+		for(j=0;j<4;j++){
+			p->vertex[i].val[j] = temp->val[j];
+		}
 	}
 }
 
@@ -213,11 +224,22 @@ void matrix_xformPolygon(Matrix *m, Polygon *p){
  * Transform the points in the Polyline p by the matrix m.
  */
 void matrix_xformPolyline(Matrix *m, Polyline *p){
-	int i;
+	int i, j;
 	Point temp;
 	for(i=0;i<p->numVertex;i++){
-		matrix_xformPoint(m, &(p->vertex[i]), &temp);
-		point_copy(&(p->vertex[i]), &temp);
+		
+		//matrix_xformPoint(m, &(p->vertex[i]), &temp);
+		for(j=0;j<4;j++){
+			temp->val[j] =	m->m[j][0] * p->vertex[i].val[0] +
+							m->m[j][1] * p->vertex[i].val[1] + 
+							m->m[j][2] * p->vertex[i].val[2] + 
+							m->m[j][3] * p->vertex[i].val[3];
+		}
+	
+		//point_copy(&(p->vertex[i]), &temp);
+		for(j=0;j<4;j++){
+			p->vertex[i].val[j] = temp->val[j];
+		}
 	}
 }
 
@@ -225,22 +247,70 @@ void matrix_xformPolyline(Matrix *m, Polyline *p){
  * Transform the points in line by the matrix m.
  */
 void matrix_xformLine(Matrix *m, Line *line){
+	int i;
 	Point temp;
-	matrix_xformPoint(m, &(line->a), &temp);
-	point_copy(&(line->a), &temp);
-	matrix_xformPoint(m, &(line->b), &temp);
-	point_copy(&(line->b), &temp);
+
+	// matrix_xformPoint(m, &(line->a), &temp);
+	for(i=0;i<4;i++){
+		temp->val[i] =	m->m[i][0] * line->a.val[0] +
+						m->m[i][1] * line->a.val[1] + 
+						m->m[i][2] * line->a.val[2] + 
+						m->m[i][3] * line->a.val[3];
+	}
+	
+	// point_copy(&(line->a), &temp);
+	for(i=0;i<4;i++){
+		line->a.val[i] = temp->val[i];
+	}
+
+	// matrix_xformPoint(m, &(line->b), &temp);
+	for(i=0;i<4;i++){
+		temp->val[i] =	m->m[i][0] * line->b.val[0] +
+						m->m[i][1] * line->b.val[1] + 
+						m->m[i][2] * line->b.val[2] + 
+						m->m[i][3] * line->b.val[3];
+	}
+	
+	// point_copy(&(line->b), &temp);
+	for(i=0;i<4;i++){
+		line->b.val[i] = temp->val[i];
+	}
 }
 
 /*
  * Premultiply the matrix by a scale matrix parameterized by sx and sy
  */
 void matrix_scale2D(Matrix *m, double sx, double sy){
+	int i, j;
 	Matrix sm;
-	matrix_identity(&sm);
+	Matrix temp;
+
+	// matrix_identity(&rm);
+	sm.m[0][1] = sm.m[0][2] = sm.m[0][3] = 
+	sm.m[1][0] = sm.m[1][2] = sm.m[1][3] = 
+	sm.m[2][0] = sm.m[2][1] = sm.m[2][3] = 
+	sm.m[3][0] = sm.m[3][1] = sm.m[3][2] =  0.0;
+	sm.m[2][2] = sm.m[3][3] = 1.0;
+
 	sm.m[0][0] = sx;
 	sm.m[1][1] = sy;
-	matrix_multiply(&sm, m, m);
+
+	// matrix_multiply(&sm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	sm.m[i][0] * m->m[0][j] +
+							sm.m[i][1] * m->m[1][j] + 
+							sm.m[i][2] * m->m[2][j] + 
+							sm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 /*
@@ -248,35 +318,110 @@ void matrix_scale2D(Matrix *m, double sx, double sy){
  * cos(t) and sin(t), where t is the angle of rotation about the Z-axis
  */
 void matrix_rotateZ(Matrix *m, double cth, double sth){
+	int i, j;
 	Matrix rm;
-	matrix_identity(&rm);
+	Matrix temp;
+
+	// matrix_identity(&rm);
+	rm.m[0][2] = rm.m[0][3] = 
+	rm.m[1][2] = rm.m[1][3] = 
+	rm.m[2][0] = rm.m[2][1] = rm.m[2][3] = 
+	rm.m[3][0] = rm.m[3][1] = rm.m[3][2] =  0.0;
+	rm.m[2][2] = rm.m[3][3] = 1.0;
+
 	rm.m[0][0] = cth;
 	rm.m[0][1] = -sth;
 	rm.m[1][0] = sth;
 	rm.m[1][1] = cth;
-	matrix_multiply(&rm, m, m);
+
+	// matrix_multiply(&rm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	rm.m[i][0] * m->m[0][j] +
+							rm.m[i][1] * m->m[1][j] + 
+							rm.m[i][2] * m->m[2][j] + 
+							rm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 /*
  * Premultiply the matrix by a 2D translation matrix parameterized by tx, ty
  */
 void matrix_translate2D(Matrix *m, double tx, double ty){
+	int i, j;
 	Matrix tm;
-	matrix_identity(&tm);
+	Matrix temp;
+
+	// matrix_identity(&tm);
+	tm.m[0][1] = tm.m[0][2] = 
+	tm.m[1][0] = tm.m[1][2] = 
+	tm.m[2][0] = tm.m[2][1] = tm.m[2][3] = 
+	tm.m[3][0] = tm.m[3][1] = tm.m[3][2] =  0.0;
+	tm.m[0][0] = tm.m[1][1] = tm.m[2][2] = tm.m[3][3] = 1.0;
+
 	tm.m[0][3] = tx;
 	tm.m[1][3] = ty;
-	matrix_multiply(&tm, m, m);
+
+	// matrix_multiply(&tm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	tm.m[i][0] * m->m[0][j] +
+							tm.m[i][1] * m->m[1][j] + 
+							tm.m[i][2] * m->m[2][j] + 
+							tm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 /*
  * Premultiply the matrix by a 2D shear matrix parameterized by shx, shy
  */
 void matrix_shear2D(Matrix *m, double shx, double shy){
+	int i, j;
 	Matrix shm;
-	matrix_identity(&shm);
+	Matrix temp;
+
+	// matrix_identity(&shm);
+	shm.m[0][2] = shm.m[0][3] = 
+	shm.m[1][2] = shm.m[1][3] = 
+	shm.m[2][0] = shm.m[2][1] = shm.m[2][3] = 
+	shm.m[3][0] = shm.m[3][1] = shm.m[3][2] =  0.0;
+	shm.m[0][0] = shm.m[1][1] = shm.m[2][2] = shm.m[3][3] = 1.0;
+
 	shm.m[0][1] = shx;
 	shm.m[1][0] = shy;
-	matrix_multiply(&shm, m, m);
+
+	// matrix_multiply(&shm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	shm.m[i][0] * m->m[0][j] +
+							shm.m[i][1] * m->m[1][j] + 
+							shm.m[i][2] * m->m[2][j] + 
+							shm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 // 3D matrix
@@ -285,24 +430,74 @@ void matrix_shear2D(Matrix *m, double shx, double shy){
  * Premultiply the matrix by a translation matrix parameterized by tx,ty,tz
  */
 void matrix_translate(Matrix *m, double tx, double ty, double tz){
+	int i, j;
 	Matrix tm;
-	matrix_identity(&tm);
+	Matrix temp;
+
+	// matrix_identity(&tm);
+	tm.m[0][1] = tm.m[0][2] = 
+	tm.m[1][0] = tm.m[1][2] = 
+	tm.m[2][0] = tm.m[2][1] = 
+	tm.m[3][0] = tm.m[3][1] = tm.m[3][2] =  0.0;
+	tm.m[0][0] = tm.m[1][1] = tm.m[2][2] = tm.m[3][3] = 1.0;
+
 	tm.m[0][3] = tx;
 	tm.m[1][3] = ty;
 	tm.m[2][3] = tz;
-	matrix_multiply(&tm, m, m);
+
+	// matrix_multiply(&tm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	tm.m[i][0] * m->m[0][j] +
+							tm.m[i][1] * m->m[1][j] + 
+							tm.m[i][2] * m->m[2][j] + 
+							tm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 /*
  * Premultiply the matrix by a scale matrix parameterized by sx,sy,sz
  */
 void matrix_scale(Matrix *m, double sx, double sy, double sz){
+	int i, j;
 	Matrix sm;
-	matrix_identity(&sm);
+	Matrix temp;
+
+	// matrix_identity(&sm);
+	sm.m[0][1] = sm.m[0][2] = sm.m[0][3] = 
+	sm.m[1][0] = sm.m[1][2] = sm.m[1][3] = 
+	sm.m[2][0] = sm.m[2][1] = sm.m[2][3] = 
+	sm.m[3][0] = sm.m[3][1] = sm.m[3][2] =  0.0;
+	sm.m[3][3] = 1.0;
+
 	sm.m[0][0] = sx;
 	sm.m[1][1] = sy;
 	sm.m[2][2] = sz;
-	matrix_multiply(&sm, m, m);
+
+	// matrix_multiply(&sm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	sm.m[i][0] * m->m[0][j] +
+							sm.m[i][1] * m->m[1][j] + 
+							sm.m[i][2] * m->m[2][j] + 
+							sm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 /*
@@ -310,13 +505,38 @@ void matrix_scale(Matrix *m, double sx, double sy, double sz){
  * cos(t) and sin(t), where t is the angle of rotation about the x axis
  */
 void matrix_rotateX(Matrix *m, double cth, double sth){
+	int i, j;
 	Matrix rm;
-	matrix_identity(&rm);
+	Matrix temp;
+
+	// matrix_identity(&rm);
+	rm.m[0][1] = rm.m[0][2] = rm.m[0][3] = 
+	rm.m[1][0] = rm.m[1][3] = 
+	rm.m[2][0] = rm.m[2][3] = 
+	rm.m[3][0] = rm.m[3][1] = rm.m[3][2] =  0.0;
+	rm.m[0][0] = rm.m[3][3] = 1.0;
+
 	rm.m[1][1] = cth;
 	rm.m[1][2] = -sth;
 	rm.m[2][1] = sth;
 	rm.m[2][2] = cth;
-	matrix_multiply(&rm, m, m);
+
+	// matrix_multiply(&rm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	rm.m[i][0] * m->m[0][j] +
+							rm.m[i][1] * m->m[1][j] + 
+							rm.m[i][2] * m->m[2][j] + 
+							rm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 /*
@@ -324,13 +544,38 @@ void matrix_rotateX(Matrix *m, double cth, double sth){
  * cos(t) and sin(t), where t is the angle of rotation about the y axis
  */
 void matrix_rotateY(Matrix *m, double cth, double sth){
+	int i, j;
 	Matrix rm;
-	matrix_identity(&rm);
+	Matrix temp;
+
+	// matrix_identity(&rm);
+	rm.m[0][1] = rm.m[0][3] = 
+	rm.m[1][0] = rm.m[1][2] = rm.m[1][3] = 
+	rm.m[2][1] = rm.m[2][3] = 
+	rm.m[3][0] = rm.m[3][1] = rm.m[3][2] =  0.0;
+	rm.m[1][1] = rm.m[3][3] = 1.0;
+
 	rm.m[0][0] = cth;
 	rm.m[0][2] = sth;
 	rm.m[2][0] = -sth;
 	rm.m[2][2] = cth;
-	matrix_multiply(&rm, m, m);
+
+	// matrix_multiply(&rm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	rm.m[i][0] * m->m[0][j] +
+							rm.m[i][1] * m->m[1][j] + 
+							rm.m[i][2] * m->m[2][j] + 
+							rm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 /*
@@ -338,15 +583,39 @@ void matrix_rotateY(Matrix *m, double cth, double sth){
  * u,v,w where the three vectors represent an orthonormal 3D basis
  */
 void matrix_rotateXYZ(Matrix *m, Vector *u, Vector *v, Vector *w){
-	int j;
+	int i, j;
 	Matrix rm;
-	matrix_identity(&rm);
+	Matrix temp;
+
+	// matrix_identity(&rm);
+	rm.m[0][3] = 
+	rm.m[1][3] = 
+	rm.m[2][3] = 
+	rm.m[3][0] = rm.m[3][1] = rm.m[3][2] =  0.0;
+	rm.m[3][3] = 1.0;
+
 	for(j=0;j<3;j++){
 		rm.m[0][j] = u->val[j];
 		rm.m[1][j] = v->val[j];
 		rm.m[2][j] = w->val[j];
 	}
-	matrix_multiply(&rm, m, m);
+
+	// matrix_multiply(&rm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	rm.m[i][0] * m->m[0][j] +
+							rm.m[i][1] * m->m[1][j] + 
+							rm.m[i][2] * m->m[2][j] + 
+							rm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 
 }
 
@@ -354,21 +623,71 @@ void matrix_rotateXYZ(Matrix *m, Vector *u, Vector *v, Vector *w){
  * Premultiply the matrix by a shear Z matrix parameterized by shx,shy
  */
 void matrix_shearZ(Matrix *m, double shx, double shy){
+	int i, j;
 	Matrix shm;
-	matrix_identity(&shm);
+	Matrix temp;
+
+	// matrix_identity(&shm);
+	shm.m[0][1] = shm.m[0][3] = 
+	shm.m[1][0] = shm.m[1][3] = 
+	shm.m[2][0] = shm.m[2][1] = shm.m[2][3] = 
+	shm.m[3][0] = shm.m[3][1] = shm.m[3][2] =  0.0;
+	shm.m[0][0] = shm.m[1][1] = shm.m[2][2] = shm.m[3][3] = 1.0;
+
 	shm.m[0][2] = shx;
 	shm.m[1][2] = shy;
-	matrix_multiply(&shm, m, m);
+
+	// matrix_multiply(&shm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	shm.m[i][0] * m->m[0][j] +
+							shm.m[i][1] * m->m[1][j] + 
+							shm.m[i][2] * m->m[2][j] + 
+							shm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 /*
  * premultiply the matrix by a perspective matrix parameterized by d
  */
 void matrix_perspective(Matrix *m, double d){
+	int i, j;
 	Matrix pm;
-	matrix_identity(&pm);
+	Matrix temp;
+
+	// matrix_identity(&pm);
+	pm.m[0][1] = pm.m[0][2] = pm.m[0][3] = 
+	pm.m[1][0] = pm.m[1][2] = pm.m[1][3] = 
+	pm.m[2][0] = pm.m[2][1] = pm.m[2][3] = 
+	pm.m[3][0] = pm.m[3][1] = 0.0;
+	pm.m[0][0] = pm.m[1][1] = pm.m[2][2] = pm.m[3][3] = 1.0;
+
 	pm.m[3][2] = 1.0/d;
-	matrix_multiply(&pm, m, m);
+
+	// matrix_multiply(&pm, m, m);
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			temp.m[i][j] = 	pm.m[i][0] * m->m[0][j] +
+							pm.m[i][1] * m->m[1][j] + 
+							pm.m[i][2] * m->m[2][j] + 
+							pm.m[i][3] * m->m[3][j];
+		}
+	}
+
+	// copy the temp matrix into the desination matrix
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			m->m[i][j] = temp.m[i][j];
+		}
+	}
 }
 
 
