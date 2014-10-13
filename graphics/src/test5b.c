@@ -9,20 +9,6 @@
 #include <math.h>
 #include "graphics.h"
 
-void setWhite( Image *src );
-void setWhite( Image *src ) {
-  int i, j;
-  Color White;
-
-  color_set(&White, 1.0, 1.0, 1.0);
-
-  for(i=0;i<src->rows;i++) {
-    for(j=0;j<src->cols;j++) {
-      image_setColor( src, i, j, White );
-    }
-  }
-}
-
 int main(int argc, char *argv[]) {
   const int nLines = 50;
   const int nFrames = 50;
@@ -39,6 +25,8 @@ int main(int argc, char *argv[]) {
   int i, t;
   char filename[256];
   Image *src;
+  Color White;
+  color_set(&White, 1.0, 1.0, 1.0);
 
   src = image_create( rows, cols );
 
@@ -64,7 +52,7 @@ int main(int argc, char *argv[]) {
   // loop for some number of frames
   for(t=0;t<nFrames;t++) {
     
-    setWhite( src );
+    image_fillColor( src, White );
 
     // rotate the lines about one end
     for(i=0;i<nLines;i++) {
@@ -101,6 +89,11 @@ int main(int argc, char *argv[]) {
 
   // cleanup
   image_free( src );
+
+  printf("converting to gif...\n");
+  system("convert -delay 10 -loop 0 frame-*.ppm test5b.gif");
+  system("rm frame-*.ppm");
+  system("animate test5b.gif");
 
   return(0);
 }
