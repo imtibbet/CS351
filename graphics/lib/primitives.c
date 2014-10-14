@@ -1234,7 +1234,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	// Check if the starting row is below the image or the end row is
 	// above the image and skip the edge if either is true
 	if( (start.val[1] > ((float)(src->rows-1))) || (end.val[1] < 0.0) ){
-		printf("whole edge outside image\n");
+		//printf("whole edge outside image\n");
 		return(NULL);
 	}
 
@@ -1260,7 +1260,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 
 	// Clip yEnd to the number of rows-1.
 	if(edge->yEnd > (src->rows-1)){
-		printf("row clipping bottom\n");
+		//printf("row clipping bottom\n");
 		edge->yEnd = src->rows-1;
 	}
 
@@ -1282,7 +1282,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	// move the intersections down to scanline zero
 	// if edge->y0 < 0
 	if(edge->y0 < epsilon){
-		printf("row clipping top\n");
+		//printf("row clipping top\n");
 		// update xIntersect
 		edge->xIntersect += (-edge->y0)*edge->dxPerScan;
 		// update y0
@@ -1297,7 +1297,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	// has gone beyond the end of the edge	
 	if( ( (edge->dxPerScan > epsilon) && (edge->xIntersect>(edge->x1)) ) || 
 		( (edge->dxPerScan < epsilon) && (edge->xIntersect<(edge->x1)) ) ){
-		printf("xIntersect has gone beyond the end of the edge\n");
+		//printf("xIntersect has gone beyond the end of the edge\n");
 		edge->xIntersect = edge->x1;
 	}
 

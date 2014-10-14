@@ -41,8 +41,6 @@ static Polygon *defineBatSymbol( float x, float y, float scale ){
 }
 
 int main(int argc, char *argv[]) {
-	const int nLines = 50;
-	const int nFrames = 50;
 	const int rows = 600;
 	const int cols = 800;
 	const int Resolution = 50;
@@ -56,13 +54,17 @@ int main(int argc, char *argv[]) {
 	Point fullEllipse[Resolution];
 	Point halfEllipse[2*(Resolution/2)+2];
 	Point unitSquare[4];
-	Polygon *skyline, *mount;
+	Polygon *mount;
 	Point lightCone[3];
 	View2D view;
 	Matrix vtm, ltm;
-	int i, j, t, index = 0;
-	float vrpx0, vrpy0;
-	char filename[256];
+	int i, j, batIndex = 0;
+	float vrpx = 0.0; 
+	float vrpy = 0.0;
+	float vdx = 10.0;
+	float vxx = 1.0;
+	float vxy = 0.0;
+	float vxz = 0.0;
 	Image *src;
 	Color White;
 	color_set(&White, 1.0, 1.0, 1.0);
@@ -77,13 +79,31 @@ int main(int argc, char *argv[]) {
 	color_set( &Yellow, 0.9, 0.9, 0.4 );
 
 	src = image_create( rows, cols );
-	image_fillColor( src, Blue );
-
-	// set up a view centered on (0, 0) with x pointing right
-	vrpx0 = vrpy0 = 0.0;
-	point_set2D( &(view.vrp), vrpx0, vrpy0 );
-	view.dx = 50.0;
-	vector_set( &(view.x), 1.0, 0.0, 0.0 );
+	
+	// grab command line argument to determine viewpoint
+	// and set up the view structure
+	if( argc == 2 ) {
+		vrpx = vrpy = atof( argv[1] );
+	} else {
+		if( argc > 2 ) {
+			vrpx = atof( argv[1] );
+			vrpy = atof( argv[2] );
+		} 
+		if( argc > 3 ) {
+			vdx = atof( argv[3] );
+			if(vdx <= 0.0){
+				vdx = 50.0;
+			}
+		}
+		if( argc > 4 ) {
+			vxx = cos( atof( argv[4] ) * M_PI/180.0);
+			vxy = sin( atof( argv[4] ) * M_PI/180.0);
+		}
+	}
+	
+	point_set2D( &(view.vrp), vrpx, vrpy );
+	view.dx = vdx;
+	vector_set( &(view.x), vxx, vxy, vxz );
 	view.screenx = cols;
 	view.screeny = rows;
 
@@ -107,18 +127,18 @@ int main(int argc, char *argv[]) {
 	point_set2D(&(lightCone[0]), 0, 0);
 	point_set2D(&(lightCone[1]), -15, 3);
 	point_set2D(&(lightCone[2]), -15, -3);
-	batCall[index] = polygon_createp(3, lightCone);
-	batCallColor[index++] = Yellow;
-	batCall[index] = polygon_createp(Resolution, unitCircle);
+	batCall[batIndex] = polygon_createp(3, lightCone);
+	batCallColor[batIndex++] = Yellow;
+	batCall[batIndex] = polygon_createp(Resolution, unitCircle);
 	// move it 5 to the left along the X-axis
 	matrix_identity(&ltm);
 	matrix_scale2D(&ltm, 3, 3);
 	matrix_translate2D(&ltm, -15, 0);
 	// transform the polygon points using LTM
-	matrix_xformPolygon(&ltm, batCall[index]);
-	batCallColor[index++] = Yellow;
-	batCall[index] = defineBatSymbol( -15, 0, 0.3 );
-	batCallColor[index++] = Black;
+	matrix_xformPolygon(&ltm, batCall[batIndex]);
+	batCallColor[batIndex++] = Yellow;
+	batCall[batIndex] = defineBatSymbol( -15, 0, 0.3 );
+	batCallColor[batIndex++] = Black;
 	
     // back of projector
 	matrix_identity(&ltm);
@@ -142,32 +162,32 @@ int main(int argc, char *argv[]) {
 		matrix_xformPoint(&ltm, &(unitCircle[j--]), &(halfEllipse[i++]));
 	}
 	// add the back of projector
-	batCall[index] = polygon_createp(2*(Resolution/2)+2, halfEllipse);
-	batCallColor[index++] = Grey;
+	batCall[batIndex] = polygon_createp(2*(Resolution/2)+2, halfEllipse);
+	batCallColor[batIndex++] = dkGrey;
 	
 	//body of projector
 	for(i=0;i<2;i++){
 		// gap of projector
-		batCall[index] = polygon_create();
-		polygon_copy(batCall[index], batCall[index-1]);
+		batCall[batIndex] = polygon_create();
+		polygon_copy(batCall[batIndex], batCall[batIndex-1]);
 		// move it 1 to the left along the X-axis
 		matrix_identity(&ltm);
 		matrix_translate2D(&ltm, -1, 0);
 		// transform the polygon points using LTM
-		matrix_xformPolygon(&ltm, batCall[index]);
+		matrix_xformPolygon(&ltm, batCall[batIndex]);
 		// add the back of projector
-		batCallColor[index++] = Yellow;
+		batCallColor[batIndex++] = Yellow;
 	
 		// bar of projector
-		batCall[index] = polygon_create();
-		polygon_copy(batCall[index], batCall[index-1]);
+		batCall[batIndex] = polygon_create();
+		polygon_copy(batCall[batIndex], batCall[batIndex-1]);
 		// move it 1 to the left along the X-axis
 		matrix_identity(&ltm);
 		matrix_translate2D(&ltm, -1, 0);
 		// transform the polygon points using LTM
-		matrix_xformPolygon(&ltm, batCall[index]);
+		matrix_xformPolygon(&ltm, batCall[batIndex]);
 		// add the back of projector
-		batCallColor[index++] = Grey;
+		batCallColor[batIndex++] = dkGrey;
 	}
 	
 	// front of projector
@@ -177,46 +197,43 @@ int main(int argc, char *argv[]) {
 	for(i=0;i<Resolution;i++) {
 		matrix_xformPoint(&ltm, &(unitCircle[i]), &(fullEllipse[i]));
 	}
-	batCall[index] = polygon_createp(Resolution, fullEllipse);
+	batCall[batIndex] = polygon_createp(Resolution, fullEllipse);
 	// move it 2 to the left along the X-axis
 	matrix_identity(&ltm);
 	matrix_translate2D(&ltm, -3, 0);
 	// transform the polygon points using LTM
-	matrix_xformPolygon(&ltm, batCall[index]);
-	batCallColor[index++] = Yellow;
+	matrix_xformPolygon(&ltm, batCall[batIndex]);
+	batCallColor[batIndex++] = Yellow;
 	
 	// bat symbol
-	batCall[index] = defineBatSymbol( 0, 0, 0.2 );
+	batCall[batIndex] = defineBatSymbol( 0, 0, 0.2 );
 	// move it 2 to the left along the X-axis
 	matrix_identity(&ltm);
 	matrix_scale2D(&ltm, 0.7, 1);
 	matrix_translate2D(&ltm, -3, 0);
 	// transform the polygon points using LTM
-	matrix_xformPolygon(&ltm, batCall[index]);
-	batCallColor[index++] = Black;
+	matrix_xformPolygon(&ltm, batCall[batIndex]);
+	batCallColor[batIndex++] = Black;
 	
 	// rotate the whole scene to point at the sky
 	matrix_identity(&ltm);
 	matrix_rotateZ(&ltm, cos(-M_PI/6.0), sin(-M_PI/6.0));
-	for(i=0;i<index;i++) {
+	for(i=0;i<batIndex;i++) {
 		matrix_xformPolygon(&ltm, batCall[i]);
 	}
-	
-	// city skyline
-	skyline = polygon_createp(4, unitSquare);
-	// move it 5 to the left along the X-axis
+
+	// mount
+	mount = polygon_createp(4, unitSquare);
 	matrix_identity(&ltm);
-	matrix_scale2D(&ltm, view.dx, view.dx);
-	matrix_translate2D(&ltm, 0, -view.dx/2);
+	matrix_scale2D(&ltm, 1, 4);
+	matrix_translate2D(&ltm, 0, -2);
 	// transform the polygon points using LTM
-	matrix_xformPolygon(&ltm, skyline);
-	// multiply the skyline by the view transformation matrix
-	matrix_xformPolygon(&vtm, skyline);
-	// draw the polygon
-	polygon_drawFill(skyline, src, dkGrey);
+	matrix_xformPolygon(&ltm, mount);
+	
+	image_fillColor( src, Blue );
 	
 	// draw projection
-	for(i=0;i<index;i++) {
+	for(i=0;i<batIndex;i++) {
 
 		// multiply the polygon by the view transformation matrix
 		matrix_xformPolygon(&vtm, batCall[i]);
@@ -225,45 +242,16 @@ int main(int argc, char *argv[]) {
 		polygon_drawFill(batCall[i], src, batCallColor[i]);
 	}
 		
-	// mount
-	mount = polygon_createp(4, unitSquare);
-	matrix_identity(&ltm);
-	matrix_scale2D(&ltm, 1, 4);
-	matrix_translate2D(&ltm, 0, -2);
-	// transform the polygon points using LTM
-	matrix_xformPolygon(&ltm, mount);
-	// multiply the skyline by the view transformation matrix
+	// multiply the mount by the view transformation matrix
 	matrix_xformPolygon(&vtm, mount);
 	// draw the polygon
 	polygon_drawFill(mount, src, Black);
 	
+	printf("writing file\n");
 	image_write( src, "twodpan.ppm" );
-
-
-	/* loop for some number of frames
-	for(t=0;t<nFrames;t++) {
-		image_fillColor( src, White );
-		
-		
-		
-		printf("writing file\n");
-		sprintf(filename, "frame-%04d.ppm", t );
-		image_write( src, filename );
-
-
-		// translate the view across the scene
-		point_set2D( &(view.vrp), vrpx0 - 2.0*t/nFrames, vrpy0 - 2.0*t/nFrames );
-		matrix_setView2D( &vtm, &view );
-		matrix_print( &vtm, stdout );
-	}*/
 
 	// cleanup
 	image_free( src );
-
-	/*printf("converting to gif...\n");
-	system("convert -delay 10 -loop 0 frame-*.ppm test5b.gif");
-	system("rm frame-*.ppm");
-	system("animate test5b.gif");*/
 
 	return(0);
 }
