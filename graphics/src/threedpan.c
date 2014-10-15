@@ -1,8 +1,8 @@
 /*
-  Bruce Maxwell
+  Ian Tibbetts (Bruce Maxwell)
   Fall 2014
 
-  Test function for 3D matrix viewing
+  3D matrix viewing
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -127,12 +127,12 @@ int main(int argc, char *argv[]) {
   polygon_init( &tpoly );
 
   printf("Drawing Polygons\n");
-  // akip the front and back, draw the rest so they display correctly
+  // skip the front and back, draw the rest so they display correctly
   for(i=2;i<6;i++) {
     polygon_copy( &tpoly, &side[i] );
     // stretch to form rectangular prism
-	matrix_identity(&ltm);
-    matrix_scale(&ltm, 1, 1, 4);
+    matrix_identity(&ltm);
+    matrix_scale(&ltm, 1, 1, 3);
     matrix_xformPolygon( &ltm, &tpoly );
     // transform to view
     matrix_xformPolygon( &vtm, &tpoly );

@@ -1,8 +1,8 @@
 /*
-  Bruce Maxwell
+  Ian Tibbetts (Bruce Maxwell)
   Fall 2014
 
-  2D View test function
+  2D View - batman
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,11 +131,9 @@ int main(int argc, char *argv[]) {
 	batCall[batIndex] = polygon_createp(3, lightCone);
 	batCallColor[batIndex++] = Yellow;
 	batCall[batIndex] = polygon_createp(Resolution, unitCircle);
-	// move it 5 to the left along the X-axis
 	matrix_identity(&ltm);
 	matrix_scale2D(&ltm, 3, 3);
 	matrix_translate2D(&ltm, -15, 0);
-	// transform the polygon points using LTM
 	matrix_xformPolygon(&ltm, batCall[batIndex]);
 	batCallColor[batIndex++] = Yellow;
 	batCall[batIndex] = defineBatSymbol( -15, 0, 0.3 );
@@ -143,76 +141,59 @@ int main(int argc, char *argv[]) {
 	
     // back of projector
 	matrix_identity(&ltm);
-	// stretch to form ellipse
 	matrix_scale2D(&ltm, 1, 2);
-	// move it 3 to the right along the X-axis
 	matrix_translate2D(&ltm, 2, 0);
-	// transform the circle points using LTM
 	for(i=0;i<=Resolution/2;i++) {
 		matrix_xformPoint(&ltm, &(unitCircle[i]), &(halfEllipse[i]));
 	}
-	j=i;
-	// continue part of the way up the projector
+	j=i; // defining the left curved edge (below) after the right curved edge (above)
 	matrix_identity(&ltm);
-	// move it 2 to the right along the X-axis
 	matrix_translate2D(&ltm, 1, 0);
 	matrix_xformPoint(&ltm, &(halfEllipse[i-1]), &(halfEllipse[i]));
-	// stretch to form ellipse
 	matrix_scale2D(&ltm, 1, 2);
 	while(j>=0) {
 		matrix_xformPoint(&ltm, &(unitCircle[j--]), &(halfEllipse[i++]));
 	}
-	// add the back of projector
 	batCall[batIndex] = polygon_createp(2*(Resolution/2)+2, halfEllipse);
 	batCallColor[batIndex++] = dkGrey;
 	
 	//body of projector
 	for(i=0;i<2;i++){
+
 		// gap of projector
 		batCall[batIndex] = polygon_create();
 		polygon_copy(batCall[batIndex], batCall[batIndex-1]);
-		// move it 1 to the left along the X-axis
 		matrix_identity(&ltm);
 		matrix_translate2D(&ltm, -1, 0);
-		// transform the polygon points using LTM
 		matrix_xformPolygon(&ltm, batCall[batIndex]);
-		// add the back of projector
 		batCallColor[batIndex++] = Yellow;
 	
 		// bar of projector
 		batCall[batIndex] = polygon_create();
 		polygon_copy(batCall[batIndex], batCall[batIndex-1]);
-		// move it 1 to the left along the X-axis
 		matrix_identity(&ltm);
 		matrix_translate2D(&ltm, -1, 0);
-		// transform the polygon points using LTM
 		matrix_xformPolygon(&ltm, batCall[batIndex]);
-		// add the back of projector
 		batCallColor[batIndex++] = dkGrey;
 	}
 	
 	// front of projector
 	matrix_identity(&ltm);
-	// stretch to form ellipse
 	matrix_scale2D(&ltm, 1, 2);
 	for(i=0;i<Resolution;i++) {
 		matrix_xformPoint(&ltm, &(unitCircle[i]), &(fullEllipse[i]));
 	}
 	batCall[batIndex] = polygon_createp(Resolution, fullEllipse);
-	// move it 2 to the left along the X-axis
 	matrix_identity(&ltm);
 	matrix_translate2D(&ltm, -3, 0);
-	// transform the polygon points using LTM
 	matrix_xformPolygon(&ltm, batCall[batIndex]);
 	batCallColor[batIndex++] = Yellow;
 	
-	// bat symbol
+	// bat symbol in the front of projector
 	batCall[batIndex] = defineBatSymbol( 0, 0, 0.2 );
-	// move it 2 to the left along the X-axis
 	matrix_identity(&ltm);
 	matrix_scale2D(&ltm, 0.7, 1);
 	matrix_translate2D(&ltm, -3, 0);
-	// transform the polygon points using LTM
 	matrix_xformPolygon(&ltm, batCall[batIndex]);
 	batCallColor[batIndex++] = Black;
 	
@@ -228,7 +209,6 @@ int main(int argc, char *argv[]) {
 	matrix_identity(&ltm);
 	matrix_scale2D(&ltm, 1, 4);
 	matrix_translate2D(&ltm, 0, -2);
-	// transform the polygon points using LTM
 	matrix_xformPolygon(&ltm, mount);
 	
 	image_fillColor( src, Blue );
@@ -245,7 +225,7 @@ int main(int argc, char *argv[]) {
 		
 	// multiply the mount by the view transformation matrix
 	matrix_xformPolygon(&vtm, mount);
-	// draw the polygon
+	// draw the mount
 	polygon_drawFill(mount, src, Black);
 	
 	printf("writing file\n");

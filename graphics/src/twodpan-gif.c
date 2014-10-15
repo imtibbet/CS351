@@ -2,7 +2,7 @@
   Ian Tibbetts
   Fall 2014
 
-  Test function for 3D matrix viewing
+  2D view - batman
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 		if(frame < (frames-frames/10)){
 			vrpx = 0.0 - 15.0*frame/frames;
 			vrpy = 0.0 + 8.0*frame/frames;
-		} else {
+		} else { // spin and zoom on bat symbol at the end
 			vdx = 10.0 - 9.0*(frame-(frames-frames/10))/(frames/10);
 			va = 0.0 + 360*(frame-(frames-frames/10))/(frames/10);
 		}

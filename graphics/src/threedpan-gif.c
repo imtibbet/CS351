@@ -2,7 +2,7 @@
   Ian Tibbetts
   Fall 2014
 
-  Test function for 3D matrix viewing
+  3D matrix viewing
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 	for(zoom=frames/2;zoom<frames;zoom++){
 		sprintf(command,"../bin/threedpan 0.0 %02f",
 				1.0+10.0*(zoom-frames/2)/(frames/2)); 
-				//0.0+360.0*(zoom-frames/2)/(frames/2));
+				//0.0+360.0*(zoom-frames/2)/(frames/2));//rotation
 		system(command);
 		sprintf(filename,"mv threedpan.ppm %03dthreedpan.ppm",zoom);
 		system(filename);
