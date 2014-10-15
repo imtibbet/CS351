@@ -12,9 +12,9 @@
 
 int main(int argc, char *argv[]) {
   const int rows = 180;
-  const int cols = 320;
+  const int cols = 320; 
   View3D view;
-  Matrix vtm;
+  Matrix vtm, ltm;
   Polygon side[6];
   Polygon tpoly;
   Point  tv[4];
@@ -114,9 +114,10 @@ int main(int argc, char *argv[]) {
 
   // use a temprary polygon to transform stuff
   polygon_init( &tpoly );
+  matrix_identity(&ltm);
 
   printf("Drawing Polygons\n");
-  for(i=0;i<6;i++) {
+  /*for(i=0;i<2;i++) {
     polygon_copy( &tpoly, &side[i] );
     matrix_xformPolygon( &vtm, &tpoly );
 
@@ -124,11 +125,22 @@ int main(int argc, char *argv[]) {
     polygon_normalize( &tpoly );
 
     polygon_draw( &tpoly, src, color[i] );
-    polygon_print( &tpoly, stdout );
+  }*/
+  for(i=2;i<6;i++) {
+    polygon_copy( &tpoly, &side[i] );
+    // stretch to form rectangular prism
+    matrix_scale(&ltm, 1, 1, 10);
+    // transform to view
+    matrix_xformPolygon( &vtm, &tpoly );
+
+    // normalize by homogeneous coordinate before drawing
+    polygon_normalize( &tpoly );
+
+    polygon_drawFill( &tpoly, src, color[i] );
   }
 
   printf("Writing image\n");
-  image_write( src, "cube.ppm" );
+  image_write( src, "threedpan.ppm" );
 
   return(0);
 }
