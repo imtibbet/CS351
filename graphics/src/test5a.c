@@ -15,8 +15,8 @@
 */
 int main(int argc, char *argv[]) {
   Image *src;
-  const int rows = 600;
-  const int cols = 800;
+  const int rows = 600*2;
+  const int cols = 800*2;
   const int Resolution = 50;
   Color Grey;
   Color dkGrey;
@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
   double theta = 0.0;
   double phaserAngle = 0.0;
   int firePhase = 0;
+  char command[256];
 
   color_set(&Grey, 180/255.0, 180/255.0, 183/255.0);
   color_set(&dkGrey, 140/255.0, 140/255.0, 143/255.0);
@@ -314,7 +315,8 @@ int main(int argc, char *argv[]) {
   }
 
   image_write(src, "test5a.ppm");
-
+  sprintf(command,"convert -scale %03dx%03d test5a.ppm test5a.ppm",cols/2,rows/2);
+  system(command);
 
   image_free(src);
 

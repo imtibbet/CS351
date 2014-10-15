@@ -11,8 +11,8 @@
 
 
 int main(int argc, char *argv[]) {
-  const int rows = 180;
-  const int cols = 320; 
+  const int rows = 180*2;
+  const int cols = 320*2; 
   View3D view;
   Matrix vtm, ltm;
   Polygon side[6];
@@ -22,6 +22,10 @@ int main(int argc, char *argv[]) {
   Color  color[6];
   Image *src;
   int i;
+  char command[256];
+  float vupx = 0.0;
+  float vupy = 1.0;
+  float vupz = 0.0;
 
   // set some colors
   color_set( &color[0], 0, 0, 1 );
@@ -52,11 +56,11 @@ int main(int argc, char *argv[]) {
   // back side
   polygon_set( &side[1], 4, &(v[4]) );
 
-  // top side
-  point_copy( &tv[0], &v[2] );
+  // right side
+  point_copy( &tv[0], &v[0] );
   point_copy( &tv[1], &v[3] );
   point_copy( &tv[2], &v[7] );
-  point_copy( &tv[3], &v[6] );
+  point_copy( &tv[3], &v[4] );
 
   polygon_set( &side[2], 4, tv );
 
@@ -69,18 +73,18 @@ int main(int argc, char *argv[]) {
   polygon_set( &side[3], 4, tv );
 
   // left side
-  point_copy( &tv[0], &v[0] );
-  point_copy( &tv[1], &v[3] );
-  point_copy( &tv[2], &v[7] );
-  point_copy( &tv[3], &v[4] );
-
-  polygon_set( &side[4], 4, tv );
-
-  // right side
   point_copy( &tv[0], &v[1] );
   point_copy( &tv[1], &v[2] );
   point_copy( &tv[2], &v[6] );
   point_copy( &tv[3], &v[5] );
+
+  polygon_set( &side[4], 4, tv );
+  
+  // top side
+  point_copy( &tv[0], &v[2] );
+  point_copy( &tv[1], &v[3] );
+  point_copy( &tv[2], &v[7] );
+  point_copy( &tv[3], &v[6] );
 
   polygon_set( &side[5], 4, tv );
 
@@ -92,14 +96,21 @@ int main(int argc, char *argv[]) {
       alpha = 0.0;
 
     point_set3D( &(view.vrp), 3*alpha, 2*alpha, -2*alpha - (1.0-alpha)*3 );
-  }
-  else {
+  } else {
     point_set3D( &(view.vrp), 3, 2, -2 );
+  }
+  if( argc > 2 ) {
+  	view.d = atof( argv[2] );  // focal length
+  } else {
+  	view.d = 1;  // focal length
+  }
+  if( argc > 3 ) {
+    vupx = cos( atof( argv[3] ) * M_PI/180.0);
+    vupy = sin( atof( argv[3] ) * M_PI/180.0);
   }
   vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 
-  vector_set( &(view.vup), 0, 1, 0 );
-  view.d = 1;  // focal length
+  vector_set( &(view.vup), vupx, vupy, vupz );
   view.du = 2;
   view.dv = view.du * (float)rows / cols;
   view.f = 0; // front clip plane
@@ -114,22 +125,15 @@ int main(int argc, char *argv[]) {
 
   // use a temprary polygon to transform stuff
   polygon_init( &tpoly );
-  matrix_identity(&ltm);
 
   printf("Drawing Polygons\n");
-  /*for(i=0;i<2;i++) {
-    polygon_copy( &tpoly, &side[i] );
-    matrix_xformPolygon( &vtm, &tpoly );
-
-    // normalize by homogeneous coordinate before drawing
-    polygon_normalize( &tpoly );
-
-    polygon_draw( &tpoly, src, color[i] );
-  }*/
+  // akip the front and back, draw the rest so they display correctly
   for(i=2;i<6;i++) {
     polygon_copy( &tpoly, &side[i] );
     // stretch to form rectangular prism
-    matrix_scale(&ltm, 1, 1, 10);
+	matrix_identity(&ltm);
+    matrix_scale(&ltm, 1, 1, 4);
+    matrix_xformPolygon( &ltm, &tpoly );
     // transform to view
     matrix_xformPolygon( &vtm, &tpoly );
 
@@ -141,6 +145,7 @@ int main(int argc, char *argv[]) {
 
   printf("Writing image\n");
   image_write( src, "threedpan.ppm" );
-
+  sprintf(command,"convert -scale %03dx%03d threedpan.ppm threedpan.ppm",cols/2,rows/2);
+  system(command);
   return(0);
 }

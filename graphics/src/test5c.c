@@ -11,8 +11,8 @@
 
 
 int main(int argc, char *argv[]) {
-  const int rows = 180;
-  const int cols = 320;
+  const int rows = 180*2;
+  const int cols = 320*2;
   View3D view;
   Matrix vtm;
   Polygon side[6];
@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
   Color  color[6];
   Image *src;
   int i;
+  char command[256];
 
   // set some colors
   color_set( &color[0], 0, 0, 1 );
@@ -129,6 +130,8 @@ int main(int argc, char *argv[]) {
 
   printf("Writing image\n");
   image_write( src, "cube.ppm" );
+  sprintf(command,"convert -scale %03dx%03d cube.ppm cube.ppm",cols/2,rows/2);
+  system(command);
 
   return(0);
 }

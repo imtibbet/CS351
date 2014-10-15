@@ -11,23 +11,25 @@
 
 
 int main(int argc, char *argv[]) {
-	const int frames = 99;
-	char command[1000];
-	char filename[1000];
-	int frame;
+	const int frames = 200;
+	char command[256];
+	char filename[256];
+	int frame, zoom;
 	  
-	for(frame=0;frame<frames;frame++){
-		sprintf(command,"../bin/threedpan 0.%02d",frame);
+	for(frame=0;frame<frames/2;frame++){
+		sprintf(command,"../bin/threedpan 0.%02d",100-frame);
 		system(command);
 		sprintf(filename,"mv threedpan.ppm %03dthreedpan.ppm",frame);
 		system(filename);
 	}
 	
 	// shrinking back down to give continuous loop
-	for(frame=frames-2;frame>-1;frame--){
-		sprintf(command,"../bin/threedpan 0.%02d",frame);
+	for(zoom=frames/2;zoom<frames;zoom++){
+		sprintf(command,"../bin/threedpan 0.0 %02f",
+				1.0+10.0*(zoom-frames/2)/(frames/2)); 
+				//0.0+360.0*(zoom-frames/2)/(frames/2));
 		system(command);
-		sprintf(filename,"mv threedpan.ppm %03dthreedpan.ppm",200-frame);
+		sprintf(filename,"mv threedpan.ppm %03dthreedpan.ppm",zoom);
 		system(filename);
 	}
 	

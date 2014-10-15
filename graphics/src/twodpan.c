@@ -41,8 +41,8 @@ static Polygon *defineBatSymbol( float x, float y, float scale ){
 }
 
 int main(int argc, char *argv[]) {
-	const int rows = 600;
-	const int cols = 800;
+	const int rows = 600*2;
+	const int cols = 800*2;
 	const int Resolution = 50;
 	Color Grey;
 	Color dkGrey;
@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
 	color_set(&White, 1.0, 1.0, 1.0);
  	Polygon *batCall[50];
  	Color batCallColor[50];
+	char command[256];
 
 	color_set(&Grey, 180/255.0, 180/255.0, 183/255.0);
 	color_set(&dkGrey, 140/255.0, 140/255.0, 143/255.0);
@@ -249,6 +250,8 @@ int main(int argc, char *argv[]) {
 	
 	printf("writing file\n");
 	image_write( src, "twodpan.ppm" );
+	sprintf(command,"convert -scale %03dx%03d twodpan.ppm twodpan.ppm",cols/2,rows/2);
+	system(command);
 
 	// cleanup
 	image_free( src );
