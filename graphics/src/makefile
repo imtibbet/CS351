@@ -124,6 +124,8 @@ twodpan-gif: $(ODIR)/twodpan-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 threedpan-gif: $(ODIR)/threedpan-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+2dreq: $(ODIR)/2dreq.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
 
