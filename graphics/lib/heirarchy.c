@@ -16,6 +16,7 @@ Element *element_create(){
 	Element *e = malloc(sizeof(Element));
 	if(!e){
 		printf("malloc failed in element_create\n");
+		return NULL;
 	}
 	return e;
 }
@@ -29,6 +30,7 @@ Element *element_init(ObjectType type, void *obj){
 	Element *e = malloc(sizeof(Element));
 	if(!e){
 		printf("malloc failed in element_init\n");
+		return NULL;
 	}
 	e->type = type;
 	switch (type) {
@@ -75,6 +77,14 @@ Element *element_init(ObjectType type, void *obj){
  * free the element and the object it contains, as appropriate.
  */
 void element_delete(Element *e){
+	if(!e){
+		printf("Null e passed to element_delete\n");
+		return;
+	}
+	if(e->type == ObjModule && e->obj){
+		free(e->obj);
+	}
+	free(e);
 
 }
 
@@ -82,15 +92,30 @@ void element_delete(Element *e){
  * Allocate an empty module.
  */
 Module *module_create(){
-
-	return NULL;
+	Module *d = malloc(sizeof(Module));
+	if(!d){
+		printf("malloc failed in module_create\n");
+		return NULL;
+	}
+	return d;
 }
 
 /*
  * clear the module’s list of Elements, freeing memory as appropriate.
  */
 void module_clear(Module *md){
-
+	Element *curE, *next;
+	if(!md){
+		printf("Null md passed to module_clear\n");
+		return;
+	}
+	curE = md->head;
+	md->head = md->tail = NULL;
+	while(curE){
+		next = curE->next;
+		free(curE);
+		curE = next;
+	}
 }
 
 /*
@@ -99,6 +124,22 @@ void module_clear(Module *md){
  */
 void module_delete(Module *md){
 
+	// module_clear(md)
+	Element *curE, *next;
+	if(!md){
+		printf("Null md passed to module_delete\n");
+		return;
+	}
+	curE = md->head;
+	md->head = md->tail = NULL;
+	while(curE){
+		next = curE->next;
+		free(curE);
+		curE = next;
+	}
+
+	// free module itself after clearing
+	free(md);
 }
 
 /*
