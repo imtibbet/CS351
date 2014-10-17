@@ -32,10 +32,10 @@ _DEPS = ppmIO.h color.h fractals.h image.h primitives.h floodfill.h graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = 2dreq 3dreq
+EXECUTABLES = 2dreq 3dreq 3dreq-gif
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = 2dreq.o 3dreq.o
+_OBJ = 2dreq.o 3dreq-gif.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -127,6 +127,8 @@ threedpan-gif: $(ODIR)/threedpan-gif.o
 2dreq: $(ODIR)/2dreq.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 3dreq: $(ODIR)/3dreq.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+3dreq-gif: $(ODIR)/3dreq-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean

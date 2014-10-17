@@ -71,7 +71,7 @@ static Polygon *defineFish( int e, float x, float y, Image *src, float scale, Co
         circle_drawFill(&eye, src, Black);
     }
 
-    // create mouth
+    // create teeth
     for ( i = x - scale/5*3; i < x + scale/5*1.5; i = i + 10 ){
         point_set2D(&(pt[14]), i, y + scale/5*3.5);
         point_set2D(&(pt[15]), i + scale/5, y + scale/5*2.3);
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
     // color the background
     image_fillColor( src, dkBlue );
 
-        // set up a view centered on (1.5, 1.5) with x pointing right
+    // set up a view centered on (1.5, 1.5) with x pointing right
     point_set2D( &(view.vrp), 1.5, 1.5 );
     view.dx = 1.0;
     vector_set( &(view.x), 1.0, 0.0, 0.0 );
