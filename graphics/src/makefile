@@ -126,6 +126,10 @@ threedpan-gif: $(ODIR)/threedpan-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 2dreq: $(ODIR)/2dreq.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+3dreq: $(ODIR)/3dreq.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+3dreq-gif: $(ODIR)/3dreq-gif.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
 
