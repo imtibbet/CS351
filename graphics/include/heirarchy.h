@@ -163,7 +163,7 @@ void module_rotateZ(Module *md, double cth, double sth);
 /*
  * Matrix operand to add a 2D shear matrix to the tail of the module’s lisT
  */
-void module_shear2D(Module *md, double shx, double shY);
+void module_shear2D(Module *md, double shx, double shy);
 
 /*
  * Draw the module into the image using the given view transformation matrix [VTM], 

@@ -146,42 +146,56 @@ void module_delete(Module *md){
  * Generic insert of an element into the module at the tail of the list.
  */
 void module_insert(Module *md, Element *e){
-
+	if(!md){
+		printf("Null md passed to module_insert\n");
+		return;
+	}
+	if(md->head){
+		md->head = md->tail = e;
+	} else {
+		md->tail->next = e;
+		md->tail = e;
+	}
 }
 
 /*
  * Adds a pointer to the Module sub to the tail of the module’s list.
  */
 void module_module(Module *md, Module *sub){
-
+	Element *e = element_init(ObjModule, sub);
+	module_insert(md, e);
 }
 
 /*
  * Adds p to the tail of the module’s list.
  */
 void module_point(Module *md, Point *p){
-
+	Element *e = element_init(ObjPoint, p);
+	module_insert(md, e);
 }
 
 /*
  * Adds p to the tail of the module’s list.
  */
 void module_line(Module *md, Line *p){
-
+	Element *e = element_init(ObjLine, p);
+	module_insert(md, e);
 }
 
 /*
  * Adds p to the tail of the module’s list.
  */
 void module_polyline(Module *md, Polyline *p){
-
+	Element *e = element_init(ObjPolyline, p);
+	module_insert(md, e);
 }
 
 /*
  * Adds p to the tail of the module’s list.
  */
 void module_polygon(Module *md, Polygon *p){
-
+	Element *e = element_init(ObjPolygon, p);
+	module_insert(md, e);
 }
 
 /*
@@ -189,35 +203,55 @@ void module_polygon(Module *md, Polygon *p){
  * placed at the tail of the module’s list.
  */
 void module_identity(Module *md){
-
+	Element *e;
+	Matrix m;
+	matrix_identity(&m);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 /*
  * Matrix operand to add a translation matrix to the tail of the module’s list.
  */
 void module_translate2D(Module *md, double tx, double ty){
-
+	Element *e;
+	Matrix m;
+	matrix_translate2D(&m,tx,ty);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 /*
  * Matrix operand to add a scale matrix to the tail of the module’s list.
  */
 void module_scale2D(Module *md, double sx, double sy){
-
+	Element *e;
+	Matrix m;
+	matrix_scale2D(&m, sx, sy);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 /*
  * Matrix operand to add a rotation about the Z axis to the tail of the module’s list
  */
 void module_rotateZ(Module *md, double cth, double sth){
-
+	Element *e;
+	Matrix m;
+	matrix_rotateZ(&m, cth, sth);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 /*
  * Matrix operand to add a 2D shear matrix to the tail of the module’s lisT
  */
-void module_shear2D(Module *md, double shx, double shY){
-
+void module_shear2D(Module *md, double shx, double shy){
+	Element *e;
+	Matrix m;
+	matrix_shear2D(&m, shx, shy);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 /*
@@ -236,35 +270,55 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
  * Matrix operand to add a 3D translation to the Module.
  */
 void module_translate(Module *md, double tx, double ty, double tz){
-
+	Element *e;
+	Matrix m;
+	matrix_translate(&m, tx, ty, tz);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 /*
  * Matrix operand to add a 3D scale to the Module.
  */
 void module_scale(Module *md, double sx, double sy, double sz){
-
+	Element *e;
+	Matrix m;
+	matrix_scale(&m, sx, sy, sz);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 /*
  * Matrix operand to add a rotation about the X-axis to the Module.
  */
 void module_rotateX(Module *md, double cth, double sth){
-
+	Element *e;
+	Matrix m;
+	matrix_rotateX(&m, cth, sth);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 /*
  * Matrix operand to add a rotation about the Y-axis to the Module.
  */
 void module_rotateY(Module *md, double cth, double sth){
-
+	Element *e;
+	Matrix m;
+	matrix_rotateY(&m, cth, sth);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 /*
  * Matrix operand to add a rotation that orients to the orthonormal axes u,v,w
  */
 void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w){
-
+	Element *e;
+	Matrix m;
+	matrix_rotateXYZ(&m, u, v, w);
+	e = element_init(ObjIdentity, m);
+	module_insert(md, e);
 }
 
 
