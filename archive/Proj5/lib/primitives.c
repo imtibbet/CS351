@@ -259,6 +259,7 @@ void line_draw(Line *l, Image *src, Color c){
 
 // CIRCLE
 
+
 /*
  * Initialize to center tc and radius tr. 
  */
@@ -1164,7 +1165,7 @@ void polygon_draw(Polygon *p, Image *src, Color c){
 }
 
 /*
-	Ian Tibbetts And Astrid Moorse (Bruce A. Maxwell)
+	Ian Tibbetts & Astrid Moore (Bruce A. Maxwell)
 	Fall 2014
 
 	scanline fill algorithm

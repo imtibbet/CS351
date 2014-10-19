@@ -14,6 +14,5 @@
 #include "floodfill.h"
 #include "list.h"
 #include "transform.h"
-#include "heirarchy.h"
 
 #endif
