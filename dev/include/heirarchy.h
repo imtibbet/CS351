@@ -60,7 +60,7 @@ typedef enum {
 } ShadeMethod;
 
 typedef struct {
-	
+	int nLights;
 } Lighting;
 
 // how an object is to be drawn into the image.

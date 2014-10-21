@@ -261,7 +261,43 @@ void module_shear2D(Module *md, double shx, double shy){
  */
 void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds, 
 				Lighting *lighting, Image *src){
+	Matrix LTM;
+	Matrix tempGTM;
+	Element *e = m->head;
+	Polygon tempPgon;
+	Line tempLine;
 
+	matrix_identity(&LTM);
+	polygon_init(&tempPgon);
+
+	while(e){
+		switch(e->type){
+			case ObjLine:
+				line_copy(&tempLine, &(e->data.line));
+				matrix_xformLine(&LTM, &tempLine);
+				matrix_xformLine(GTM, &tempLine);
+				matrix_xformLine(VTM, &tempLine);
+				// check normalization
+				vector_normalize(&tempLine->a);
+				vector_normalize(&tempLine->b);
+				line_draw(&tempLine, src, ds->color);
+			case ObjPolygon:
+				polygon_copy(&tempPgon, &(e->data.polygon);
+				matrix_xformPolygon(&tempPgon, &LTM);
+				matrix_xformPolygon(&tempPgon, GTM);
+				matrix_xformPolygon(&tempPgon, VTM);
+				polygon_normalize(&tempPgon, &LTM);
+				polygon_normalize(&tempPgon, GTM);
+				polygon_normalize(&tempPgon, VTM);
+				polygon_draw(&tempPgon, src, ds->data.color);
+				polygon_clear(&tempPgon);
+			case ObjModule:
+				matrix_multiply(GTM, &LTM, &tempGTM);
+				module_draw(e->data.mod, VTM, &tempGTM, ds, lighting, src);
+			case ObjMatrix:
+				matrix_multiply(&(e->data.matrix), &LTM, &GTM);
+		}
+	}
 }
 
 // 3D Module functions
@@ -328,7 +364,14 @@ void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w){
  * Make sure each polygon has surface normals defined for it.
  */
 void module_cube(Module *md, int solid){
+	if(solid == 0){
+		// add only lines
 
+	}
+	else{
+		// use polygons
+
+	}
 }
 
 // Shading/Color Module Functions
