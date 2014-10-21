@@ -60,7 +60,7 @@ typedef enum {
 } ShadeMethod;
 
 typedef struct {
-	
+	int nLights;
 } Lighting;
 
 // how an object is to be drawn into the image.
@@ -220,7 +220,7 @@ void module_color(Module *md, Color *c);
 /*
  * create a new DrawState structure and initialize the fields.
  */
-void drawstate_create( void );
+DrawState *drawstate_create( void );
 
 /*
  * set the color field to c.
