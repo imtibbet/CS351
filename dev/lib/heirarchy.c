@@ -364,8 +364,11 @@ void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w){
  * Make sure each polygon has surface normals defined for it.
  */
 void module_cube(Module *md, int solid){
+	Element *e;
+
 	if(solid == 0){
 		// add only lines
+
 
 	}
 	else{
@@ -380,7 +383,7 @@ void module_cube(Module *md, int solid){
  * Adds the foreground color value to the tail of the module’s list
  */
 void module_color(Module *md, Color *c){
-
+	image_fillColor(md->tail.color, c);
 }
 
 // Draw State
@@ -389,41 +392,41 @@ void module_color(Module *md, Color *c){
  * create a new DrawState structure and initialize the fields.
  */
 void drawstate_create( void ){
-
+	DrawState *ds;
 }
 
 /*
  * set the color field to c.
  */
 void drawstate_setColor( DrawState *s, Color c ){
-
+	s->color = c;
 }
 
 /*
  * set the body field to c.
  */
 void drawstate_setBody( DrawState *s, Color c ){
-
+	s->body = c;
 }
 
 /*
  * set the surface field to c.
  */
 void drawstate_setSurface( DrawState *s, Color c ){
-
+	s->surface = c;
 }
 
 /*
  * set the surfaceCoeff field to f.
  */
 void drawstate_setSurfaceCoeff( DrawState *s, float f ){
-
+	s->surfaceCoeff = f;
 }
 
 /*
  * copy the DrawState data.
  */
 void drawstate_copy( DrawState *to, DrawState *from ){
-
+	*to = *from;
 }
 
