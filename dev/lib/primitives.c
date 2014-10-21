@@ -111,7 +111,6 @@ void line_set2D(Line *l, double x0, double y0, double x1, double y1){
 /*
  * Initialze a line to ta and tb. 
  */
- 
 void line_set(Line *l, Point ta, Point tb){
 	if(!l){
 		return;

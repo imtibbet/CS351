@@ -427,12 +427,14 @@ void module_color(Module *md, Color *c){
 /*
  * create a new DrawState structure and initialize the fields.
  */
-void drawstate_create(){
+DrawState *drawstate_create(){
 	DrawState *ds = malloc(sizeof(DrawState));
+	color_set(&(ds->color), 255.0, 255.0, 255.0);
 	if(!ds){
 		printf("malloc failed in drawstate_create\n");
-		return;
+		return NULL;
 	}
+	return ds;
 }
 
 /*

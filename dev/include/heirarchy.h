@@ -220,7 +220,7 @@ void module_color(Module *md, Color *c);
 /*
  * create a new DrawState structure and initialize the fields.
  */
-void drawstate_create( void );
+DrawState *drawstate_create( void );
 
 /*
  * set the color field to c.

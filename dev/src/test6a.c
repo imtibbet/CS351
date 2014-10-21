@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
   // setup vtm
   point_set2D( &vrp, 0, 0 );
   vector_set( &xaxis, 1, 0, 0 );
-  view2D_set( &view, &vrp, 2, &xaxis, 640, 360 );
+  // view2D_set( &view, &vrp, 2, &xaxis, 640, 360 );
   matrix_setView2D( &vtm, &view );
 
   // create a body
