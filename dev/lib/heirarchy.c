@@ -147,7 +147,6 @@ void module_clear(Module *md){
  * including the memory pointed to by md.
  */
 void module_delete(Module *md){
-	int i;
 	// module_clear(md)
 	Element *curE, *next;
 	if(!md){
@@ -160,9 +159,11 @@ void module_delete(Module *md){
 	curE = md->head;
 	md->head = md->tail = NULL;
 	while(curE){
+		printf("module type is %s", curE->type);
+
 		next = curE->next;
 		if ( curE->type == ObjModule ){
-			module_delete(curE);
+			free(curE);
 		}
 		else{
 			printf("module type is %s", curE->type);
