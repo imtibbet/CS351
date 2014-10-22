@@ -73,11 +73,16 @@ void line_set(Line *l, Point ta, Point tb);
 /** Set the z-buffer flag to the given value. **/
 void line_zBuffer(Line *l, int flag);
 
+void line_normalize(Line *l);
+
 /** Copy the line data structure. **/
 void line_copy(Line *to, Line *from);
 
 /** Draw the line into src using Color c. **/
 void line_draw(Line *l, Image *src, Color c);
+
+/** Print the line to the stream designated by FILE pointer **/
+void line_print(Line *p, FILE *fp);
 
 // Circle functions
 

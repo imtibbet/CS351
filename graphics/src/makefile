@@ -131,7 +131,13 @@ threedpan-gif: $(ODIR)/threedpan-gif.o
 3dreq-gif: $(ODIR)/3dreq-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 # proj 6
+test6a: $(ODIR)/test6a.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+test6b: $(ODIR)/test6b.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 moduleGen: $(ODIR)/moduleGen.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+req2: $(ODIR)/req2.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 .PHONY: clean
 

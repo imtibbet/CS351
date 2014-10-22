@@ -265,6 +265,13 @@ void line_draw(Line *l, Image *src, Color c){
 	}
 }
 
+/*
+ * Print the line to the stream designated by FILE pointer 
+ */
+void line_print(Line *l, FILE *fp){
+	fprintf(fp,"(%.3f, %.3f) to (%.3f, %.3f)\n", 
+				l->a.val[0], l->a.val[1], l->b.val[0], l->b.val[1]);
+}
 // CIRCLE
 
 /*
@@ -1032,6 +1039,7 @@ void polygon_set(Polygon *p, int numV, Point *vlist){
 	// get space for the vertex list
 	p->vertex = malloc(sizeof(Point) * numV);
 	if(!p->vertex){
+		printf("malloc failed in polygon_set\n");
 		p->nVertex = 0;
 		return;
 	}
@@ -1104,11 +1112,13 @@ void polygon_copy(Polygon *to, Polygon *from){
 	// allocate new destination space
 	to->vertex = malloc( sizeof(Point) * (from->nVertex) );
 	if(!to->vertex){
+		printf("malloc failed in ppolygon_copy\n");
 		to->nVertex = 0;
 		return;
 	}
 	
 	// copy the points to destination
+	printf("copying polygon\n");
 	to->nVertex = from->nVertex;
 	for(i=0;i<(to->nVertex);i++){
 		to->vertex[i] = from->vertex[i];
