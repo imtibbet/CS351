@@ -174,7 +174,11 @@ void module_insert(Module *md, Element *e){
  */
 void module_module(Module *md, Module *sub){
 	Element *e = element_init(ObjModule, sub);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} else {
+		md->tail = e;
+	}
 }
 
 /*

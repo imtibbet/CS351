@@ -803,8 +803,8 @@ void view2D_set(View2D *view, Point *vrp, double dx, Vector *xaxis, int rows, in
 	if(view && vrp && dx && xaxis && rows && cols){
 		view->vrp = *vrp;
 		view->x = *xaxis;
-		view->screenx = cols;
-		view->screeny = rows;
+		view->screenx = rows;
+		view->screeny = cols;
 		view->dx = dx;
 	}
 	else{
