@@ -9,7 +9,7 @@
 int genModule(char *infilename, char *outfilename) {
 	FILE *infile, *outfile;
 	char buff[1000], codeline[1000];
-	char *firstword, *buf;
+	char *firstword, *linein;
 	int i;
 	int moduleID = 0;
 
@@ -38,10 +38,10 @@ int genModule(char *infilename, char *outfilename) {
 
 	// loop until EOF is reached
 	while (fgets(buff,1000, infile)!=NULL){
-		buf = strtok (buff, "\n");
-		printf("reading line: %s\n", buf);
-		firstword = strtok (buff,"()");
-		if(strcmp(buf, "begin module") == 0){
+		linein = strtok (buff, "\n");
+		printf("reading line: %s\n", linein);
+		firstword = strtok (buff,"()\n");
+		if(strcmp(linein, "begin module") == 0){
 			sprintf(codeline, "Module *mod%d = module_create();", ++moduleID);
 		} else if(strcmp(firstword, "line2D") == 0){
 			firstword = strtok (NULL, "()");
