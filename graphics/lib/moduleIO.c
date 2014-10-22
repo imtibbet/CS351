@@ -5,17 +5,11 @@
 #include <string.h>
 #include "graphics.h"
 
-static char getModLine(char *line);
-static char getModLine(char *line){
-	if(strcmp(line, "begin module") == 0){
-		return("create module");
-	}
-}
-
 // read in rgb values from the ppm file output by cqcam
 int genModule(char *infilename, char *outfilename) {
 	FILE *infile, *outfile;
 	char buf[1000];
+	char *codeline;
 
 	// open input file for reading
 	infile =fopen(infilename,"r");
@@ -35,7 +29,10 @@ int genModule(char *infilename, char *outfilename) {
 	// loop until EOF is reached
 	while (fgets(buf,1000, infile)!=NULL){
 		printf("%s\n", buf);
-		fprintf(outfile, "%s\n",getModLine(&buf));
+		if(strcmp(buf, "begin module") == 0){
+			codeline = "create module";
+		}
+		fprintf(outfile, "%s\n", codeline);
 	}
 
 	fclose(infile);
