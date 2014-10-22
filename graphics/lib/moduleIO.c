@@ -9,7 +9,8 @@
 int genModule(char *infilename, char *outfilename) {
 	FILE *infile, *outfile;
 	char buf[1000];
-	char *codeline;
+	char *codeline, *firstword;
+	int i, moduleID = 0;
 
 	// open input file for reading
 	infile =fopen(infilename,"r");
@@ -20,19 +21,37 @@ int genModule(char *infilename, char *outfilename) {
 
 	// open ouput file for writing
 	outfile =fopen(outfilename,"w");
-	if (!infile){
+	if (!outfile){
 		printf("%s did not open for writing properly\n",outfilename);
 		fclose(infile);
 		return 0;
 	}
 
+	fprintf(outfile, "%s", 	"#include 'graphics.h'\n"
+							"int main(int argc, char *argv[]) {\n"
+							"\tLine l;\n"
+							"\tPoint pt;\n"
+							"\tPolyline *pl = polyline_create();\n"
+							"\tPolygon *pg = polygon_create();\n"
+							"\tMatrix m;\n\n");
+
 	// loop until EOF is reached
 	while (fgets(buf,1000, infile)!=NULL){
 		printf("%s\n", buf);
+		firstword = strtok (buf,"()");
 		if(strcmp(buf, "begin module") == 0){
-			codeline = "create module";
+			sprintf(codeline, "Module *mod%d = module_create();", moduleID++);
+		} else if(strcmp(firstword, "line2D") == 0){
+			firstword = strtok (NULL, "()");
+			sprintf(codeline, "line_set2D(&l, %s);\nmodule_line(mod%d, &l);", firstword, moduleID);
+		} else {
+			printf("%s isn't a recognized line for genModule\n", buf);
+			codeline = "NOT RECOGNIZED"
 		}
 		fprintf(outfile, "%s\n", codeline);
+	}
+	for(i=0;i<moduleID;i++){
+		sprintf(codeline, "mod%d = module_clear()", moduleID);
 	}
 
 	fclose(infile);

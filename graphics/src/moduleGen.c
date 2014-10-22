@@ -13,7 +13,7 @@
 int main(int argc, char *argv[]) {
 
   // grab command line argument to call module generate
-  int success;
+  int success = 0;
   if( argc < 2 ) {
     printf("Usage: require input [and optionally output] filenames as command line parameters\n");
   } else if (argc == 2) {
