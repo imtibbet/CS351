@@ -15,5 +15,6 @@
 #include "list.h"
 #include "transform.h"
 #include "heirarchy.h"
+#include "moduleIO.h"
 
 #endif
