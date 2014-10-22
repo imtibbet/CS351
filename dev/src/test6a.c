@@ -35,8 +35,6 @@
 
   matrix_setView2D
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include "graphics.h"
 
 int main(int argc, char *argv[]) {
@@ -62,11 +60,14 @@ int main(int argc, char *argv[]) {
   // setup gtm
   matrix_identity( &gtm );
 
+  printf("matrix_identity created\n");
+
   // setup vtm
   point_set2D( &vrp, 0, 0 );
   vector_set( &xaxis, 1, 0, 0 );
   view2D_set( &view, &vrp, 2, &xaxis, 640, 360 );
   matrix_setView2D( &vtm, &view );
+  printf("set up vtm\n");
 
   // create a body
   body = module_create();
@@ -76,6 +77,7 @@ int main(int argc, char *argv[]) {
   point_set2D(&p[2], 2.2, 0.25 );
   point_set2D(&p[3], 2, 0.4 );
   point_set2D(&p[4], 0, .5 );
+  printf("set up points\n");
 
   for(i=0;i<5;i++) {
     int a = i;
@@ -84,10 +86,12 @@ int main(int argc, char *argv[]) {
     line_set( &l, p[a], p[b] );
     module_line( body, &l );
   }
+
   line_set2D( &l, 0.6, 0.05, 0.6, 0.45 );
   module_line( body, &l );
   line_set2D( &l, 1.1, 0.08, 1.1, 0.42 );
   module_line( body, &l );
+  printf("created a body\n");
 
   // create an engine
   engine = module_create();
@@ -104,6 +108,7 @@ int main(int argc, char *argv[]) {
     line_set( &l, p[a], p[b] );
     module_line( engine, &l );
   }
+  printf("created an engine\n");
 
   // make a wing
   wing = module_create();
@@ -124,6 +129,7 @@ int main(int argc, char *argv[]) {
   module_scale2D( wing, 1.5, 1.0 );
   module_translate2D( wing, -0.05, 0.05 );
   module_module( wing, engine );
+  printf("created a wing\n");
 
   // make an x-wing
   xwing = module_create();
@@ -135,6 +141,7 @@ int main(int argc, char *argv[]) {
   module_scale2D( xwing, 1, -1 );
   module_translate2D( xwing, 0, 0 );
   module_module( xwing, wing );
+  printf("made an x-wing\n");
 
   // make a formation
   formation = module_create();
@@ -144,12 +151,14 @@ int main(int argc, char *argv[]) {
   module_module( formation, xwing );
   module_translate2D(formation, 0, -5 );
   module_module( formation, xwing );
+  printf("made a formation\n");
 
   // make a scene
   scene = module_create();
   module_scale2D( scene, 0.1, 0.1 );
   module_translate2D( scene, 0.2, 0 );
   module_module( scene, formation );
+  printf("made a scene\n");
   
 	// draw stars into the scene
   module_identity(scene);
@@ -157,15 +166,17 @@ int main(int argc, char *argv[]) {
     point_set2D( &(p[0]), drand48()*2 - 1, drand48()*1 - 0.5 );
     module_point( scene, &(p[0]) );
   }
-
+  printf("drew stars into scene\n");
 
 	// create the image and draw the module
   src = image_create( view.screeny, view.screenx );
   ds = drawstate_create(); // default color is white
   module_draw( scene, &vtm, &gtm, ds, NULL, src );
+  printf("created the image and drew the module\n");
 
 	// write out the image
   image_write( src, "xwings.ppm" );
+  printf("wrote out the image\n");
 
 	// free modules
   module_delete( scene );
@@ -173,12 +184,15 @@ int main(int argc, char *argv[]) {
   module_delete( xwing );
   module_delete( body );
   module_delete( wing );
+  printf("freed modules\n");
 
 	// free drawstate
   free( ds );
+  printf("freed drawstate\n");
 
 	// free image
   image_free( src );
+  printf("freed image\n");
 
   return(0);
 }

@@ -1,5 +1,5 @@
 /*
- * Author: Ian Tibbetts & Astrid Moore
+ * Author: Ian Tibbetts and Astrid Moore
  * Date: 10/17/14
  *
  * The heirarchical model
@@ -182,7 +182,12 @@ void module_module(Module *md, Module *sub){
  */
 void module_point(Module *md, Point *p){
 	Element *e = element_init(ObjPoint, p);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -190,7 +195,12 @@ void module_point(Module *md, Point *p){
  */
 void module_line(Module *md, Line *p){
 	Element *e = element_init(ObjLine, p);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -198,7 +208,12 @@ void module_line(Module *md, Line *p){
  */
 void module_polyline(Module *md, Polyline *p){
 	Element *e = element_init(ObjPolyline, p);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -206,7 +221,12 @@ void module_polyline(Module *md, Polyline *p){
  */
 void module_polygon(Module *md, Polygon *p){
 	Element *e = element_init(ObjPolygon, p);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -218,7 +238,12 @@ void module_identity(Module *md){
 	Matrix m;
 	matrix_identity(&m);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -229,7 +254,12 @@ void module_translate2D(Module *md, double tx, double ty){
 	Matrix m;
 	matrix_translate2D(&m,tx,ty);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -240,7 +270,12 @@ void module_scale2D(Module *md, double sx, double sy){
 	Matrix m;
 	matrix_scale2D(&m, sx, sy);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -251,7 +286,12 @@ void module_rotateZ(Module *md, double cth, double sth){
 	Matrix m;
 	matrix_rotateZ(&m, cth, sth);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -262,7 +302,12 @@ void module_shear2D(Module *md, double shx, double shy){
 	Matrix m;
 	matrix_shear2D(&m, shx, shy);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -368,7 +413,12 @@ void module_translate(Module *md, double tx, double ty, double tz){
 	Matrix m;
 	matrix_translate(&m, tx, ty, tz);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -379,7 +429,12 @@ void module_scale(Module *md, double sx, double sy, double sz){
 	Matrix m;
 	matrix_scale(&m, sx, sy, sz);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -390,7 +445,12 @@ void module_rotateX(Module *md, double cth, double sth){
 	Matrix m;
 	matrix_rotateX(&m, cth, sth);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -401,7 +461,12 @@ void module_rotateY(Module *md, double cth, double sth){
 	Matrix m;
 	matrix_rotateY(&m, cth, sth);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 /*
@@ -412,7 +477,12 @@ void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w){
 	Matrix m;
 	matrix_rotateXYZ(&m, u, v, w);
 	e = element_init(ObjIdentity, &m);
-	module_insert(md, e);
+	if (!md->head){
+		md->head = e;
+	} 
+	else {
+		md->tail = e;
+	}
 }
 
 
@@ -453,12 +523,20 @@ void module_cube(Module *md, int solid){
 		// front side
 		polygon_set( &p, 4, &(v[0]) );
 		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		if (!md->head){
+		md->head = e;
+		} else {
+			md->tail = e;
+		}
 
 		// back side
 		polygon_set( &p, 4, &(v[4]) );
 		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		if (!md->head){
+		md->head = e;
+		} else {
+			md->tail = e;
+		}
 
 		// top side
 		point_copy( &tv[0], &v[2] );
@@ -468,7 +546,11 @@ void module_cube(Module *md, int solid){
 
 		polygon_set( &p, 4, tv );
 		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		if (!md->head){
+		md->head = e;
+		} else {
+			md->tail = e;
+		}
 
 		// bottom side
 		point_copy( &tv[0], &v[0] );
@@ -478,7 +560,11 @@ void module_cube(Module *md, int solid){
 
 		polygon_set( &p, 4, tv );
 		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		if (!md->head){
+		md->head = e;
+		} else {
+			md->tail = e;
+		}
 
 		// left side
 		point_copy( &tv[0], &v[0] );
@@ -488,7 +574,11 @@ void module_cube(Module *md, int solid){
 
 		polygon_set( &p, 4, tv );
 		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		if (!md->head){
+		md->head = e;
+		} else {
+			md->tail = e;
+		}
 
 		// right side
 		point_copy( &tv[0], &v[1] );
@@ -498,7 +588,11 @@ void module_cube(Module *md, int solid){
 
 		polygon_set( &p, 4, tv );
 		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		if (!md->head){
+		md->head = e;
+		} else {
+			md->tail = e;
+		}
 	}
 }
 
