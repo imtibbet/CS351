@@ -798,5 +798,17 @@ void matrix_perspective(Matrix *m, double d){
  	matrix_print(vtm, stdout);
  }
 
-
+void view2D_set(View2D *view, Point *vrp, double dx, Vector *xaxis, int rows, int cols){
+	
+	if(view && vrp && dx && xaxis && rows && cols){
+		view->vrp = *vrp;
+		view->x = *xaxis;
+		view->screenx = rows;
+		view->screeny = cols;
+		view->dx = dx;
+	}
+	else{
+		printf("Invalid parameter entry\n");
+	}
+}
 
