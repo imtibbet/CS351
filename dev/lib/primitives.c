@@ -87,6 +87,14 @@ void point_print(Point *p, FILE *fp){
 				p->val[0], p->val[1], p->val[2], p->val[3]);
 }
 
+/*
+ * normalize the x and y values of a point by its homogeneous coordinate
+ */
+void point_normalize(Point *p){
+	p->val[0] = p->val[0] / p->val[3]; // x=x/h
+	p->val[1] = p->val[1] / p->val[3]; // y=y/h
+}
+
 // LINE
 
 /*
@@ -895,6 +903,17 @@ void polyline_draw(Polyline *p, Image *src, Color c){
 		line_draw(&l, src, c);
 	}
 	// printf("polyline drawn\n");
+}
+
+/*
+ * normalize the x and y values of each vertex by the homogeneous coord
+ */
+void polyline_normalize( Polyline *p){
+	int i;
+	for(i=0;i<p->numVertex;i++){
+		p->vertex[i].val[0] = p->vertex[i].val[0] / p->vertex[i].val[3];
+		p->vertex[i].val[1] = p->vertex[i].val[1] / p->vertex[i].val[3];
+	}
 }
 
 // Polygon

@@ -130,6 +130,8 @@ threedpan-gif: $(ODIR)/threedpan-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 3dreq-gif: $(ODIR)/3dreq-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+
+# proj 6
 test6a: $(ODIR)/test6a.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 

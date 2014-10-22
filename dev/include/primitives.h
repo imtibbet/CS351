@@ -59,6 +59,9 @@ void point_drawf(Point *p, Image *src, FPixel c);
 /** Print the point to the stream designated by FILE pointer **/
 void point_print(Point *p, FILE *fp);
 
+/** Normalize the Vector to unit length. Do not modify the homogeneous coordinate. **/
+void point_normalize(Point *p);
+
 // Line functions
 
 /** Initialize a 2D line. **/
@@ -142,6 +145,11 @@ void polyline_print(Polyline *p, FILE *fp);
 
 /* Draw the Polyline using color c. */
 void polyline_draw(Polyline *p, Image *src, Color c);
+
+/*
+ * normalize the x and y values of each vertex by the homogeneous coord
+ */
+void polyline_normalize( Polyline *p);
 
 // Polygon
 
