@@ -83,6 +83,12 @@ void element_delete(Element *e){
 		return;
 	}
 	switch(e->type){
+		case ObjLine:
+			free(&(e->obj.line));
+			break;
+		case ObjPoint:
+			free(&(e->obj.point));
+			break;
 		case ObjPolyline:
 			polyline_free(&(e->obj.polyline));
 			break;
@@ -90,7 +96,14 @@ void element_delete(Element *e){
 			polygon_free(&(e->obj.polygon));
 			break;
 		case ObjModule:
-			module_clear(((Module *)(e->obj.module)));
+		case ObjMatrix:
+			free(&(e->obj.matrix));
+			break;
+		case ObjSurfaceColor:
+			free(&(e->obj.color));
+			break;
+		case ObjSurfaceCoeff:
+			free(&(e->obj.coeff));
 			break;
 		default:
 			printf("ObjectType type is not handled in element_delete\n");
@@ -134,20 +147,31 @@ void module_clear(Module *md){
  * including the memory pointed to by md.
  */
 void module_delete(Module *md){
-
+	int i;
 	// module_clear(md)
 	Element *curE, *next;
 	if(!md){
 		printf("Null md passed to module_delete\n");
 		return;
 	}
+
+	printf("length of module, %i\n", sizeof(md));
+
 	curE = md->head;
 	md->head = md->tail = NULL;
 	while(curE){
 		next = curE->next;
+		if ( curE->type == ObjModule ){
+			module_delete(curE);
+		}
+		else{
+			printf("module type is %s", curE->type);
+		}
 		element_delete(curE);
 		curE = next;
 	}
+
+	printf("length of module in the end, %i\n", sizeof(md));
 
 	// free module itself after clearing
 	free(md);
