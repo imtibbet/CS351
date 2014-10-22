@@ -8,9 +8,10 @@
 // read in rgb values from the ppm file output by cqcam
 int genModule(char *infilename, char *outfilename) {
 	FILE *infile, *outfile;
-	char buf[1000];
-	char *codeline, *firstword;
-	int i, moduleID = 0;
+	char buff[1000], codeline[1000];
+	char *firstword, *buf;
+	int i;
+	int moduleID = 0;
 
 	// open input file for reading
 	infile =fopen(infilename,"r");
@@ -36,18 +37,19 @@ int genModule(char *infilename, char *outfilename) {
 							"\tMatrix m;\n\n");
 
 	// loop until EOF is reached
-	while (fgets(buf,1000, infile)!=NULL){
-		printf("%s\n", buf);
-		firstword = strtok (buf,"()");
+	while (fgets(buff,1000, infile)!=NULL){
+		buf = strtok (buff, "\n");
+		printf("reading line: %s\n", buf);
+		firstword = strtok (buff,"()");
 		if(strcmp(buf, "begin module") == 0){
-			sprintf(codeline, "Module *mod%d = module_create();", moduleID++);
+			sprintf(codeline, "Module *mod%d = module_create();", ++moduleID);
 		} else if(strcmp(firstword, "line2D") == 0){
 			firstword = strtok (NULL, "()");
 			sprintf(codeline, "line_set2D(&l, %s);\nmodule_line(mod%d, &l);", firstword, moduleID);
 		} else {
-			printf("%s isn't a recognized line for genModule\n", buf);
-			codeline = "NOT RECOGNIZED"
+			sprintf(codeline, "NOT RECOGNIZED");
 		}
+		printf("resulting code: %s\n", codeline);
 		fprintf(outfile, "%s\n", codeline);
 	}
 	for(i=0;i<moduleID;i++){
