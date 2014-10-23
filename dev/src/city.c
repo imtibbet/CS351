@@ -28,8 +28,8 @@ void building1( Module *mod ){
 	// corners of a cube, centered at (0, 0, 0)
 	point_set3D( &v[0], -1, -1, -1 );
 	point_set3D( &v[1],  1, -1, -1 );
-	point_set3D( &v[2],  1,  1.5, -1 );
-	point_set3D( &v[3], -1,  1.5, -1);
+	point_set3D( &v[2],  1,  1, -1 );
+	point_set3D( &v[3], -1,  1, -1);
 	point_set3D( &v[4], -1, -1,  1 );
 	point_set3D( &v[5],  1, -1,  1 );
 	point_set3D( &v[6],  1,  1,  1 );
@@ -98,7 +98,6 @@ int main(int argc, char *argv[]) {
 	DrawState *ds;
 	Color Flame = { { 1.0, 0.7, 0.2 } };
 	Color Red =  { { 1.0, 0.2, 0.1 } };
-	float bodyWidth = 2.0;
 
 	// set up the view
 	point_set3D( &(view.vrp), 15, 30, 100 );
@@ -114,19 +113,19 @@ int main(int argc, char *argv[]) {
 
 	printf("set up view\n");
 
-	matrix_septiew3D( &vtm, &view );
+	matrix_setView3D( &vtm, &view );
  	matrix_identity( &gtm );
 
  	// building 1
  	b1 = module_create();
- 	module_scale( b1, 5, 5, 5);
- 	module_rotateX( b1, 0, 1);
- 	module_color( b1, &Flame);
- 	building1( b1 );
+ 	module_rotateX( b1, 0, 1 );
+ 	module_color( b1, &Flame );
+ 	module_scale( b1, 1, 5, 1);
+ 	module_cube( b1, 0 );
  	printf("made building1\n");
 
 	// create the image and drawstate
-	src = image_create( 500, 500 );
+	src = image_create( view.screenx, view.screeny );
 	ds = drawstate_create();
 	ds->shade = ShadeFrame;
 	printf("created the image and drawstate\n");
@@ -144,8 +143,8 @@ int main(int argc, char *argv[]) {
 	printf("polygon freed\n");
 
 	// free the modules
-	// module_delete( b1 );
-	// printf("module freed\n");
+	module_delete( b1 );
+	printf("module freed\n");
 
 	// free drawstate
 	free(ds);
