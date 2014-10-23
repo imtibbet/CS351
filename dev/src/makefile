@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = moduleGen test6a	
+EXECUTABLES = test6a test6b city
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = moduleGen.o test6a
+_OBJ = test6a.o test6b.o city.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -131,9 +131,15 @@ threedpan-gif: $(ODIR)/threedpan-gif.o
 3dreq-gif: $(ODIR)/3dreq-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 # proj 6
+test6a: $(ODIR)/test6a.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+test6b: $(ODIR)/test6b.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 moduleGen: $(ODIR)/moduleGen.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
-test6a: $(ODIR)/test6a.o
+req2: $(ODIR)/req2.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+city: $(ODIR)/city.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean

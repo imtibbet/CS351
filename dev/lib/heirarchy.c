@@ -51,6 +51,7 @@ Element *element_init(ObjectType type, void *obj){
 			polygon_copy(&(e->obj.polygon), (Polygon*)obj);
 			break;
 		case ObjIdentity:
+			break;
 		case ObjMatrix:
 			matrix_copy(&(e->obj.matrix), (Matrix*)obj);
 			break;
@@ -69,7 +70,7 @@ Element *element_init(ObjectType type, void *obj){
 			e->obj.module = obj;
 			break;
 		default:
-			printf("ObjectType type is not handled in element_init\n");
+			printf("ObjectType %d is not handled in element_init\n",type);
 	}
 	return e;
 }
@@ -82,31 +83,20 @@ void element_delete(Element *e){
 		printf("Null e passed to element_delete\n");
 		return;
 	}
+	//printf("deleting element of type %d\n", e->type);
 	switch(e->type){
-		case ObjLine:
-			free(&(e->obj.line));
-			break;
-		case ObjPoint:
-			free(&(e->obj.point));
-			break;
 		case ObjPolyline:
 			polyline_free(&(e->obj.polyline));
 			break;
 		case ObjPolygon:
 			polygon_free(&(e->obj.polygon));
 			break;
-		case ObjModule:
-		case ObjMatrix:
-			free(&(e->obj.matrix));
-			break;
-		case ObjSurfaceColor:
-			free(&(e->obj.color));
-			break;
-		case ObjSurfaceCoeff:
-			free(&(e->obj.coeff));
-			break;
+		/*case ObjModule:
+			module_delete(((Module *)(e->obj.module)));
+			break;*/
 		default:
-			printf("ObjectType type is not handled in element_delete\n");
+			break;
+			//printf("ObjectType %d is not handled in element_delete\n",e->type);
 	}
 	free(e);
 
@@ -154,25 +144,13 @@ void module_delete(Module *md){
 		return;
 	}
 
-	printf("length of module, %i\n", sizeof(md));
-
 	curE = md->head;
 	md->head = md->tail = NULL;
 	while(curE){
-		printf("module type is %s", curE->type);
-
 		next = curE->next;
-		if ( curE->type == ObjModule ){
-			free(curE);
-		}
-		else{
-			printf("module type is %s", curE->type);
-		}
 		element_delete(curE);
 		curE = next;
 	}
-
-	printf("length of module in the end, %i\n", sizeof(md));
 
 	// free module itself after clearing
 	free(md);
@@ -186,7 +164,7 @@ void module_insert(Module *md, Element *e){
 		printf("Null md passed to module_insert\n");
 		return;
 	}
-	if(md->head){
+	if(!md->head){
 		md->head = md->tail = e;
 	} else {
 		md->tail->next = e;
@@ -199,11 +177,7 @@ void module_insert(Module *md, Element *e){
  */
 void module_module(Module *md, Module *sub){
 	Element *e = element_init(ObjModule, sub);
-	if (!md->head){
-		md->head = e;
-	} else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 /*
@@ -211,12 +185,7 @@ void module_module(Module *md, Module *sub){
  */
 void module_point(Module *md, Point *p){
 	Element *e = element_init(ObjPoint, p);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 /*
@@ -224,12 +193,7 @@ void module_point(Module *md, Point *p){
  */
 void module_line(Module *md, Line *p){
 	Element *e = element_init(ObjLine, p);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 /*
@@ -237,12 +201,7 @@ void module_line(Module *md, Line *p){
  */
 void module_polyline(Module *md, Polyline *p){
 	Element *e = element_init(ObjPolyline, p);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 /*
@@ -250,12 +209,7 @@ void module_polyline(Module *md, Polyline *p){
  */
 void module_polygon(Module *md, Polygon *p){
 	Element *e = element_init(ObjPolygon, p);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 /*
@@ -264,15 +218,8 @@ void module_polygon(Module *md, Polygon *p){
  */
 void module_identity(Module *md){
 	Element *e;
-	Matrix m;
-	matrix_identity(&m);
-	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	e = element_init(ObjIdentity, NULL);
+	module_insert(md, e);
 }
 
 /*
@@ -281,14 +228,10 @@ void module_identity(Module *md){
 void module_translate2D(Module *md, double tx, double ty){
 	Element *e;
 	Matrix m;
+	matrix_identity(&m);
 	matrix_translate2D(&m,tx,ty);
-	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	e = element_init(ObjMatrix, &m);
+	module_insert(md, e);
 }
 
 /*
@@ -297,14 +240,10 @@ void module_translate2D(Module *md, double tx, double ty){
 void module_scale2D(Module *md, double sx, double sy){
 	Element *e;
 	Matrix m;
-	matrix_scale2D(&m, sx, sy);
-	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	matrix_identity(&m);
+	matrix_scale2D(&m,sx,sy);
+	e = element_init(ObjMatrix, &m);
+	module_insert(md, e);
 }
 
 /*
@@ -313,30 +252,22 @@ void module_scale2D(Module *md, double sx, double sy){
 void module_rotateZ(Module *md, double cth, double sth){
 	Element *e;
 	Matrix m;
+	matrix_identity(&m);
 	matrix_rotateZ(&m, cth, sth);
-	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	e = element_init(ObjMatrix, &m);
+	module_insert(md, e);
 }
 
 /*
- * Matrix operand to add a 2D shear matrix to the tail of the module’s lisT
+ * Matrix operand to add a 2D shear matrix to the tail of the module’s list
  */
 void module_shear2D(Module *md, double shx, double shy){
 	Element *e;
 	Matrix m;
+	matrix_identity(&m);
 	matrix_shear2D(&m, shx, shy);
-	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	e = element_init(ObjMatrix, &m);
+	module_insert(md, e);
 }
 
 /*
@@ -350,28 +281,36 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 	// all locally needed variables
 	Matrix LTM, tempGTM;
 	Line tempLine;
-	Point tempPointLTM, tempPointGTM, tempPointVTM;
+	DrawState *tempds = drawstate_create();
+	Point tempPoint, tempPointLTM, tempPointGTM, tempPointVTM;
 	Polyline *tempPolyline = polyline_create();
 	Polygon *tempPolygon = polygon_create();
 	Element *e = md->head;
 	matrix_identity(&LTM);
 
+	printf("GTM\n");
+	matrix_print(GTM, stdout);
+	
 	// loop until the end of the linked list is reached
 	while(e){
-	
+		printf("Handling type %d\n", e->type);
 		// draw based on type
 		switch(e->type){
 			case ObjNone:
 				break;
 			case ObjPoint:
+				printf("drawing point ");
 				// copy, xform, normalize, draw
-				matrix_xformPoint(&LTM, &(e->obj.point), &tempPointLTM);
+				point_copy(&tempPoint, &(e->obj.point));
+				matrix_xformPoint(&LTM, &tempPoint, &tempPointLTM);
 				matrix_xformPoint(GTM, &tempPointLTM, &tempPointGTM);
 				matrix_xformPoint(VTM, &tempPointGTM, &tempPointVTM);
 				point_normalize(&(tempPointVTM));
+				point_print(&tempPointVTM, stdout);
 				point_draw(&tempPointVTM, src, ds->color);
 				break;
 			case ObjLine:
+				printf("drawing line ");
 				// copy, xform, normalize, draw
 				line_copy(&tempLine, &(e->obj.line));
 				matrix_xformLine(&LTM, &tempLine);
@@ -379,28 +318,33 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				matrix_xformLine(VTM, &tempLine);
 				point_normalize(&(tempLine.a));
 				point_normalize(&(tempLine.b));
+				line_print(&tempLine, stdout);
 				line_draw(&tempLine, src, ds->color);
 				break;
 			case ObjPolyline:
+				printf("drawing polyline ");
 				// copy, xform, normalize, draw
 				polyline_copy(tempPolyline, &(e->obj.polyline));
 				matrix_xformPolyline(&LTM, tempPolyline);
 				matrix_xformPolyline(GTM, tempPolyline);
 				matrix_xformPolyline(VTM, tempPolyline);
 				polyline_normalize(tempPolyline);
+				polyline_print(tempPolyline, stdout);
 				polyline_draw(tempPolyline, src, ds->color);
 				break;
 			case ObjPolygon:
+				printf("drawing polygon ");
 				// copy, xform, normalize, draw
 				polygon_copy(tempPolygon, &(e->obj.polygon));
 				matrix_xformPolygon(&LTM, tempPolygon);
 				matrix_xformPolygon(GTM, tempPolygon);
 				matrix_xformPolygon(VTM, tempPolygon);
 				polygon_normalize(tempPolygon);
-				polygon_draw(tempPolygon, src, ds->color);
+				polygon_print(tempPolygon, stdout);
+				polygon_drawFill(tempPolygon, src, ds->color);
 				break;
 			case ObjColor:
-				ds->color = e->obj.color;
+				drawstate_setColor(ds, e->obj.color);
 				break;
 			case ObjBodyColor:
 				break;
@@ -411,16 +355,18 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 			case ObjLight:
 				break;
 			case ObjIdentity:
+				matrix_identity(&LTM);
 				break;
 			case ObjMatrix:
 				matrix_multiply(&(e->obj.matrix), &LTM, &LTM);
 				break;
 			case ObjModule:
 				matrix_multiply(GTM, &LTM, &tempGTM);
-				module_draw(e->obj.module, VTM, &tempGTM, ds, lighting, src);
+				drawstate_copy(tempds, ds);
+				module_draw(e->obj.module, VTM, &tempGTM, tempds, lighting, src);
 				break;
 			default:
-				printf("ObjectType type is not handled in module_draw\n");
+				printf("ObjectType %d is not handled in module_draw\n",e->type);
 		}
 		
 		// advance traversal
@@ -440,14 +386,10 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 void module_translate(Module *md, double tx, double ty, double tz){
 	Element *e;
 	Matrix m;
+	matrix_identity(&m);
 	matrix_translate(&m, tx, ty, tz);
 	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 /*
@@ -456,14 +398,10 @@ void module_translate(Module *md, double tx, double ty, double tz){
 void module_scale(Module *md, double sx, double sy, double sz){
 	Element *e;
 	Matrix m;
+	matrix_identity(&m);
 	matrix_scale(&m, sx, sy, sz);
 	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 /*
@@ -472,14 +410,10 @@ void module_scale(Module *md, double sx, double sy, double sz){
 void module_rotateX(Module *md, double cth, double sth){
 	Element *e;
 	Matrix m;
+	matrix_identity(&m);
 	matrix_rotateX(&m, cth, sth);
 	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 /*
@@ -488,14 +422,10 @@ void module_rotateX(Module *md, double cth, double sth){
 void module_rotateY(Module *md, double cth, double sth){
 	Element *e;
 	Matrix m;
+	matrix_identity(&m);
 	matrix_rotateY(&m, cth, sth);
 	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 /*
@@ -504,14 +434,10 @@ void module_rotateY(Module *md, double cth, double sth){
 void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w){
 	Element *e;
 	Matrix m;
+	matrix_identity(&m);
 	matrix_rotateXYZ(&m, u, v, w);
 	e = element_init(ObjIdentity, &m);
-	if (!md->head){
-		md->head = e;
-	} 
-	else {
-		md->tail = e;
-	}
+	module_insert(md, e);
 }
 
 
@@ -523,10 +449,9 @@ void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w){
 void module_cube(Module *md, int solid){
 	Element *e;
  	Polygon p;
-	Line l;
 	Point v[8];
 	Point tv[4];
-	int i;
+	Line l;
 	
 	// initialize polygon
 	polygon_init( &p );
@@ -543,29 +468,60 @@ void module_cube(Module *md, int solid){
 		
 	if(solid == 0){
 		// add only lines ( 12 of them )
-		//line_set( &l, &(v[0]), &(v[1]) );
-		//e = element_init(ObjLine, &l);
-		//module_insert(md, e);
+		
+		// front face lines
+		line_set( &l, v[0], v[1] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		line_set( &l, v[1], v[2] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		line_set( &l, v[2], v[3] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		line_set( &l, v[3], v[0] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		
+		// back face lines
+		line_set( &l, v[4], v[5] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		line_set( &l, v[5], v[6] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		line_set( &l, v[6], v[7] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		line_set( &l, v[7], v[4] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		
+		// connecting lines
+		line_set( &l, v[2], v[6] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		line_set( &l, v[3], v[7] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		line_set( &l, v[0], v[4] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
+		line_set( &l, v[1], v[5] );
+		e = element_init(ObjLine, &l);
+		module_insert(md, e);
 	}
 	else{
 	 	// use polygons ( 6 of them )
 		// front side
 		polygon_set( &p, 4, &(v[0]) );
 		e = element_init(ObjPolygon, &p);
-		if (!md->head){
-		md->head = e;
-		} else {
-			md->tail = e;
-		}
+		module_insert(md, e);
 
 		// back side
 		polygon_set( &p, 4, &(v[4]) );
 		e = element_init(ObjPolygon, &p);
-		if (!md->head){
-		md->head = e;
-		} else {
-			md->tail = e;
-		}
+		module_insert(md, e);
 
 		// top side
 		point_copy( &tv[0], &v[2] );
@@ -575,11 +531,7 @@ void module_cube(Module *md, int solid){
 
 		polygon_set( &p, 4, tv );
 		e = element_init(ObjPolygon, &p);
-		if (!md->head){
-		md->head = e;
-		} else {
-			md->tail = e;
-		}
+		module_insert(md, e);
 
 		// bottom side
 		point_copy( &tv[0], &v[0] );
@@ -589,11 +541,7 @@ void module_cube(Module *md, int solid){
 
 		polygon_set( &p, 4, tv );
 		e = element_init(ObjPolygon, &p);
-		if (!md->head){
-		md->head = e;
-		} else {
-			md->tail = e;
-		}
+		module_insert(md, e);
 
 		// left side
 		point_copy( &tv[0], &v[0] );
@@ -603,11 +551,7 @@ void module_cube(Module *md, int solid){
 
 		polygon_set( &p, 4, tv );
 		e = element_init(ObjPolygon, &p);
-		if (!md->head){
-		md->head = e;
-		} else {
-			md->tail = e;
-		}
+		module_insert(md, e);
 
 		// right side
 		point_copy( &tv[0], &v[1] );
@@ -617,11 +561,7 @@ void module_cube(Module *md, int solid){
 
 		polygon_set( &p, 4, tv );
 		e = element_init(ObjPolygon, &p);
-		if (!md->head){
-		md->head = e;
-		} else {
-			md->tail = e;
-		}
+		module_insert(md, e);
 	}
 }
 
@@ -639,11 +579,9 @@ void module_color(Module *md, Color *c){
 		printf("Null color passed to module_color\n");
 		return;
 	}
-	if(!md->tail){
-		printf("Empty module passed to module_color\n");
-		return;
-	}
-	md->tail->obj.color = *c;
+	Element *e;
+	e = element_init(ObjColor, c);
+	module_insert(md, e);
 }
 
 // Draw State

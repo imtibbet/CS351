@@ -235,6 +235,5 @@ void matrix_perspective(Matrix *m, double d);
  */
  void matrix_setView3D(Matrix *vtm, View3D *view);
 
-void view2D_set(View2D *view, Point *vrp, double dx, Vector *xaxis, int rows, int cols);
 
 #endif

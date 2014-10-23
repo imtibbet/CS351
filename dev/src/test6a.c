@@ -35,6 +35,8 @@
 
   matrix_setView2D
  */
+#include <stdio.h>
+#include <stdlib.h>
 #include "graphics.h"
 
 int main(int argc, char *argv[]) {
@@ -48,8 +50,6 @@ int main(int argc, char *argv[]) {
   Module *xwing;
   Module *formation;
   int i;
-  Point vrp;
-  Vector xaxis;
   Point p[8];
   Line l;
   DrawState *ds;
@@ -60,12 +60,12 @@ int main(int argc, char *argv[]) {
   // setup gtm
   matrix_identity( &gtm );
 
-  printf("matrix_identity created\n");
-
   // setup vtm
-  point_set2D( &vrp, 0, 0 );
-  vector_set( &xaxis, 1, 0, 0 );
-  view2D_set( &view, &vrp, 2, &xaxis, 640, 360 );
+  point_set2D( &(view.vrp), 0, 0 );
+  vector_set( &(view.x), 1, 0, 0 );
+  view.dx = 2;
+  view.screenx = 640;
+  view.screeny = 360;
   matrix_setView2D( &vtm, &view );
   printf("set up vtm\n");
 
@@ -86,7 +86,6 @@ int main(int argc, char *argv[]) {
     line_set( &l, p[a], p[b] );
     module_line( body, &l );
   }
-
   line_set2D( &l, 0.6, 0.05, 0.6, 0.45 );
   module_line( body, &l );
   line_set2D( &l, 1.1, 0.08, 1.1, 0.42 );
@@ -168,6 +167,7 @@ int main(int argc, char *argv[]) {
   }
   printf("drew stars into scene\n");
 
+
 	// create the image and draw the module
   src = image_create( view.screeny, view.screenx );
   ds = drawstate_create(); // default color is white
@@ -180,19 +180,21 @@ int main(int argc, char *argv[]) {
 
 	// free modules
   module_delete( scene );
+  printf("freed scene\n");
   module_delete( formation );
+  printf("freed formation\n");
   module_delete( xwing );
+  printf("freed xwing\n");
   module_delete( body );
+  printf("freed body\n");
   module_delete( wing );
-  printf("freed modules\n");
+  printf("freed wing\n");
 
 	// free drawstate
   free( ds );
-  printf("freed drawstate\n");
 
 	// free image
   image_free( src );
-  printf("freed image\n");
 
   return(0);
 }

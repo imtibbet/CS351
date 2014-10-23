@@ -42,7 +42,9 @@ void cylinder( Module *mod, int sides ) {
     point_set3D( &pt[2], x2, 1.0, z2 );
 
     polygon_set( &p, 3, pt );
+  	printf("start modp\n");
     module_polygon( mod, &p );
+  	printf("end modp\n");
 
     point_copy( &pt[0], &xbot );
     point_set3D( &pt[1], x1, 0.0, z1 );
@@ -146,26 +148,32 @@ int main(int argc, char *argv[]) {
   view.screeny = 360;
 
   matrix_setView3D( &vtm, &view );
+  printf("view\n");
   matrix_identity( &gtm );
 
   // engine
+  printf("start engine\n");
   engine = module_create();
   module_scale( engine, 1.3, 6, 1.3);
   module_rotateX( engine, 0, 1 );
-  cylinder( engine, 10 );
+  printf("start cylinder\n");
+  //cylinder( engine, 10 );
+  printf("start color\n");
   module_scale( engine, .8, .8, 1 );
   module_color( engine, &Flame );
-  cylinder( engine, 10 );
+  //cylinder( engine, 10 );
+  printf("engine\n");
 
   // laser
   laser = module_create();
   module_scale( laser, 0.5, 5, 0.5 );
   module_rotateX( laser, 0, 1 );
-  cylinder( laser, 6 );
+  //cylinder( laser, 6 );
   module_scale( laser, 0.4, 0.4, 1.0 );
   module_translate( laser, 0, 0, 4.5 );
   module_color( laser, &Red );
-  cylinder( laser, 10 );
+  //cylinder( laser, 10 );
+  printf("laser\n");
 
   // wing
   wing = module_create();
@@ -207,6 +215,7 @@ int main(int argc, char *argv[]) {
 
   module_translate( wing, 15, 0.25, 0 );
   module_module( wing, laser );
+  printf("wing\n");
 
   // 4 wings
   wings = module_create();
@@ -231,6 +240,7 @@ int main(int argc, char *argv[]) {
   module_rotateZ(wings, cos( 0.3) , sin(0.3) );
   module_translate( wings, -bodyWidth, 0, 0 );
   module_module( wings, wing );
+  printf("4 wings\n");
 
   // body
   body = module_create();
@@ -276,6 +286,7 @@ int main(int argc, char *argv[]) {
   point_set3D( &pt[3], -bodyWidth*0.5, -bodyWidth*0.3, 35 );
   polygon_set( &p, 4, pt );
   module_polygon( body, &p );
+  printf("body\n");
 
   // scene with three ships (body module)
   scene = module_create();
@@ -300,11 +311,13 @@ int main(int argc, char *argv[]) {
   module_rotateX( scene, cos( 0.2), sin(0.2) );
   module_translate( scene, -35, -3, -60 );
   module_module( scene, body );
+  printf("scene\n");
 
   // create the image and drawstate
   src = image_create( 360, 640 );
   ds = drawstate_create();
   ds->shade = ShadeFrame;
+  printf("image and ds\n");
 
   // draw into the scene
   module_draw( scene, &vtm, &gtm, ds, NULL, src );
