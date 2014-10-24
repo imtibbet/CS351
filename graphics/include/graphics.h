@@ -10,6 +10,7 @@
 #include "color.h"
 #include "image.h"
 #include "fractals.h"
+#include "drawstate.h"
 #include "primitives.h"
 #include "floodfill.h"
 #include "list.h"
