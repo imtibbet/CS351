@@ -1161,7 +1161,7 @@ void polygon_normalize( Polygon *p){
 /*
  * dispatch the drawing of the polygon using DrawState d.
  */
-void polygon_draw(Polygon *p, Image *src, DrawState d){
+void polygon_draw(Polygon *p, Image *src, DrawState *d){
 	switch(d->shade){
 		case ShadeFrame:
 			polygon_drawFrame(p, src, d->color);
