@@ -85,13 +85,15 @@ void element_delete(Element *e){
 		printf("Null e passed to element_delete\n");
 		return;
 	}
-	//printf("deleting element of type %d\n", e->type);
+	printf("deleting element of type %d\n", e->type);
 	switch(e->type){
 		case ObjPolyline:
 			polyline_free(&(e->obj.polyline));
 			break;
 		case ObjPolygon:
+			printf("freeing polygon\n");
 			polygon_free(&(e->obj.polygon));
+			printf("done freeing polygon\n");
 			break;
 		default:
 			break;
