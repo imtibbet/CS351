@@ -1118,7 +1118,6 @@ void polygon_copy(Polygon *to, Polygon *from){
 	}
 	
 	// copy the points to destination
-	printf("copying polygon\n");
 	to->nVertex = from->nVertex;
 	for(i=0;i<(to->nVertex);i++){
 		to->vertex[i] = from->vertex[i];

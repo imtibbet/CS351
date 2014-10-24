@@ -42,9 +42,7 @@ void cylinder( Module *mod, int sides ) {
     point_set3D( &pt[2], x2, 1.0, z2 );
 
     polygon_set( &p, 3, pt );
-  	printf("start modp\n");
     module_polygon( mod, &p );
-  	printf("end modp\n");
 
     point_copy( &pt[0], &xbot );
     point_set3D( &pt[1], x1, 0.0, z1 );
@@ -157,22 +155,22 @@ int main(int argc, char *argv[]) {
   module_scale( engine, 1.3, 6, 1.3);
   module_rotateX( engine, 0, 1 );
   printf("start cylinder\n");
-  //cylinder( engine, 10 );
+  cylinder( engine, 10 );
   printf("start color\n");
   module_scale( engine, .8, .8, 1 );
   module_color( engine, &Flame );
-  //cylinder( engine, 10 );
+  cylinder( engine, 10 );
   printf("engine\n");
 
   // laser
   laser = module_create();
   module_scale( laser, 0.5, 5, 0.5 );
   module_rotateX( laser, 0, 1 );
-  //cylinder( laser, 6 );
+  cylinder( laser, 6 );
   module_scale( laser, 0.4, 0.4, 1.0 );
   module_translate( laser, 0, 0, 4.5 );
   module_color( laser, &Red );
-  //cylinder( laser, 10 );
+  cylinder( laser, 10 );
   printf("laser\n");
 
   // wing
@@ -312,7 +310,7 @@ int main(int argc, char *argv[]) {
   module_translate( scene, -35, -3, -60 );
   module_module( scene, body );
   printf("scene\n");
-
+ 
   // create the image and drawstate
   src = image_create( 360, 640 );
   ds = drawstate_create();
@@ -321,20 +319,28 @@ int main(int argc, char *argv[]) {
 
   // draw into the scene
   module_draw( scene, &vtm, &gtm, ds, NULL, src );
-
+  printf("done draw\n");
+  
 	// write out the scene
   image_write( src, "wings.ppm" );
 
 	// free the polygon data
   polygon_clear( &p );
-
+  printf("polygon cleared\n");
+  
 	// free the modules
   module_delete( scene );
+  printf("scene deleted\n");
   module_delete( wing );
+  printf("wing deleted\n");
   module_delete( wings );
+  printf("wings deleted\n");
   module_delete( laser );
+  printf("laser deleted\n");
   module_delete( body );
+  printf("body deleted\n");
   module_delete( engine );
+  printf("engine deleted\n");
 
 	// free the drawstate
 	free(ds);
