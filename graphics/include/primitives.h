@@ -215,9 +215,14 @@ void polygon_print(Polygon *p, FILE *fp);
 void polygon_normalize( Polygon *p);
 
 /*
+ * dispatch the drawing of the polygon using DrawState d.
+ */
+void polygon_draw(Polygon *p, Image *src, DrawState d);
+
+/*
  * draw the outline of the polygon using color c.
  */
-void polygon_draw(Polygon *p, Image *src, Color c);
+void polygon_drawFrame(Polygon *p, Image *src, Color c);
 
 /*
  * draw the filled polygon using color c with the scanline rendering algorithm.

@@ -1159,9 +1159,23 @@ void polygon_normalize( Polygon *p){
 }
 
 /*
+ * dispatch the drawing of the polygon using DrawState d.
+ */
+void polygon_draw(Polygon *p, Image *src, DrawState d){
+	switch(d->shade){
+		case ShadeFrame:
+			polygon_drawFrame(p, src, d->color);
+			break;
+		case ShadeConstant:
+		default:
+			polygon_drawFill(p, src, d->color);
+	}
+}
+
+/*
  * draw the outline of the polygon using color c.
  */
-void polygon_draw(Polygon *p, Image *src, Color c){
+void polygon_drawFrame(Polygon *p, Image *src, Color c){
 	int i;
 	Line l;
 

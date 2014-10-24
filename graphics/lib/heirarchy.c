@@ -400,7 +400,7 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				matrix_xformPolygon(VTM, tempPolygon);
 				polygon_normalize(tempPolygon);
 				//polygon_print(tempPolygon, stdout);
-				polygon_drawFill(tempPolygon, src, ds->color);
+				polygon_draw(tempPolygon, src, ds);
 				break;
 			case ObjColor:
 				drawstate_setColor(ds, e->obj.color);
