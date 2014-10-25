@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
 					z = atof(thirdword);
 					point_set3D(&(temppts[0]), x, y, z);
 				}
-				module_point(mod[activeMod], &(temppts[0]));
+				module_point(mod[activeMod]->item.module, &(temppts[0]));
 			} 
 			else if(strcmp(secondword, "line") == 0){
 				for(i=0;i<2;i++){
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
 					}
 				}
 				line_set(&templine, temppts[0], temppts[1]);
-				module_line(mod[activeMod], &templine);
+				module_line(mod[activeMod]->item.module, &templine);
 			} 
 			else if(strcmp(secondword, "polyline") == 0){
 				thirdword = strtok (NULL, delim);
@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
 					searchname = strtok (NULL, delim));
 				}
 				polyline_set(&temppolyline, i, &(temppts[0]);
-				module_polyline(mod[activeMod], &temppolyline);
+				module_polyline(mod[activeMod]->item.module, &temppolyline);
 			}
 			else if(strcmp(secondword, "polygon") == 0){
 				thirdword = strtok (NULL, delim);
@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
 					searchname = strtok (NULL, delim));
 				}
 				polygon_set(&temppolygon, i, &(temppts[0]);
-				module_polygon(mod[activeMod], &temppolygon);
+				module_polygon(mod[activeMod]->item.module, &temppolygon);
 			} 
 			else {
 				printf("add NOT RECOGNIZED");
@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
 						break;
 					}
 				}
-				module_module(mod[activeMod], &(mod[j]->item.module));
+				module_module(mod[activeMod]->item.module, &(mod[j]->item.module));
 			} 
 			else if(strcmp(secondword, "point") == 0){
 				searchname = strtok (NULL, delim);
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
 						break;
 					}
 				}
-				module_point(mod[activeMod], &(pt[j]->item.point));
+				module_point(mod[activeMod]->item.module, &(pt[j]->item.point));
 			} 
 			else if(strcmp(secondword, "line") == 0){
 				searchname = strtok (NULL, delim);
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]) {
 						break;
 					}
 				}
-				module_line(mod[activeMod], &(l[j]->item.line));
+				module_line(mod[activeMod]->item.module, &(l[j]->item.line));
 			} 
 			else if(strcmp(secondword, "polyline") == 0){
 				searchname = strtok (NULL, delim);
@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
 						break;
 					}
 				}
-				module_polyline(mod[activeMod], &(pl[j]->item.polyline));
+				module_polyline(mod[activeMod]->item.module, &(pl[j]->item.polyline));
 			} 
 			else if(strcmp(secondword, "polygon") == 0){
 				searchname = strtok (NULL, delim);
@@ -284,7 +284,7 @@ int main(int argc, char *argv[]) {
 						break;
 					}
 				}
-				module_polygon(mod[activeMod], &(pg[j]->item.polygon));
+				module_polygon(mod[activeMod]->item.module, &(pg[j]->item.polygon));
 			} 
 			else {
 				printf("put NOT RECOGNIZED");
@@ -310,13 +310,16 @@ int main(int argc, char *argv[]) {
 				vector_set(&(view2D.x), x, y, z);
 			}
 			else if(strcmp(secondword, "dx") == 0){
-				view2D.dx = atof(strtok (NULL, delim));
+				thirdword = strtok (NULL, delim);
+				view2D.dx = atof(thirdword);
 			}
 			else if(strcmp(secondword, "screenx") == 0){
-				view2D.screenx = atof(strtok (NULL, delim));
+				thirdword = strtok (NULL, delim);
+				view2D.dx = atof(thirdword);
 			}
 			else if(strcmp(secondword, "screeny") == 0){
-				view2D.screeny = atof(strtok (NULL, delim));
+				thirdword = strtok (NULL, delim);
+				view2D.dx = atof(thirdword);
 			}
 			else{
 				printf("view2D NOT RECOGNIZED");
@@ -392,7 +395,7 @@ int main(int argc, char *argv[]) {
 		matrix_setView3D( &vtm, &view3D );
 		src = image_create( view3D.screeny, view3D.screenx );
 	}
-	module_draw(mod[activeMod], VTM, GTM, ds, NULL, src);
+	module_draw(mod[activeMod]->item.module, VTM, GTM, ds, NULL, src);
 	image_write(src, outfilename);
 
 	// clean up
