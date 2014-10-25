@@ -992,13 +992,9 @@ void polygon_free(Polygon *p){
 	if(p){
 		polygon_print(p, stdout);
 		if(p->vertex){
-			printf("freeing vertex\n");
 			free(p->vertex);
-			printf("done freeing vertex\n");
 		}
-		printf("freeing polygon pointer\n");
 		free(p);
-		printf("done freeing polygon pointer\n");
 	} else {
 		printf("null p passed to polygon_free\n");
 	}

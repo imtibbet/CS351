@@ -379,6 +379,23 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	// check that everything was defined correctly
+	for(j=0;j<numpoints;j++){
+		printf("point named %s\n", pt[j]->name);
+		point_print(&(pt[j]->item.point), stdout);
+	}
+	for(j=0;j<numlines;j++){
+		printf("line named %s\n", pt[j]->name);
+		line_print(&(pt[j]->item.line), stdout);
+	}
+	for(j=0;j<numpolylines;j++){
+		printf("polyline named %s\n", pt[j]->name);
+		polyline_print(&(pt[j]->item.polyline), stdout);
+	}
+	for(j=0;j<numpolygons;j++){
+		printf("polygon named %s\n", pt[j]->name);
+		polygon_print(&(pt[j]->item.polygon), stdout);
+	}
 	// verify that at least one module defined
 	if(activeMod == -1){
 		printf("no modules defined, nothing is being drawn, no side effects\n");
