@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
 	Matrix gtm;
 
 	// variables for parsing
+	const char *varname;
 	char *infilename, *outfilename;
 	FILE *infile;
 	char buff[1000];
@@ -92,11 +93,11 @@ int main(int argc, char *argv[]) {
 		if(strcmp(firstword, "def") == 0){
 			secondword = strtok (NULL, delim);
 			if(strcmp(secondword, "point") == 0){
-				thirdword = strtok (NULL, delim);
-				printf("thirdword %s\n", thirdword);
+				varname = strtok (NULL, delim);
+				printf("varname %s\n", varname);
 				pt[numpoints] = malloc(sizeof(TableItem));
-				strcpy(pt[numpoints]->name, thirdword);
-				printf("thirdword %s\n", thirdword);
+				strcpy(pt[numpoints]->name, varname);
+				printf("varname %s\n", varname);
 				thirdword = strtok (NULL, delim);
 				printf("thirdword %s\n", thirdword);
 				x = atof(thirdword);
@@ -113,9 +114,9 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			else if(strcmp(secondword, "line") == 0){
-				thirdword = strtok (NULL, delim);
+				varname = strtok (NULL, delim);
 				l[numlines] = malloc(sizeof(TableItem));
-				strcpy(l[numlines]->name, thirdword);
+				strcpy(l[numlines]->name, varname);
 				for(i=0;i<2;i++){
 					searchname = strtok (NULL, delim);
 					for(j=0;j<numpoints;j++){
@@ -128,9 +129,9 @@ int main(int argc, char *argv[]) {
 				line_set(&(l[numlines++]->item.line), temppts[0], temppts[1]);
 			}
 			else if(strcmp(secondword, "polyline") == 0){
-				thirdword = strtok (NULL, delim);
+				varname = strtok (NULL, delim);
 				pl[numpolylines] = malloc(sizeof(TableItem));
-				strcpy(pl[numpolylines]->name, thirdword);
+				strcpy(pl[numpolylines]->name, varname);
 				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
@@ -145,9 +146,9 @@ int main(int argc, char *argv[]) {
 				pl[numpolylines++]->item.polyline = *(polyline_createp(i, &(temppts[0])));
 			}
 			else if(strcmp(secondword, "polygon") == 0){
-				thirdword = strtok (NULL, delim);
+				varname = strtok (NULL, delim);
 				pg[numpolygons] = malloc(sizeof(TableItem));
-				strcpy(pg[numpolygons]->name, thirdword);
+				strcpy(pg[numpolygons]->name, varname);
 				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
@@ -162,9 +163,9 @@ int main(int argc, char *argv[]) {
 				pg[numpolygons++]->item.polygon = *(polygon_createp(i, &(temppts[0])));
 			}
 			else if(strcmp(secondword, "module") == 0){
-				thirdword = strtok (NULL, delim);
+				varname = strtok (NULL, delim);
 				mod[++activeMod] = malloc(sizeof(TableItem));
-				strcpy(mod[activeMod]->name, thirdword);
+				strcpy(mod[activeMod]->name, varname);
 				mod[activeMod]->item.module = module_create();
 			}
 			else {
