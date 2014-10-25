@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 			if(strcmp(secondword, "point") == 0){
 				thirdword = strtok (NULL, delim);
 				pt[numpoints] = malloc(sizeof(TableItem));
-				pt[numpoints]->name = thirdword;
+				strcpyy(pt[numpoints]->name, thirdword);
 				thirdword = strtok (NULL, delim);
 				x = atof(thirdword);
 				thirdword = strtok (NULL, delim);
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
 			else if(strcmp(secondword, "line") == 0){
 				thirdword = strtok (NULL, delim);
 				l[numlines] = malloc(sizeof(TableItem));
-				l[numlines]->name = thirdword;
+				strcpyy(l[numlines]->name, thirdword);
 				for(i=0;i<2;i++){
 					searchname = strtok (NULL, delim);
 					for(j=0;j<numpoints;j++){
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
 			else if(strcmp(secondword, "polyline") == 0){
 				thirdword = strtok (NULL, delim);
 				pl[numpolylines] = malloc(sizeof(TableItem));
-				pl[numpolylines]->name = thirdword;
+				strcpyy(pl[numpolylines]->name, thirdword);
 				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
 			else if(strcmp(secondword, "polygon") == 0){
 				thirdword = strtok (NULL, delim);
 				pg[numpolygons] = malloc(sizeof(TableItem));
-				pg[numpolygons]->name = thirdword;
+				strcpyy(pg[numpolygons]->name, thirdword);
 				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 			else if(strcmp(secondword, "module") == 0){
 				thirdword = strtok (NULL, delim);
 				mod[++activeMod] = malloc(sizeof(TableItem));
-				mod[activeMod]->name = thirdword;
+				strcpyy(mod[activeMod]->name, thirdword);
 				mod[activeMod]->item.module = module_create();
 			}
 			else {
@@ -199,9 +199,6 @@ int main(int argc, char *argv[]) {
 				module_line(mod[activeMod]->item.module, &templine);
 			} 
 			else if(strcmp(secondword, "polyline") == 0){
-				thirdword = strtok (NULL, delim);
-				pl[numpolylines] = malloc(sizeof(TableItem));
-				pl[numpolylines]->name = thirdword;
 				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
@@ -217,9 +214,6 @@ int main(int argc, char *argv[]) {
 				module_polyline(mod[activeMod]->item.module, &temppolyline);
 			}
 			else if(strcmp(secondword, "polygon") == 0){
-				thirdword = strtok (NULL, delim);
-				pg[numpolygons] = malloc(sizeof(TableItem));
-				pg[numpolygons]->name = thirdword;
 				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
