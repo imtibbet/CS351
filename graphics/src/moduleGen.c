@@ -43,12 +43,12 @@ int main(int argc, char *argv[]) {
 	char *linein, *firstword, *secondword, *thirdword, *searchname;
 	char *delim = " \n";
 	int i, j, is2D;
-	int activeMod = 0;
+	int activeMod = -1;
 	int numpoints = 0;
 	int numlines = 0;
 	int numpolylines = 0;
 	int numpolygons = 0;
-	TableItem *pt[1000], *l[1000], *pl[1000], *pg[1000], *mx[1000], *mod[1000];
+	TableItem *pt[1000], *l[1000], *pl[1000], *pg[1000], *mod[1000];
 	Point temppts[50];
 	Line templine;
 	Polyline temppolyline;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
 				if(thirdword == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
 				}
-				else{
+				} else {
 					z = atof(thirdword);
 					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
 				}
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 					}
 					searchname = strtok (NULL, delim));
 				}
-				polyline_createp(&(pl[numpolylines++]->item.polyline), i, &(temppts[0]);
+				pl[numpolylines++]->item.polyline = *(polyline_createp(i, &(temppts[0])));
 			}
 			else if(strcmp(secondword, "polygon") == 0){
 				thirdword = strtok (NULL, delim);
@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
 					}
 					searchname = strtok (NULL, delim));
 				}
-				polygon_createp(&(pg[numpolygons++]->item.polygon), i, &(temppts[0]);
+				pg[numpolygons++]->item.polygon = *(polygon_createp(i, &(temppts[0])));
 			}
 			else if(strcmp(secondword, "module") == 0){
 				thirdword = strtok (NULL, delim);
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
 				thirdword = strtok (NULL, delim);
 				if(thirdword == NULL){
 					point_set2D(&(temppts[0]), x, y);
-				else{
+				} else {
 					z = atof(thirdword);
 					point_set3D(&(temppts[0]), x, y, z);
 				}
@@ -214,7 +214,7 @@ int main(int argc, char *argv[]) {
 					}
 					searchname = strtok (NULL, delim));
 				}
-				polyline_set(&temppolyline, i, &(temppts[0]);
+				polyline_set(&temppolyline, i, &(temppts[0]));
 				module_polyline(mod[activeMod]->item.module, &temppolyline);
 			}
 			else if(strcmp(secondword, "polygon") == 0){
@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
 					}
 					searchname = strtok (NULL, delim));
 				}
-				polygon_set(&temppolygon, i, &(temppts[0]);
+				polygon_set(&temppolygon, i, &(temppts[0]));
 				module_polygon(mod[activeMod]->item.module, &temppolygon);
 			} 
 			else {
@@ -243,12 +243,12 @@ int main(int argc, char *argv[]) {
 			secondword = strtok (NULL, delim);
 			if(strcmp(secondword, "module") == 0){
 				searchname = strtok (NULL, delim);
-				for(j=0;j<nummodules;j++){
+				for(j=0;j<activeMod;j++){
 					if(strcmp(mod[j]->name, searchname) == 0){
 						break;
 					}
 				}
-				module_module(mod[activeMod]->item.module, &(mod[j]->item.module));
+				module_module(mod[activeMod]->item.module, mod[j]->item.module);
 			} 
 			else if(strcmp(secondword, "point") == 0){
 				searchname = strtok (NULL, delim);
