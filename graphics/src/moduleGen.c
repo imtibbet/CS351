@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
 			}
 			else if(strcmp(secondword, "screeny") == 0){
 				thirdword = strtok (NULL, delim);
-				view2D.screenx = atof(thirdword);
+				view2D.screeny = atof(thirdword);
 			}
 			else{
 				printf("view2D NOT RECOGNIZED");
@@ -413,6 +413,8 @@ int main(int argc, char *argv[]) {
 		matrix_setView3D( &vtm, &view3D );
 		src = image_create( view3D.screeny, view3D.screenx );
 	}
+	printf("vtm in module generation:\n");
+	matrix_print(&vtm, stdout);
 	module_draw(mod[activeMod]->item.module, &vtm, &gtm, ds, NULL, src);
 	image_write(src, outfilename);
 
