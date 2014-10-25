@@ -29,8 +29,6 @@ typedef struct{
 int main(int argc, char *argv[]) {
 
 	// variables for the view and image
-	Point vrp;
-	Vector xaxis;
 	DrawState *ds;
 	Image *src;
 	View2D view2D;
@@ -41,10 +39,10 @@ int main(int argc, char *argv[]) {
 	// variables for parsing
 	char *infilename, *outfilename;
 	FILE *infile;
-	char *buff[1000];
+	char buff[1000];
 	char *linein, *firstword, *secondword, *thirdword, *searchname;
 	char *delim = " \n";
-	int i, j, is2D;
+	int i, j, is2D = 0;
 	int activeMod = -1;
 	int numpoints = 0;
 	int numlines = 0;
