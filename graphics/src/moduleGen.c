@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
 				l[numlines] = malloc(sizeof(TableItem));
 				l[numlines]->name = thirdword;
 				for(i=0;i<2;i++){
-					searchname = strtok (NULL, delim));
+					searchname = strtok (NULL, delim);
 					for(j=0;j<numpoints;j++){
 						if(strcmp(pt[j]->name, searchname) == 0){
 							temppts[i] = pt[j]->item.point;
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
 				thirdword = strtok (NULL, delim);
 				pl[numpolylines] = malloc(sizeof(TableItem));
 				pl[numpolylines]->name = thirdword;
-				searchname = strtok (NULL, delim));
+				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
 					for(j=0;j<numpoints;j++){
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 							break;
 						}
 					}
-					searchname = strtok (NULL, delim));
+					searchname = strtok (NULL, delim);
 				}
 				pl[numpolylines++]->item.polyline = *(polyline_createp(i, &(temppts[0])));
 			}
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 				thirdword = strtok (NULL, delim);
 				pg[numpolygons] = malloc(sizeof(TableItem));
 				pg[numpolygons]->name = thirdword;
-				searchname = strtok (NULL, delim));
+				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
 					for(j=0;j<numpoints;j++){
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
 							break;
 						}
 					}
-					searchname = strtok (NULL, delim));
+					searchname = strtok (NULL, delim);
 				}
 				pg[numpolygons++]->item.polygon = *(polygon_createp(i, &(temppts[0])));
 			}
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
 			} 
 			else if(strcmp(secondword, "line") == 0){
 				for(i=0;i<2;i++){
-					searchname = strtok (NULL, delim));
+					searchname = strtok (NULL, delim);
 					for(j=0;j<numpoints;j++){
 						if(strcmp(pt[j]->name, searchname) == 0){
 							temppts[i] = pt[j]->item.point;
@@ -202,7 +202,7 @@ int main(int argc, char *argv[]) {
 				thirdword = strtok (NULL, delim);
 				pl[numpolylines] = malloc(sizeof(TableItem));
 				pl[numpolylines]->name = thirdword;
-				searchname = strtok (NULL, delim));
+				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
 					for(j=0;j<numpoints;j++){
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
 							break;
 						}
 					}
-					searchname = strtok (NULL, delim));
+					searchname = strtok (NULL, delim);
 				}
 				polyline_set(&temppolyline, i, &(temppts[0]));
 				module_polyline(mod[activeMod]->item.module, &temppolyline);
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
 				thirdword = strtok (NULL, delim);
 				pg[numpolygons] = malloc(sizeof(TableItem));
 				pg[numpolygons]->name = thirdword;
-				searchname = strtok (NULL, delim));
+				searchname = strtok (NULL, delim);
 				i = 0;
 				while(searchname != NULL){
 					for(j=0;j<numpoints;j++){
@@ -229,7 +229,7 @@ int main(int argc, char *argv[]) {
 							break;
 						}
 					}
-					searchname = strtok (NULL, delim));
+					searchname = strtok (NULL, delim);
 				}
 				polygon_set(&temppolygon, i, &(temppts[0]));
 				module_polygon(mod[activeMod]->item.module, &temppolygon);
@@ -394,7 +394,7 @@ int main(int argc, char *argv[]) {
 		matrix_setView3D( &vtm, &view3D );
 		src = image_create( view3D.screeny, view3D.screenx );
 	}
-	module_draw(mod[activeMod]->item.module, vtm, gtm, ds, NULL, src);
+	module_draw(mod[activeMod]->item.module, &vtm, &gtm, ds, NULL, src);
 	image_write(src, outfilename);
 
 	// clean up
