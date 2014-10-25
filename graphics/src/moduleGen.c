@@ -102,7 +102,6 @@ int main(int argc, char *argv[]) {
 				thirdword = strtok (NULL, delim);
 				if(thirdword == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
-				}
 				} else {
 					z = atof(thirdword);
 					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
@@ -395,7 +394,7 @@ int main(int argc, char *argv[]) {
 		matrix_setView3D( &vtm, &view3D );
 		src = image_create( view3D.screeny, view3D.screenx );
 	}
-	module_draw(mod[activeMod]->item.module, VTM, GTM, ds, NULL, src);
+	module_draw(mod[activeMod]->item.module, vtm, gtm, ds, NULL, src);
 	image_write(src, outfilename);
 
 	// clean up
