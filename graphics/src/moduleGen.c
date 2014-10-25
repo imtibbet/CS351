@@ -379,9 +379,6 @@ int main(int argc, char *argv[]) {
 		else{
 			printf("NOT RECOGNIZED");
 		}
-		printf("firstword %s\n", firstword);
-		printf("secondword %s\n", secondword);
-		printf("thirdword %s\n", thirdword);
 	}
 
 	// check that everything was defined correctly

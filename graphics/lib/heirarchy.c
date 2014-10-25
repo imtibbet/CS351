@@ -358,7 +358,7 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 	
 	// loop until the end of the linked list is reached
 	while(e){
-		//printf("Handling type %d\n", e->type);
+		printf("Handling type %d\n", e->type);
 		// draw based on type
 		switch(e->type){
 			case ObjNone:
