@@ -95,8 +95,10 @@ int main(int argc, char *argv[]) {
 				thirdword = strtok (NULL, delim);
 				pt[numpoints] = malloc(sizeof(TableItem));
 				pt[numpoints]->name = thirdword;
-				x = atof(strtok (NULL, delim));
-				y = atof(strtok (NULL, delim));
+				thirdword = strtok (NULL, delim);
+				x = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				y = atof(thirdword);
 				thirdword = strtok (NULL, delim);
 				if(thirdword == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
@@ -166,12 +168,15 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		else if(strcmp(firstword, "add") == 0){
+			secondword = strtok (NULL, delim);
 			if(strcmp(firstword, "module") == 0){
 				printf("can't add module, must def and put named modules only\n");
 			} 
-			else if(strcmp(firstword, "point") == 0){
-				x = atof(strtok (NULL, delim));
-				y = atof(strtok (NULL, delim));
+			else if(strcmp(secondword, "point") == 0){
+				thirdword = strtok (NULL, delim);
+				x = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				y = atof(thirdword);
 				thirdword = strtok (NULL, delim);
 				if(thirdword == NULL){
 					point_set2D(&(temppts[0]), x, y);
@@ -181,7 +186,7 @@ int main(int argc, char *argv[]) {
 				}
 				module_point(mod[activeMod], &(temppts[0]));
 			} 
-			else if(strcmp(firstword, "line") == 0){
+			else if(strcmp(secondword, "line") == 0){
 				for(i=0;i<2;i++){
 					searchname = strtok (NULL, delim));
 					for(j=0;j<numpoints;j++){
@@ -235,7 +240,8 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		else if(strcmp(firstword, "put") == 0){
-			if(strcmp(firstword, "module") == 0){
+			secondword = strtok (NULL, delim);
+			if(strcmp(secondword, "module") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<nummodules;j++){
 					if(strcmp(mod[j]->name, searchname) == 0){
@@ -244,7 +250,7 @@ int main(int argc, char *argv[]) {
 				}
 				module_module(mod[activeMod], &(mod[j]->item.module));
 			} 
-			else if(strcmp(firstword, "point") == 0){
+			else if(strcmp(secondword, "point") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numpoints;j++){
 					if(strcmp(pt[j]->name, searchname) == 0){
@@ -253,7 +259,7 @@ int main(int argc, char *argv[]) {
 				}
 				module_point(mod[activeMod], &(pt[j]->item.point));
 			} 
-			else if(strcmp(firstword, "line") == 0){
+			else if(strcmp(secondword, "line") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numlines;j++){
 					if(strcmp(l[j]->name, searchname) == 0){
@@ -262,7 +268,7 @@ int main(int argc, char *argv[]) {
 				}
 				module_line(mod[activeMod], &(l[j]->item.line));
 			} 
-			else if(strcmp(firstword, "polyline") == 0){
+			else if(strcmp(secondword, "polyline") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numpolylines;j++){
 					if(strcmp(pl[j]->name, searchname) == 0){
@@ -271,7 +277,7 @@ int main(int argc, char *argv[]) {
 				}
 				module_polyline(mod[activeMod], &(pl[j]->item.polyline));
 			} 
-			else if(strcmp(firstword, "polygon") == 0){
+			else if(strcmp(secondword, "polygon") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numpolygons;j++){
 					if(strcmp(pg[j]->name, searchname) == 0){
@@ -286,25 +292,30 @@ int main(int argc, char *argv[]) {
 		}
 		else if(strcmp(firstword, "view2D") == 0){
 			is2D = 1;
-			if(strcmp(firstword, "vrp") == 0){
-				x = atof(strtok (NULL, delim));
-				y = atof(strtok (NULL, delim));
+			secondword = strtok (NULL, delim);
+			if(strcmp(secondword, "vrp") == 0){
+				thirdword = strtok (NULL, delim);
+				x = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				y = atof(thirdword);
 				z = 0;
 				point_set3D(&(view2D.vrp), x, y, z);
 			}
-			else if(strcmp(firstword, "x") == 0){
-				x = atof(strtok (NULL, delim));
-				y = atof(strtok (NULL, delim));
+			else if(strcmp(secondword, "x") == 0){
+				thirdword = strtok (NULL, delim);
+				x = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				y = atof(thirdword);
 				z = 0;
 				vector_set(&(view2D.x), x, y, z);
 			}
-			else if(strcmp(firstword, "dx") == 0){
+			else if(strcmp(secondword, "dx") == 0){
 				view2D.dx = atof(strtok (NULL, delim));
 			}
-			else if(strcmp(firstword, "screenx") == 0){
+			else if(strcmp(secondword, "screenx") == 0){
 				view2D.screenx = atof(strtok (NULL, delim));
 			}
-			else if(strcmp(firstword, "screeny") == 0){
+			else if(strcmp(secondword, "screeny") == 0){
 				view2D.screeny = atof(strtok (NULL, delim));
 			}
 			else{
@@ -313,35 +324,49 @@ int main(int argc, char *argv[]) {
 		}
 		else if(strcmp(firstword, "view3D") == 0){
 			is2D = 0;
-			if(strcmp(firstword, "vrp") == 0){
-				x = atof(strtok (NULL, delim));
-				y = atof(strtok (NULL, delim));
-				z = atof(strtok (NULL, delim));
+			secondword = strtok (NULL, delim);
+			if(strcmp(secondword, "vrp") == 0){
+				thirdword = strtok (NULL, delim);
+				x = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				y = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				z = atof(thirdword);
 				point_set3D(&(view3D.vrp), x, y, z);
 			}
-			else if(strcmp(firstword, "vpn") == 0){
-				x = atof(strtok (NULL, delim));
-				y = atof(strtok (NULL, delim));
-				z = atof(strtok (NULL, delim));
+			else if(strcmp(secondword, "vpn") == 0){
+				thirdword = strtok (NULL, delim);
+				x = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				y = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				z = atof(thirdword);
 				vector_set(&(view3D.vpn), x, y, z);
 			}
-			else if(strcmp(firstword, "vup") == 0){
-				x = atof(strtok (NULL, delim));
-				y = atof(strtok (NULL, delim));
-				z = atof(strtok (NULL, delim));
+			else if(strcmp(secondword, "vup") == 0){
+				thirdword = strtok (NULL, delim);
+				x = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				y = atof(thirdword);
+				thirdword = strtok (NULL, delim);
+				z = atof(thirdword);
 				vector_set(&(view3D.vup), x, y, z);
 			}
-			else if(strcmp(firstword, "d") == 0){
-				view3D.d = atof(strtok (NULL, delim));
+			else if(strcmp(secondword, "d") == 0){
+				thirdword = strtok (NULL, delim);
+				view3D.d = atof(thirdword);
 			}
-			else if(strcmp(firstword, "du") == 0){
-				view3D.du = atof(strtok (NULL, delim));
+			else if(strcmp(secondword, "du") == 0){
+				thirdword = strtok (NULL, delim);
+				view3D.du = atof(thirdword);
 			}
-			else if(strcmp(firstword, "screenx") == 0){
-				view3D.screenx = atof(strtok (NULL, delim));
+			else if(strcmp(secondword, "screenx") == 0){
+				thirdword = strtok (NULL, delim);
+				view3D.screenx = atof(thirdword);
 			}
-			else if(strcmp(firstword, "screeny") == 0){
-				view3D.screeny = atof(strtok (NULL, delim));
+			else if(strcmp(secondword, "screeny") == 0){
+				thirdword = strtok (NULL, delim);
+				view3D.screeny = atof(thirdword);
 			}
 			else{
 				printf("view3D NOT RECOGNIZED");
