@@ -93,13 +93,18 @@ int main(int argc, char *argv[]) {
 			secondword = strtok (NULL, delim);
 			if(strcmp(secondword, "point") == 0){
 				thirdword = strtok (NULL, delim);
+				printf("thirdword %s\n", thirdword);
 				pt[numpoints] = malloc(sizeof(TableItem));
 				strcpy(pt[numpoints]->name, thirdword);
+				printf("thirdword %s\n", thirdword);
 				thirdword = strtok (NULL, delim);
+				printf("thirdword %s\n", thirdword);
 				x = atof(thirdword);
 				thirdword = strtok (NULL, delim);
+				printf("thirdword %s\n", thirdword);
 				y = atof(thirdword);
 				thirdword = strtok (NULL, delim);
+				printf("thirdword %s\n", thirdword);
 				if(thirdword == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
 				} else {
