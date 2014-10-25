@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
   printf("image and ds\n");
 
   // draw into the scene
-/*  module_draw( scene, &vtm, &gtm, ds, NULL, src );
+  module_draw( scene, &vtm, &gtm, ds, NULL, src );
   printf("done draw\n");
   
 	// write out the scene
@@ -327,7 +327,7 @@ int main(int argc, char *argv[]) {
 	// free the polygon data
   polygon_clear( &p );
   printf("polygon cleared\n");
-*/  
+  
 	// free the modules
   module_delete( scene );
   printf("scene deleted\n");
