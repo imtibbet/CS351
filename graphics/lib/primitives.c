@@ -990,7 +990,6 @@ Polygon *polygon_createp(int numV, Point *vlist){
  */
 void polygon_free(Polygon *p){
 	if(p){
-		polygon_print(p, stdout);
 		if(p->vertex){
 			free(p->vertex);
 		}

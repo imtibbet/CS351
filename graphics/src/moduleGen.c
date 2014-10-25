@@ -232,6 +232,8 @@ int main(int argc, char *argv[]) {
 					searchname = strtok (NULL, delim);
 				}
 				polygon_set(&temppolygon, i, &(temppts[0]));
+				printf("polygon added to module %s\n", mod[activeMod]->name);
+				polygon_print(&temppolygon, stdout);
 				module_polygon(mod[activeMod]->item.module, &temppolygon);
 			} 
 			else {
