@@ -22,7 +22,7 @@ typedef union {
 } Item;
 
 typedef struct{
-	char *name;
+	char name[256];
 	Item item;
 } TableItem;
 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	Matrix gtm;
 
 	// variables for parsing
-	const char *varname;
+	const char varname[256];
 	char *infilename, *outfilename;
 	FILE *infile;
 	char buff[1000];
