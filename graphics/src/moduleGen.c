@@ -4,6 +4,7 @@
 
 	for easily generating modules
  */
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -40,6 +41,7 @@ int main(int argc, char *argv[]) {
 	// variables for parsing
 	char *infilename, *outfilename;
 	FILE *infile;
+	char *buff[1000];
 	char *linein, *firstword, *secondword, *thirdword, *searchname;
 	char *delim = " \n";
 	int i, j, is2D;
