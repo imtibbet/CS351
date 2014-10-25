@@ -316,11 +316,11 @@ int main(int argc, char *argv[]) {
 			}
 			else if(strcmp(secondword, "screenx") == 0){
 				thirdword = strtok (NULL, delim);
-				view2D.dx = atof(thirdword);
+				view2D.screenx = atof(thirdword);
 			}
 			else if(strcmp(secondword, "screeny") == 0){
 				thirdword = strtok (NULL, delim);
-				view2D.dx = atof(thirdword);
+				view2D.screenx = atof(thirdword);
 			}
 			else{
 				printf("view2D NOT RECOGNIZED");
