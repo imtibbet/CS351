@@ -335,7 +335,7 @@ int main(int argc, char *argv[]) {
 						}
 					}
 				}
-				module_rotateXYZ(mod[activeMod]->item.module, &(uvw[0]), &(uvw[1]), &(uvw[2]);
+				module_rotateXYZ(mod[activeMod]->item.module, &(uvw[0]), &(uvw[1]), &(uvw[2]));
 			} 
 			else if(strcmp(secondword, "translate") == 0){
 				nextword = strtok (NULL, delim);

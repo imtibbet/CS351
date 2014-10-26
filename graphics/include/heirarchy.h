@@ -175,6 +175,10 @@ void module_rotateY(Module *md, double cth, double sth);
  */
 void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w);
 
+/*
+ * Matrix operand to add a Z shear matrix to the tail of the module’s list
+ */
+void module_shearZ(Module *md, double shx, double shy);
 
 /*
  * Adds a unit cube, axis-aligned and centered on zero to the Module. 
