@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 	char buff[1000];
 	char *linein, *firstword, *secondword, *nextword, *searchname, *varname;
 	char *delim = " \n";
-	int i, j, is2D = 0;
+	int i, j, solid, is2D = 0;
 	int activeMod = -1;
 	int numpoints = 0;
 	int numvectors = 0;
@@ -310,6 +310,14 @@ int main(int argc, char *argv[]) {
 				polygon_print(&temppolygon, stdout);
 				module_polygon(mod[activeMod]->item.module, &temppolygon);
 			} 
+			else if(strcmp(secondword, "cube") == 0){
+				nextword = strtok (NULL, delim);
+				if(nextword)
+					solid = atoi(nextword);
+				else
+					solid = 1;
+				module_cube(mod[activeMod]->item.module, solid);
+			}
 			else if(strcmp(secondword, "rotateX") == 0){
 				nextword = strtok (NULL, delim);
 				theta = M_PI*atof(nextword)/180.0;
@@ -379,7 +387,7 @@ int main(int argc, char *argv[]) {
 			} 
 			else {
 				printf(	"Seond word of add not not recognized.\n"
-						"Must be module, point, line, polyline, polygon"
+						"Must be module, point, line, polyline, polygon, cube"
 						", rotateX, rotateY, rotateZ, rotateXYZ"
 						", translate, scale, shear2D, or shearZ\n");
 			}
