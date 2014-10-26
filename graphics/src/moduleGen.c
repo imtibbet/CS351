@@ -31,12 +31,15 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers){
 	char *curterm, *searchname;
 	int j;
 	float recresult = 1.0;
+
+	// check for multiplication and recurse through arguments
 	if(strchr(str, '*')){
 		curterm = strtok(str, "*");
 		while(curterm)
 			recresult *= stringToFloat(curterm, numbs, numnumbers);
 		return(recresult);
 	}
+
 	// check for the number as a key in the numbers table
 	searchname = strtok (str,"()");
 	for(j=0;j<numnumbers;j++){
@@ -48,7 +51,7 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers){
 	// if the number is found, return it
 	if(j!=numnumbers)
 		return(numbs[j]->item.number);
-
+	printf("checking for sin and cos %s\n", str);
 	// otherwise, check for sin or cos
 	if(strncmp(str, "sin", 3) == 0){
 		searchname = strtok (NULL, "()");
@@ -123,6 +126,8 @@ int main(int argc, char *argv[]) {
 
 		// remove newline
 		linein = strtok (buff, "\n");
+		if(!linein)
+			continue;
 		printf("reading line: %s\n", linein);
 
 		// get the first and second words
