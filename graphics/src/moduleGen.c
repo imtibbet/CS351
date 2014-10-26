@@ -318,6 +318,9 @@ int main(int argc, char *argv[]) {
 					solid = 1;
 				module_cube(mod[activeMod]->item.module, solid);
 			}
+			else if(strcmp(secondword, "identity") == 0){
+				module_identity(mod[activeMod]->item.module);
+			}
 			else if(strcmp(secondword, "rotateX") == 0){
 				nextword = strtok (NULL, delim);
 				theta = M_PI*atof(nextword)/180.0;
