@@ -312,17 +312,17 @@ int main(int argc, char *argv[]) {
 			} 
 			else if(strcmp(secondword, "rotateX") == 0){
 				nextword = strtok (NULL, delim);
-				theta = atof(nextword);
+				theta = 180*atof(nextword)/M_PI;
 				module_rotateX(mod[activeMod]->item.module, cos(theta), sin(theta));
 			} 
 			else if(strcmp(secondword, "rotateY") == 0){
 				nextword = strtok (NULL, delim);
-				theta = atof(nextword);
+				theta = 180*atof(nextword)/M_PI;
 				module_rotateY(mod[activeMod]->item.module, cos(theta), sin(theta));
 			} 
 			else if(strcmp(secondword, "rotateZ") == 0){
 				nextword = strtok (NULL, delim);
-				theta = atof(nextword);
+				theta = 180*atof(nextword)/M_PI;
 				module_rotateZ(mod[activeMod]->item.module, cos(theta), sin(theta));
 			} 
 			else if(strcmp(secondword, "rotateXYZ") == 0){
