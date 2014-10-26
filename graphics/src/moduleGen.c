@@ -421,10 +421,18 @@ int main(int argc, char *argv[]) {
 		matrix_print(&vtm, stdout);
 		module_draw(mod[activeMod]->item.module, &vtm, &gtm, ds, NULL, src);
 		image_write(src, outfilename);
+
+		// some clean up
+		image_free(src);
+		for(j=0;j<=activeMod;j++){
+			printf("freeing module named %s\n", mod[j]->name);
+			module_clear(mod[j]->item.module);
+			free(mod[j]);
+		}
 	}
-	// clean up
+	
+	// rest of the clean up
 	fclose(infile);
-	image_free(src);
 	for(j=0;j<numpoints;j++){
 		printf("freeing point named %s\n", pt[j]->name);
 		free(pt[j]);
@@ -444,11 +452,6 @@ int main(int argc, char *argv[]) {
 		if(pg[j]->item.polygon.vertex)
 			free(pg[j]->item.polygon.vertex);
 		free(pg[j]);
-	}
-	for(j=0;j<=activeMod;j++){
-		printf("freeing module named %s\n", mod[j]->name);
-		module_clear(mod[j]->item.module);
-		free(mod[j]);
 	}
 
 	return(0);
