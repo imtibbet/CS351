@@ -436,13 +436,13 @@ int main(int argc, char *argv[]) {
 	for(j=0;j<numpolylines;j++){
 		printf("freeing polyline named %s\n", pl[j]->name);
 		if(pl[j]->item.polyline.vertex)
-			free(pl[j]->item.polyline.vertex)
+			free(pl[j]->item.polyline.vertex);
 		free(pl[j]);
 	}
 	for(j=0;j<numpolygons;j++){
 		printf("freeing polygon named %s\n", pg[j]->name);
 		if(pg[j]->item.polygon.vertex)
-			free(pg[j]->item.polygon.vertex)
+			free(pg[j]->item.polygon.vertex);
 		free(pg[j]);
 	}
 	for(j=0;j<=activeMod;j++){
