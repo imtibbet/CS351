@@ -312,19 +312,19 @@ int main(int argc, char *argv[]) {
 			} 
 			else if(strcmp(secondword, "rotateX") == 0){
 				nextword = strtok (NULL, delim);
-				theta = 180*atof(nextword)/M_PI;
+				theta = M-PI*atof(nextword)/180.0;
 				module_rotateX(mod[activeMod]->item.module, cos(theta), sin(theta));
-			} 
+			}
 			else if(strcmp(secondword, "rotateY") == 0){
 				nextword = strtok (NULL, delim);
-				theta = 180*atof(nextword)/M_PI;
+				theta = M-PI*atof(nextword)/180.0;
 				module_rotateY(mod[activeMod]->item.module, cos(theta), sin(theta));
-			} 
+			}
 			else if(strcmp(secondword, "rotateZ") == 0){
 				nextword = strtok (NULL, delim);
-				theta = 180*atof(nextword)/M_PI;
+				theta = M-PI*atof(nextword)/180.0;
 				module_rotateZ(mod[activeMod]->item.module, cos(theta), sin(theta));
-			} 
+			}
 			else if(strcmp(secondword, "rotateXYZ") == 0){
 				for(i=0;i<3;i++){
 					searchname = strtok (NULL, delim);
