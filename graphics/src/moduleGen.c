@@ -378,47 +378,78 @@ int main(int argc, char *argv[]) {
 					"Must be def, add, put, view2D, or view3D\n");
 		}
 	}
+	printf("EOF reached\n");
 
 	// check that everything was defined correctly
+	printf("User defined primitives:\n");
 	for(j=0;j<numpoints;j++){
 		printf("point named %s\n", pt[j]->name);
 		point_print(&(pt[j]->item.point), stdout);
 	}
 	for(j=0;j<numlines;j++){
-		printf("line named %s\n", pt[j]->name);
-		line_print(&(pt[j]->item.line), stdout);
+		printf("line named %s\n", l[j]->name);
+		line_print(&(l[j]->item.line), stdout);
 	}
 	for(j=0;j<numpolylines;j++){
-		printf("polyline named %s\n", pt[j]->name);
-		polyline_print(&(pt[j]->item.polyline), stdout);
+		printf("polyline named %s\n", pl[j]->name);
+		polyline_print(&(pl[j]->item.polyline), stdout);
 	}
 	for(j=0;j<numpolygons;j++){
-		printf("polygon named %s\n", pt[j]->name);
-		polygon_print(&(pt[j]->item.polygon), stdout);
+		printf("polygon named %s\n", pg[j]->name);
+		polygon_print(&(pg[j]->item.polygon), stdout);
 	}
+	printf("User defined modules:\n");
 	// verify that at least one module defined
 	if(activeMod == -1){
 		printf("no modules defined, nothing is being drawn, no side effects\n");
-	}
+	} else {
+		for(j=0;j<=activeMod;j++){
+			printf("module named %s\n", mod[j]->name);
+		}
 
-	// define view and draw state and draw last module defined
-	matrix_identity( &gtm );
-	if(is2D){
-		matrix_setView2D( &vtm, &view2D );
-		src = image_create( view2D.screeny, view2D.screenx );
+		// define view and draw state and draw last module defined
+		matrix_identity( &gtm );
+		if(is2D){
+			matrix_setView2D( &vtm, &view2D );
+			src = image_create( view2D.screeny, view2D.screenx );
+		}
+		else {
+			matrix_setView3D( &vtm, &view3D );
+			src = image_create( view3D.screeny, view3D.screenx );
+		}
+		printf("vtm in module generation:\n");
+		matrix_print(&vtm, stdout);
+		module_draw(mod[activeMod]->item.module, &vtm, &gtm, ds, NULL, src);
+		image_write(src, outfilename);
 	}
-	else {
-		matrix_setView3D( &vtm, &view3D );
-		src = image_create( view3D.screeny, view3D.screenx );
-	}
-	printf("vtm in module generation:\n");
-	matrix_print(&vtm, stdout);
-	module_draw(mod[activeMod]->item.module, &vtm, &gtm, ds, NULL, src);
-	image_write(src, outfilename);
-
 	// clean up
 	fclose(infile);
 	image_free(src);
+	for(j=0;j<numpoints;j++){
+		printf("freeing point named %s\n", pt[j]->name);
+		free(pt[j]);
+	}
+	for(j=0;j<numlines;j++){
+		printf("freeing line named %s\n", l[j]->name);
+		free(l[j]);
+	}
+	for(j=0;j<numpolylines;j++){
+		printf("freeing polyline named %s\n", pl[j]->name);
+		if(pl[j]->item.polyline.vertex)
+			free(pl[j]->item.polyline.vertex)
+		free(pl[j]);
+	}
+	for(j=0;j<numpolygons;j++){
+		printf("freeing polygon named %s\n", pg[j]->name);
+		if(pg[j]->item.polygon.vertex)
+			free(pg[j]->item.polygon.vertex)
+		free(pg[j]);
+	}
+	for(j=0;j<=activeMod;j++){
+		printf("freeing module named %s\n", mod[j]->name);
+		module_clear(mod[j]->item.module);
+		free(mod[j]);
+	}
 
 	return(0);
 }
