@@ -27,9 +27,17 @@ typedef struct{
 	Item item;
 } TableItem;
 
-static float stringToFloat(char *str, char *numbs, int numnumbers){
-	char *num, *searchname;
-	// check for the number as a key in the numebrs table
+static float stringToFloat(char *str, TableItem **numbs, int numnumbers){
+	char *curterm, *searchname;
+	int j;
+	float recresult = 1.0;
+	if(strchr(str, '*')){
+		curterm = strtok(str, "*");
+		while(curterm)
+			recresult *= stringToFloat(curterm, numbs, numnumbers);
+		return(recresult);
+	}
+	// check for the number as a key in the numbers table
 	searchname = strtok (str,"()");
 	for(j=0;j<numnumbers;j++){
 		if(strcmp(numbs[j]->name, searchname) == 0){
@@ -39,16 +47,16 @@ static float stringToFloat(char *str, char *numbs, int numnumbers){
 
 	// if the number is found, return it
 	if(j!=numnumbers)
-		return(numbs[j]);
+		return(numbs[j]->item.number);
 
 	// otherwise, check for sin or cos
 	if(strncmp(str, "sin", 3) == 0){
 		searchname = strtok (NULL, "()");
-		return(sin(atof(searchname)));
+		return(sin(M_PI*atof(searchname)/180.0));
 	}
 	else if(strncmp(str, "cos", 3) == 0){
 		searchname = strtok (NULL, "()");
-		return(cos(atof(searchname)));
+		return(cos(M_PI*atof(searchname)/180.0));
 	} 
 	else {
 		return(atof(searchname));
@@ -138,7 +146,7 @@ int main(int argc, char *argv[]) {
 				if(nextword == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
 				} else {
-					z = stringToFloat(nextword);
+					z = stringToFloat(nextword, numbs, numnumbers);
 					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
 				}
 			}
