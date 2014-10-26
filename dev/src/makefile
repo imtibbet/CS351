@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = test6a test6b city
+EXECUTABLES = test6a test6b city city-gif
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = test6a.o test6b.o city.o
+_OBJ = test6a.o test6b.o city.o city-gif.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -140,6 +140,8 @@ moduleGen: $(ODIR)/moduleGen.o
 req2: $(ODIR)/req2.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 city: $(ODIR)/city.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+city-gif: $(ODIR)/city-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean

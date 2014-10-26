@@ -49,31 +49,6 @@ typedef struct {
 	Element *tail; // keep around a pointer to the last object
 } Module;
 
-// determine how an object is drawn into the image.
-typedef enum { 
-	ShadeFrame, // draw only the borders of objects, including polygons.
-	ShadeConstant, // draw objects using the current foreground color, fill polygons.
-	ShadeDepth, // draw objects using their depth value.
-	ShadeFlat, // draw objects using shading calculations, but each polygon is a constant value.
-	ShadeGouraud, // draw objects using Gouraud shading.
-	ShadePhong // draw objects using Phong shading.
-} ShadeMethod;
-
-typedef struct {
-	int nLights;
-} Lighting;
-
-// how an object is to be drawn into the image.
-typedef struct {
-	Color color; // the foreground color, used in the default drawing mode.
-	Color flatColor; // the color to flat-fill a polygon based on a shading calculation.
-	Color body; // the body reflection color, used for shading calculations.
-	Color surface; // the surface reflection color, used for shading calculations.
-	float surfaceCoeff; // a float that represents the shininess of the surface.
-	ShadeMethod shade; // an enumerated type ShadeMethod.
-	int zBufferFlag; // whether to use z-buffer hidden surface removal
-} DrawState;
-
 // 2D and Generic Module Function
 
 /*
@@ -214,37 +189,5 @@ void module_cube(Module *md, int solid);
  * Adds the foreground color value to the tail of the module’s list
  */
 void module_color(Module *md, Color *c);
-
-// Draw State
-
-/*
- * create a new DrawState structure and initialize the fields.
- */
-DrawState *drawstate_create( void );
-
-/*
- * set the color field to c.
- */
-void drawstate_setColor( DrawState *s, Color c );
-
-/*
- * set the body field to c.
- */
-void drawstate_setBody( DrawState *s, Color c );
-
-/*
- * set the surface field to c.
- */
-void drawstate_setSurface( DrawState *s, Color c );
-
-/*
- * set the surfaceCoeff field to f.
- */
-void drawstate_setSurfaceCoeff( DrawState *s, float f );
-
-/*
- * copy the DrawState data.
- */
-void drawstate_copy( DrawState *to, DrawState *from );
 
 #endif

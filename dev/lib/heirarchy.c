@@ -34,7 +34,7 @@ Element *element_init(ObjectType type, void *obj){
 	}
 	e->type = type;
 	e->next = NULL;
-	switch (type) {
+	switch (e->type) {
 		case ObjNone:
 			printf("ObjNone not implemented in element_init\n");
 			break;
@@ -45,9 +45,11 @@ Element *element_init(ObjectType type, void *obj){
 			point_copy(&(e->obj.point), (Point*)obj);
 			break;
 		case ObjPolyline:
+  			polyline_init(&(e->obj.polyline));
 			polyline_copy(&(e->obj.polyline), (Polyline*)obj);
 			break;
 		case ObjPolygon:
+  			polygon_init(&(e->obj.polygon));
 			polygon_copy(&(e->obj.polygon), (Polygon*)obj);
 			break;
 		case ObjIdentity:
@@ -86,17 +88,18 @@ void element_delete(Element *e){
 	//printf("deleting element of type %d\n", e->type);
 	switch(e->type){
 		case ObjPolyline:
-			polyline_free(&(e->obj.polyline));
+			//polyline_free(&(e->obj.polyline));
+			if(e->obj.polyline.vertex)
+				free(e->obj.polyline.vertex);
 			break;
 		case ObjPolygon:
-			polygon_free(&(e->obj.polygon));
+			//polygon_free(&(e->obj.polygon));
+			if(e->obj.polygon.vertex)
+				free(e->obj.polygon.vertex);
 			break;
-		/*case ObjModule:
-			module_delete(((Module *)(e->obj.module)));
-			break;*/
 		default:
-			break;
 			//printf("ObjectType %d is not handled in element_delete\n",e->type);
+			break;
 	}
 	free(e);
 
@@ -111,6 +114,7 @@ Module *module_create(){
 		printf("malloc failed in module_create\n");
 		return NULL;
 	}
+	d->head = d->tail = NULL;
 	return d;
 }
 
@@ -164,6 +168,10 @@ void module_insert(Module *md, Element *e){
 		printf("Null md passed to module_insert\n");
 		return;
 	}
+	if(!e){
+		printf("Null e passed to module_insert\n");
+		return;
+	}
 	if(!md->head){
 		md->head = md->tail = e;
 	} else {
@@ -176,6 +184,14 @@ void module_insert(Module *md, Element *e){
  * Adds a pointer to the Module sub to the tail of the module’s list.
  */
 void module_module(Module *md, Module *sub){
+	if(!md){
+		printf("Null md passed to module_module\n");
+		return;
+	}
+	if(!sub){
+		printf("Null sub passed to module_module\n");
+		return;
+	}
 	Element *e = element_init(ObjModule, sub);
 	module_insert(md, e);
 }
@@ -184,6 +200,14 @@ void module_module(Module *md, Module *sub){
  * Adds p to the tail of the module’s list.
  */
 void module_point(Module *md, Point *p){
+	if(!md){
+		printf("Null md passed to module_point\n");
+		return;
+	}
+	if(!p){
+		printf("Null point passed to module_point\n");
+		return;
+	}
 	Element *e = element_init(ObjPoint, p);
 	module_insert(md, e);
 }
@@ -192,6 +216,14 @@ void module_point(Module *md, Point *p){
  * Adds p to the tail of the module’s list.
  */
 void module_line(Module *md, Line *p){
+	if(!md){
+		printf("Null md passed to module_line\n");
+		return;
+	}
+	if(!p){
+		printf("Null line passed to module_line\n");
+		return;
+	}
 	Element *e = element_init(ObjLine, p);
 	module_insert(md, e);
 }
@@ -200,6 +232,14 @@ void module_line(Module *md, Line *p){
  * Adds p to the tail of the module’s list.
  */
 void module_polyline(Module *md, Polyline *p){
+	if(!md){
+		printf("Null md passed to module_polyline\n");
+		return;
+	}
+	if(!p){
+		printf("Null polyline passed to module_polyline\n");
+		return;
+	}
 	Element *e = element_init(ObjPolyline, p);
 	module_insert(md, e);
 }
@@ -208,6 +248,14 @@ void module_polyline(Module *md, Polyline *p){
  * Adds p to the tail of the module’s list.
  */
 void module_polygon(Module *md, Polygon *p){
+	if(!md){
+		printf("Null md passed to module_polygon\n");
+		return;
+	}
+	if(!p){
+		printf("Null polygon passed to module_polygon\n");
+		return;
+	}
 	Element *e = element_init(ObjPolygon, p);
 	module_insert(md, e);
 }
@@ -217,6 +265,10 @@ void module_polygon(Module *md, Polygon *p){
  * placed at the tail of the module’s list.
  */
 void module_identity(Module *md){
+	if(!md){
+		printf("Null md passed to module_identity\n");
+		return;
+	}
 	Element *e;
 	e = element_init(ObjIdentity, NULL);
 	module_insert(md, e);
@@ -226,6 +278,10 @@ void module_identity(Module *md){
  * Matrix operand to add a translation matrix to the tail of the module’s list.
  */
 void module_translate2D(Module *md, double tx, double ty){
+	if(!md){
+		printf("Null md passed to module_translate2D\n");
+		return;
+	}
 	Element *e;
 	Matrix m;
 	matrix_identity(&m);
@@ -238,6 +294,10 @@ void module_translate2D(Module *md, double tx, double ty){
  * Matrix operand to add a scale matrix to the tail of the module’s list.
  */
 void module_scale2D(Module *md, double sx, double sy){
+	if(!md){
+		printf("Null md passed to module_scale2D\n");
+		return;
+	}
 	Element *e;
 	Matrix m;
 	matrix_identity(&m);
@@ -250,6 +310,10 @@ void module_scale2D(Module *md, double sx, double sy){
  * Matrix operand to add a rotation about the Z axis to the tail of the module’s list
  */
 void module_rotateZ(Module *md, double cth, double sth){
+	if(!md){
+		printf("Null md passed to module_rotateZ\n");
+		return;
+	}
 	Element *e;
 	Matrix m;
 	matrix_identity(&m);
@@ -262,6 +326,10 @@ void module_rotateZ(Module *md, double cth, double sth){
  * Matrix operand to add a 2D shear matrix to the tail of the module’s list
  */
 void module_shear2D(Module *md, double shx, double shy){
+	if(!md){
+		printf("Null md passed to module_shear2D\n");
+		return;
+	}
 	Element *e;
 	Matrix m;
 	matrix_identity(&m);
@@ -282,14 +350,11 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 	Matrix LTM, tempGTM;
 	Line tempLine;
 	DrawState *tempds = drawstate_create();
-	Point tempPoint, tempPointLTM, tempPointGTM, tempPointVTM;
+	Point tempPointLTM, tempPointGTM, tempPointVTM;
 	Polyline *tempPolyline = polyline_create();
 	Polygon *tempPolygon = polygon_create();
 	Element *e = md->head;
 	matrix_identity(&LTM);
-
-	printf("GTM\n");
-	matrix_print(GTM, stdout);
 	
 	// loop until the end of the linked list is reached
 	while(e){
@@ -299,49 +364,47 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 			case ObjNone:
 				break;
 			case ObjPoint:
-				printf("drawing point ");
+				//printf("drawing point ");
 				// copy, xform, normalize, draw
-				point_copy(&tempPoint, &(e->obj.point));
-				matrix_xformPoint(&LTM, &tempPoint, &tempPointLTM);
+				matrix_xformPoint(&LTM, &(e->obj.point), &tempPointLTM);
 				matrix_xformPoint(GTM, &tempPointLTM, &tempPointGTM);
 				matrix_xformPoint(VTM, &tempPointGTM, &tempPointVTM);
 				point_normalize(&(tempPointVTM));
-				point_print(&tempPointVTM, stdout);
+				//point_print(&tempPointVTM, stdout);
 				point_draw(&tempPointVTM, src, ds->color);
 				break;
 			case ObjLine:
-				printf("drawing line ");
+				//printf("drawing line ");
 				// copy, xform, normalize, draw
 				line_copy(&tempLine, &(e->obj.line));
 				matrix_xformLine(&LTM, &tempLine);
 				matrix_xformLine(GTM, &tempLine);
 				matrix_xformLine(VTM, &tempLine);
 				point_normalize(&(tempLine.a));
-				point_normalize(&(tempLine.b));
-				line_print(&tempLine, stdout);
+				//line_print(&tempLine, stdout);
 				line_draw(&tempLine, src, ds->color);
 				break;
 			case ObjPolyline:
-				printf("drawing polyline ");
+				//printf("drawing polyline ");
 				// copy, xform, normalize, draw
 				polyline_copy(tempPolyline, &(e->obj.polyline));
 				matrix_xformPolyline(&LTM, tempPolyline);
 				matrix_xformPolyline(GTM, tempPolyline);
 				matrix_xformPolyline(VTM, tempPolyline);
 				polyline_normalize(tempPolyline);
-				polyline_print(tempPolyline, stdout);
+				//polyline_print(tempPolyline, stdout);
 				polyline_draw(tempPolyline, src, ds->color);
 				break;
 			case ObjPolygon:
-				printf("drawing polygon ");
+				//printf("drawing polygon ");
 				// copy, xform, normalize, draw
 				polygon_copy(tempPolygon, &(e->obj.polygon));
 				matrix_xformPolygon(&LTM, tempPolygon);
 				matrix_xformPolygon(GTM, tempPolygon);
 				matrix_xformPolygon(VTM, tempPolygon);
 				polygon_normalize(tempPolygon);
-				polygon_print(tempPolygon, stdout);
-				polygon_drawFill(tempPolygon, src, ds->color);
+				//polygon_print(tempPolygon, stdout);
+				polygon_draw(tempPolygon, src, ds);
 				break;
 			case ObjColor:
 				drawstate_setColor(ds, e->obj.color);
@@ -384,11 +447,15 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
  * Matrix operand to add a 3D translation to the Module.
  */
 void module_translate(Module *md, double tx, double ty, double tz){
+	if(!md){
+		printf("Null md passed to module_translate\n");
+		return;
+	}
 	Element *e;
 	Matrix m;
 	matrix_identity(&m);
 	matrix_translate(&m, tx, ty, tz);
-	e = element_init(ObjIdentity, &m);
+	e = element_init(ObjMatrix, &m);
 	module_insert(md, e);
 }
 
@@ -396,11 +463,15 @@ void module_translate(Module *md, double tx, double ty, double tz){
  * Matrix operand to add a 3D scale to the Module.
  */
 void module_scale(Module *md, double sx, double sy, double sz){
+	if(!md){
+		printf("Null md passed to module_scale\n");
+		return;
+	}
 	Element *e;
 	Matrix m;
 	matrix_identity(&m);
 	matrix_scale(&m, sx, sy, sz);
-	e = element_init(ObjIdentity, &m);
+	e = element_init(ObjMatrix, &m);
 	module_insert(md, e);
 }
 
@@ -408,11 +479,15 @@ void module_scale(Module *md, double sx, double sy, double sz){
  * Matrix operand to add a rotation about the X-axis to the Module.
  */
 void module_rotateX(Module *md, double cth, double sth){
+	if(!md){
+		printf("Null md passed to module_rotateX\n");
+		return;
+	}
 	Element *e;
 	Matrix m;
 	matrix_identity(&m);
 	matrix_rotateX(&m, cth, sth);
-	e = element_init(ObjIdentity, &m);
+	e = element_init(ObjMatrix, &m);
 	module_insert(md, e);
 }
 
@@ -420,11 +495,15 @@ void module_rotateX(Module *md, double cth, double sth){
  * Matrix operand to add a rotation about the Y-axis to the Module.
  */
 void module_rotateY(Module *md, double cth, double sth){
+	if(!md){
+		printf("Null md passed to module_rotateY\n");
+		return;
+	}
 	Element *e;
 	Matrix m;
 	matrix_identity(&m);
 	matrix_rotateY(&m, cth, sth);
-	e = element_init(ObjIdentity, &m);
+	e = element_init(ObjMatrix, &m);
 	module_insert(md, e);
 }
 
@@ -432,11 +511,15 @@ void module_rotateY(Module *md, double cth, double sth){
  * Matrix operand to add a rotation that orients to the orthonormal axes u,v,w
  */
 void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w){
+	if(!md){
+		printf("Null md passed to module_rotateXYZ\n");
+		return;
+	}
 	Element *e;
 	Matrix m;
 	matrix_identity(&m);
 	matrix_rotateXYZ(&m, u, v, w);
-	e = element_init(ObjIdentity, &m);
+	e = element_init(ObjMatrix, &m);
 	module_insert(md, e);
 }
 
@@ -447,6 +530,10 @@ void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w){
  * Make sure each polygon has surface normals defined for it.
  */
 void module_cube(Module *md, int solid){
+	if(!md){
+		printf("Null md passed to module_cube\n");
+		return;
+	}
 	Element *e;
  	Polygon p;
 	Point v[8];
@@ -582,79 +669,5 @@ void module_color(Module *md, Color *c){
 	Element *e;
 	e = element_init(ObjColor, c);
 	module_insert(md, e);
-}
-
-// Draw State
-
-/*
- * create a new DrawState structure and initialize the fields.
- */
-DrawState *drawstate_create(){
-	DrawState *ds = malloc(sizeof(DrawState));
-	if(!ds){
-		printf("malloc failed in drawstate_create\n");
-		return NULL;
-	}
-	color_set(&(ds->color), 1.0, 1.0, 1.0);
-	return ds;
-}
-
-/*
- * set the color field to c.
- */
-void drawstate_setColor( DrawState *s, Color c ){
-	if(!s){
-		printf("Null DrawState passed to drawstate_setColor\n");
-		return;
-	}
-	s->color = c;
-}
-
-/*
- * set the body field to c.
- */
-void drawstate_setBody( DrawState *s, Color c ){
-	if(!s){
-		printf("Null DrawState passed to drawstate_setBody\n");
-		return;
-	}
-	s->body = c;
-}
-
-/*
- * set the surface field to c.
- */
-void drawstate_setSurface( DrawState *s, Color c ){
-	if(!s){
-		printf("Null DrawState passed to drawstate_setSurface\n");
-		return;
-	}
-	s->surface = c;
-}
-
-/*
- * set the surfaceCoeff field to f.
- */
-void drawstate_setSurfaceCoeff( DrawState *s, float f ){
-	if(!s){
-		printf("Null DrawState passed to drawstate_setSurfaceCoeff\n");
-		return;
-	}
-	s->surfaceCoeff = f;
-}
-
-/*
- * copy the DrawState data.
- */
-void drawstate_copy( DrawState *to, DrawState *from ){
-	if(!to){
-		printf("Null 'to' DrawState passed to drawstate_copy\n");
-		return;
-	}
-	if(!from){
-		printf("Null 'from' DrawState passed to drawstate_copy\n");
-		return;
-	}
-	*to = *from;
 }
 

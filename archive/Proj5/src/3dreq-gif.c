@@ -1,5 +1,5 @@
 /*
-  Ian Tibbetts
+  Astrid Moore
   Fall 2014
 
   Test function for 3D matrix viewing
