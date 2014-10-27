@@ -380,7 +380,7 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				matrix_xformLine(&LTM, &tempLine);
 				matrix_xformLine(GTM, &tempLine);
 				matrix_xformLine(VTM, &tempLine);
-				point_normalize(&(tempLine.a));
+				line_normalize(&tempLine);
 				//line_print(&tempLine, stdout);
 				line_draw(&tempLine, src, ds->color);
 				break;
@@ -523,6 +523,21 @@ void module_rotateXYZ(Module *md, Vector *u, Vector *v, Vector *w){
 	module_insert(md, e);
 }
 
+/*
+ * Matrix operand to add a Z shear matrix to the tail of the module’s list
+ */
+void module_shearZ(Module *md, double shx, double shy){
+	if(!md){
+		printf("Null md passed to module_shearZ\n");
+		return;
+	}
+	Element *e;
+	Matrix m;
+	matrix_identity(&m);
+	matrix_shearZ(&m, shx, shy);
+	e = element_init(ObjMatrix, &m);
+	module_insert(md, e);
+}
 
 /*
  * Adds a unit cube, axis-aligned and centered on zero to the Module. 

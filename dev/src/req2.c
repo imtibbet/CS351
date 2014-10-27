@@ -26,6 +26,8 @@ int main(int argc, char *argv[]) {
   vector_set( &(view.vup), 0, 1, 0 );
   view.d = 1;
   view.du = 2;
+  view.f = 1;
+  view.b = 50;
   view.screenx = 640;
   view.screeny = 360;
   matrix_setView3D( &vtm, &view );
@@ -34,8 +36,6 @@ int main(int argc, char *argv[]) {
 	// cube module
 	cube = module_create();
 	module_color(cube, &Blue);
-	module_rotateX(cube, cos(M_PI/6), sin(M_PI/6));
-	module_rotateZ(cube, cos(M_PI/6), sin(M_PI/6));
 	module_cube(cube, 0);
 	
 

@@ -272,6 +272,17 @@ void line_print(Line *l, FILE *fp){
 	fprintf(fp,"(%.3f, %.3f) to (%.3f, %.3f)\n", 
 				l->a.val[0], l->a.val[1], l->b.val[0], l->b.val[1]);
 }
+
+/*
+ * normalize the x and y values of a line by its homogeneous coordinate
+ */
+void line_normalize(Line *line){
+	line->a.val[0] = line->a.val[0] / line->a.val[3]; // x=x/h
+	line->a.val[1] = line->a.val[1] / line->a.val[3]; // y=y/h
+	line->b.val[0] = line->b.val[0] / line->b.val[3]; // x=x/h
+	line->b.val[1] = line->b.val[1] / line->b.val[3]; // y=y/h
+}
+
 // CIRCLE
 
 /*

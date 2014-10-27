@@ -59,7 +59,7 @@ void point_drawf(Point *p, Image *src, FPixel c);
 /** Print the point to the stream designated by FILE pointer **/
 void point_print(Point *p, FILE *fp);
 
-/** Normalize the Vector to unit length. Do not modify the homogeneous coordinate. **/
+/** Normalize the point. Do not modify the homogeneous coordinate. **/
 void point_normalize(Point *p);
 
 // Line functions
