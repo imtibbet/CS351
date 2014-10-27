@@ -34,6 +34,8 @@ typedef struct{
 
 typedef struct{
 	char name[256];
+	char *definition[2000];
+	int numlines;
 	int numparams;
 	ParamListItem *params;
 	Module *module;
@@ -100,23 +102,19 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 	}
 }
 
-int main(int argc, char *argv[]) {
 
-	// variables for the view and image
-	DrawState *ds;
-	Image *src;
-	View2D view2D;
-	View3D view3D;
-	Matrix vtm;
-	Matrix gtm;
 
+
+static int parseModule(int activeMod, ModuleItem **mod, 
+						TableItem **pt, TableItem **v, TableItem **numbs, 
+						TableItem **l, TableItem **pl, TableItem **pg, 
+						int numparams, int numpoints, int numvectors, int numlines, 
+						int numpolylines, int numpolygons, int numnumbers){
 	// variables for parsing
 	const int maxdef = 1000;
 	const int maxline = 1000;
 	const int maxpts = 50;
 	const int maxparam = 50;
-	char *infilename, *outfilename;
-	FILE *infile;
 	char buff[maxline];
 	char linein[maxline];
 	char *params[maxparam];
@@ -126,200 +124,62 @@ int main(int argc, char *argv[]) {
 			*searchname;
 	char *delim = " \n";
 	int i, j, solid, templateMod, is2D = 0;
-	int activeMod = -1;
-	int numparams = 0;
-	int numpoints = 0;
-	int numvectors = 0;
-	int numlines = 0;
-	int numpolylines = 0;
-	int numpolygons = 0;
-	int numnumbers = 0;
-	TableItem 	*pt[maxdef], *v[maxdef], *numbs[maxdef], *l[maxdef], 
-				*pl[maxdef], *pg[maxdef];
-	ModuleItem 	*mod[maxdef];
+	int curLine = 0;
+	int totalLines;
+	int numAddedMods = 1;
 	Point temppts[maxpts];
 	Vector uvw[3];
 	Line templine;
 	Polyline temppolyline;
 	Polygon temppolygon;
 	float x, y, z, theta;
-
-	// init
-	polyline_init(&temppolyline);
-	polygon_init(&temppolygon);
-	ds = drawstate_create();
-
-	// grab input filename from command line
-	if( argc < 2 ) {
-		printf("Usage: require input filename as command line parameter\n");
-		return(0);
-	} else if (argc == 2) {
-		infilename =  argv[1];
-		outfilename = "moduleGen_output.ppm";
-	} else {
-		infilename =  argv[1];
-		outfilename = argv[2];  
+	
+	// get the first and second words
+	strcpy(buff, mod[activeMod]->definition[0]);
+	firstword = strtok (buff,delim);
+	secondword = strtok (NULL, delim);
+	strcpy(varname, strtok (NULL, delim));
+	// check for any parameters
+	numparams = 0;
+	params[numparams] = strtok (NULL, delim);
+	while(params[numparams]!=NULL){
+		//printf("encountered parameter %s\n", params[numparams]);
+		params[++numparams] = strtok (NULL, delim);
 	}
-
-	// open input file for reading
-	infile =fopen(infilename,"r");
-	if (!infile){
-		printf("%s did not open for reading properly\n",infilename);
-		return 1;
+	mod[activeMod]->numparams = numparams;
+	
+	// if any parameters, parse and build table of parameters
+	if(numparams){
+		printf("module has %d parameters, processing\n", numparams);
+		mod[activeMod]->params = malloc(numparams*sizeof(ParamListItem));
+		for(j=0;j<numparams;j++){
+			strcpy(mod[activeMod]->params[j].name, strtok(params[j], "="));
+			//printf("processing parameter %s\n", mod[activeMod]->params[j].name);
+			strcpy(tempparamval, strtok(NULL, "="));
+			mod[activeMod]->params[j].val = atof(tempparamval);
+			sprintf(tempparamval, "%0.3f", mod[activeMod]->params[j].val);
+			/*printf("parameter %s has default value %f\n", 
+					mod[activeMod]->params[j].name, 
+					mod[activeMod]->params[j].val);*/
+			strcat(varname, tempparamval);
+		}
 	}
-
-	// loop until EOF is reached, generating modules
-	while (fgets(buff,1000, infile)!=NULL){
-
-		// remove newline
-		if(!strtok(buff, "\n"))
-			continue;
+	printf("defining module named %s\n", varname);
+	
+	// create module
+	strcpy(mod[activeMod]->name, varname);
+	
+	// populate module
+	totalLines = mod[activeMod]->numlines;
+	for(curLine=1;curLine<totalLines;curLine++){
+		strcpy(buff, mod[activeMod]->definition[curLine]);
 		strcpy(linein, strtok (buff, "\n"));
-		if(strncmp(linein," ",1) == 0 || strncmp(linein,"#",1) == 0)
-			continue;
-		printf("reading line: %s\n", linein);
-
+		printf("definition line %s\n",linein);
+		
 		// get the first and second words
 		firstword = strtok (buff,delim);
 		secondword = strtok (NULL, delim);
-		if(strcmp(firstword, "def") == 0){
-			strcpy(varname, strtok (NULL, delim));
-			if(strcmp(secondword, "module") == 0){
-				printf("defining module named %s\n", varname);
-				// get space for new module
-				mod[++activeMod] = malloc(sizeof(ModuleItem));
-				mod[activeMod]->module = module_create();
-				
-				// check for any parameters
-				numparams = 0;
-				params[numparams] = strtok (NULL, delim);
-				while(params[numparams]!=NULL){
-					printf("encountered parameter %s\n", params[numparams]);
-					params[++numparams] = strtok (NULL, delim);
-				}
-				mod[activeMod]->numparams = numparams;
-				
-				// if any parameters, parse and build table of parameters
-				if(numparams){
-					printf("module has %d parameters, processing\n", numparams);
-					mod[activeMod]->params = malloc(numparams*sizeof(ParamListItem));
-					for(j=0;j<numparams;j++){
-						strcpy(mod[activeMod]->params[j].name, strtok(params[j], "="));
-						printf("processing parameter %s\n", mod[activeMod]->params[j].name);
-						strcpy(tempparamval, strtok(NULL, "="));
-						mod[activeMod]->params[j].val = atof(tempparamval);
-						sprintf(tempparamval, "%0.3f", mod[activeMod]->params[j].val);
-						printf("parameter %s has default value %f\n", 
-								mod[activeMod]->params[j].name, 
-								mod[activeMod]->params[j].val);
-						strcat(varname, tempparamval);
-					}
-				}
-				
-				// create module
-				strcpy(mod[activeMod]->name, varname);
-			}
-			else if(strcmp(secondword, "point") == 0){
-				pt[numpoints] = malloc(sizeof(TableItem));
-				strcpy(pt[numpoints]->name, varname);
-				xstr = strtok (NULL, delim);
-				ystr = strtok (NULL, delim);
-				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, NULL);
-				y = stringToFloat(ystr, numbs, numnumbers, NULL);
-				if(zstr == NULL){
-					point_set2D(&(pt[numpoints++]->item.point), x, y);
-				} else {
-					z = stringToFloat(zstr, numbs, numnumbers, NULL);
-					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
-				}
-			}
-			else if(strcmp(secondword, "line") == 0){
-				l[numlines] = malloc(sizeof(TableItem));
-				strcpy(l[numlines]->name, varname);
-				for(i=0;i<2;i++){
-					searchname = strtok (NULL, delim);
-					for(j=0;j<numpoints;j++){
-						if(strcmp(pt[j]->name, searchname) == 0){
-							temppts[i] = pt[j]->item.point;
-							break;
-						}
-					}
-				}
-				line_set(&(l[numlines++]->item.line), temppts[0], temppts[1]);
-			}
-			else if(strcmp(secondword, "polyline") == 0){
-				pl[numpolylines] = malloc(sizeof(TableItem));
-				strcpy(pl[numpolylines]->name, varname);
-				searchname = strtok (NULL, delim);
-				i = 0;
-				while(searchname != NULL){
-					for(j=0;j<numpoints;j++){
-						if(strcmp(pt[j]->name, searchname) == 0){
-							temppts[i++] = pt[j]->item.point;
-							break;
-						}
-					}
-					searchname = strtok (NULL, delim);
-				}
-				pl[numpolylines++]->item.polyline = *(polyline_createp(i, &(temppts[0])));
-			}
-			else if(strcmp(secondword, "polygon") == 0){
-				pg[numpolygons] = malloc(sizeof(TableItem));
-				strcpy(pg[numpolygons]->name, varname);
-				searchname = strtok (NULL, delim);
-				i = 0;
-				while(searchname != NULL){
-					for(j=0;j<numpoints;j++){
-						if(strcmp(pt[j]->name, searchname) == 0){
-							temppts[i++] = pt[j]->item.point;
-							break;
-						}
-					}
-					searchname = strtok (NULL, delim);
-				}
-				pg[numpolygons++]->item.polygon = *(polygon_createp(i, &(temppts[0])));
-			}
-			else if(strcmp(secondword, "vector") == 0){
-				v[numvectors] = malloc(sizeof(TableItem));
-				strcpy(v[numvectors]->name, varname);
-				xstr = strtok (NULL, delim);
-				ystr = strtok (NULL, delim);
-				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, NULL);
-				y = stringToFloat(ystr, numbs, numnumbers, NULL);
-				if(zstr == NULL){
-					z = 0.0;
-				} else {
-					z = stringToFloat(zstr, numbs, numnumbers, NULL);
-				}
-				vector_set(&(v[numvectors++]->item.vector), x, y, z);
-			}
-			else if(strcmp(secondword, "number") == 0){
-				numbs[numnumbers] = malloc(sizeof(TableItem));
-				strcpy(numbs[numnumbers]->name, varname);
-				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers, NULL);
-				numbs[numnumbers++]->item.number = x;
-			}
-			else {
-				printf(	"Seond word of def not not recognized.\n"
-						"Must be module, point, vector, line, polyline, "
-						"polygon, or number\n");
-			}
-		}
-		/*else if(strcmp(firstword, "set") == 0){
-			if(strcmp(secondword, "number") == 0){
-				searchname = strtok (NULL, delim);
-				for(j=0;j<numnumbers;j++){
-					if(strcmp(numbs[j]->name, searchname) == 0){
-						numbs[j]->item.number = stringToFloat(strtok (NULL, delim), numbs, numnumbers, NULL);
-						break;
-					}
-				}
-			}
-		}*/
-		else if(strcmp(firstword, "put") == 0){
+		if(strcmp(firstword, "put") == 0){
 			if(strcmp(secondword, "module") == 0){
 				strcpy(varname, strtok (NULL, delim));
 				// find template module if any
@@ -347,11 +207,12 @@ int main(int argc, char *argv[]) {
 				// build varname for search
 				// loop over all defined parameters
 				for(i=0;i<mod[templateMod]->numparams;i++){
+					printf("template parameter %s\n", mod[templateMod]->params[i].name);
 					// loop over given params to see if new value given
 					for(j=0;j<numparams;j++){
 						strcpy(tempparamval, strtok(params[j], "="));
-						printf("processing parameter %s\n", tempparamval);
-						if(strcmp(mod[templateMod]->params[j].name, tempparamval) == 0){
+						printf("given parameter %s\n", tempparamval);
+						if(strcmp(mod[templateMod]->params[i].name, tempparamval) == 0){
 							break;
 						}
 					}
@@ -362,7 +223,7 @@ int main(int argc, char *argv[]) {
 						sprintf(tempparamval, "%0.3f", atof(tempparamval));
 						strcat(varname, tempparamval);
 					} else {
-						sprintf(tempparamval, "%0.3f", mod[templateMod]->params[j].val);
+						sprintf(tempparamval, "%0.3f", mod[templateMod]->params[i].val);
 						strcat(varname, tempparamval);
 					}
 				}
@@ -381,18 +242,23 @@ int main(int argc, char *argv[]) {
 				}
 				else{
 					printf("make new instantiation of %s\n", varname);
-				}
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
+					// get space for new module
+					printf("numAddedMods=%d\n",numAddedMods);
+					mod[activeMod+numAddedMods] = malloc(sizeof(ModuleItem));
+					mod[activeMod+numAddedMods]->module = module_create();
+					mod[activeMod+numAddedMods]->definition[0] = malloc(strlen(linein));
+					strcpy(mod[activeMod+numAddedMods]->definition[0], linein);
+					for(j=1;j<mod[templateMod]->numlines;j++){
+						mod[activeMod+numAddedMods]->definition[j] = malloc(strlen(mod[templateMod]->definition[j]));
+						strcpy(mod[activeMod+numAddedMods]->definition[j], mod[templateMod]->definition[j]);
+					}
+					mod[activeMod+numAddedMods]->numlines = mod[templateMod]->numlines;
+					numAddedMods += parseModule(activeMod+numAddedMods, mod, pt, v, numbs, l, pl, pg, 
+								numparams, numpoints, numvectors, numlines, 
+								numpolylines, numpolygons, numnumbers);
+					printf("made module\n");			
+					module_module(mod[activeMod]->module, mod[activeMod+numAddedMods-1]->module);
+				}				
 			} 
 			else if(strcmp(secondword, "point") == 0){
 				searchname = strtok (NULL, delim);
@@ -596,6 +462,228 @@ int main(int argc, char *argv[]) {
 						", translate, scale, shear2D, or shearZ\n");
 			}
 		}
+	}
+	return(numAddedMods);
+}
+
+
+
+
+
+
+int main(int argc, char *argv[]) {
+
+	// variables for the view and image
+	DrawState *ds;
+	Image *src;
+	View2D view2D;
+	View3D view3D;
+	Matrix vtm;
+	Matrix gtm;
+
+	// variables for parsing
+	const int maxdef = 1000;
+	const int maxline = 1000;
+	const int maxpts = 50;
+	const int maxparam = 50;
+	char *infilename, *outfilename;
+	FILE *infile;
+	char buff[maxline];
+	char linein[maxline];
+	char *params[maxparam];
+	char varname[256];
+	char tempparamval[256];
+	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
+			*searchname;
+	char *delim = " \n";
+	int i, j, solid, templateMod, is2D = 0;
+	int activeMod = -1;
+	int drawMod = -1;
+	int curLine = 0;
+	int numparams = 0;
+	int numpoints = 0;
+	int numvectors = 0;
+	int numlines = 0;
+	int numpolylines = 0;
+	int numpolygons = 0;
+	int numnumbers = 0;
+	TableItem 	*pt[maxdef], *v[maxdef], *numbs[maxdef], *l[maxdef], 
+				*pl[maxdef], *pg[maxdef];
+	ModuleItem 	*mod[maxdef];
+	Point temppts[maxpts];
+	Vector uvw[3];
+	Line templine;
+	Polyline temppolyline;
+	Polygon temppolygon;
+	float x, y, z, theta;
+
+	// init
+	polyline_init(&temppolyline);
+	polygon_init(&temppolygon);
+	ds = drawstate_create();
+
+	// grab input filename from command line
+	if( argc < 2 ) {
+		printf("Usage: require input filename as command line parameter\n");
+		return(0);
+	} else if (argc == 2) {
+		infilename =  argv[1];
+		outfilename = "moduleGen_output.ppm";
+	} else {
+		infilename =  argv[1];
+		outfilename = argv[2];  
+	}
+
+	// open input file for reading
+	infile =fopen(infilename,"r");
+	if (!infile){
+		printf("%s did not open for reading properly\n",infilename);
+		return 1;
+	}
+
+	// loop until EOF is reached, generating modules
+	while (fgets(buff,1000, infile)!=NULL){
+
+		// remove newline
+		if(!strtok(buff, "\n"))
+			continue;
+		strcpy(linein, strtok (buff, "\n"));
+		if(strncmp(linein," ",1) == 0 || strncmp(linein,"#",1) == 0)
+			continue;
+		printf("reading line: %s\n", linein);
+
+		// get the first and second words
+		firstword = strtok (buff,delim);
+		secondword = strtok (NULL, delim);
+		if(strcmp(firstword, "draw") == 0){
+			for(j=0;j<activeMod;j++){
+				if(strncmp(mod[j]->name, secondword, strlen(secondword)) == 0){
+					break;
+				}
+			}
+			printf("set to draw module %s\n", secondword);
+			drawMod = j;
+		}
+		else if(strcmp(firstword, "def") == 0){
+				
+			strcpy(varname, strtok (NULL, delim));
+			if(strcmp(secondword, "module") == 0){
+			
+				// if a module has been previously defined, parse all lines
+				if(activeMod == -1)
+					activeMod++;
+				else{
+					mod[activeMod]->numlines = curLine;
+					activeMod += parseModule(activeMod, mod, pt, v, numbs, l, pl, pg, 
+								numparams, numpoints, numvectors, numlines, 
+								numpolylines, numpolygons, numnumbers);
+					printf("activeMod=%d\n",activeMod);
+					curLine = 0;
+				}
+			
+				// get space for new module
+				mod[activeMod] = malloc(sizeof(ModuleItem));
+				mod[activeMod]->module = module_create();
+				mod[activeMod]->definition[curLine] = malloc(strlen(linein));
+				strcpy(mod[activeMod]->definition[curLine++], linein);
+			}
+			else if(strcmp(secondword, "point") == 0){
+				pt[numpoints] = malloc(sizeof(TableItem));
+				strcpy(pt[numpoints]->name, varname);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				if(zstr == NULL){
+					point_set2D(&(pt[numpoints++]->item.point), x, y);
+				} else {
+					z = stringToFloat(zstr, numbs, numnumbers, NULL);
+					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
+				}
+			}
+			else if(strcmp(secondword, "line") == 0){
+				l[numlines] = malloc(sizeof(TableItem));
+				strcpy(l[numlines]->name, varname);
+				for(i=0;i<2;i++){
+					searchname = strtok (NULL, delim);
+					for(j=0;j<numpoints;j++){
+						if(strcmp(pt[j]->name, searchname) == 0){
+							temppts[i] = pt[j]->item.point;
+							break;
+						}
+					}
+				}
+				line_set(&(l[numlines++]->item.line), temppts[0], temppts[1]);
+			}
+			else if(strcmp(secondword, "polyline") == 0){
+				pl[numpolylines] = malloc(sizeof(TableItem));
+				strcpy(pl[numpolylines]->name, varname);
+				searchname = strtok (NULL, delim);
+				i = 0;
+				while(searchname != NULL){
+					for(j=0;j<numpoints;j++){
+						if(strcmp(pt[j]->name, searchname) == 0){
+							temppts[i++] = pt[j]->item.point;
+							break;
+						}
+					}
+					searchname = strtok (NULL, delim);
+				}
+				pl[numpolylines++]->item.polyline = *(polyline_createp(i, &(temppts[0])));
+			}
+			else if(strcmp(secondword, "polygon") == 0){
+				pg[numpolygons] = malloc(sizeof(TableItem));
+				strcpy(pg[numpolygons]->name, varname);
+				searchname = strtok (NULL, delim);
+				i = 0;
+				while(searchname != NULL){
+					for(j=0;j<numpoints;j++){
+						if(strcmp(pt[j]->name, searchname) == 0){
+							temppts[i++] = pt[j]->item.point;
+							break;
+						}
+					}
+					searchname = strtok (NULL, delim);
+				}
+				pg[numpolygons++]->item.polygon = *(polygon_createp(i, &(temppts[0])));
+			}
+			else if(strcmp(secondword, "vector") == 0){
+				v[numvectors] = malloc(sizeof(TableItem));
+				strcpy(v[numvectors]->name, varname);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				if(zstr == NULL){
+					z = 0.0;
+				} else {
+					z = stringToFloat(zstr, numbs, numnumbers, NULL);
+				}
+				vector_set(&(v[numvectors++]->item.vector), x, y, z);
+			}
+			else if(strcmp(secondword, "number") == 0){
+				numbs[numnumbers] = malloc(sizeof(TableItem));
+				strcpy(numbs[numnumbers]->name, varname);
+				nextword = strtok (NULL, delim);
+				x = stringToFloat(nextword, numbs, numnumbers, NULL);
+				numbs[numnumbers++]->item.number = x;
+			}
+			else {
+				printf(	"Seond word of def not not recognized.\n"
+						"Must be module, point, vector, line, polyline, "
+						"polygon, or number\n");
+			}
+		}
+		else if(strcmp(firstword, "put") == 0){
+			mod[activeMod]->definition[curLine] = malloc(strlen(linein));
+			strcpy(mod[activeMod]->definition[curLine++], linein);
+		}
+		else if(strcmp(firstword, "add") == 0){
+			mod[activeMod]->definition[curLine] = malloc(strlen(linein));
+			strcpy(mod[activeMod]->definition[curLine++], linein);
+		}
 		else if(strcmp(firstword, "view2D") == 0){
 			is2D = 1;
 			if(strcmp(secondword, "vrp") == 0){
@@ -694,6 +782,12 @@ int main(int argc, char *argv[]) {
 					"Must be def, add, put, view2D, or view3D\n");
 		}
 	}
+	mod[activeMod]->numlines = curLine;
+	activeMod += parseModule(activeMod, mod, pt, v, numbs, l, pl, pg, 
+				numparams, numpoints, numvectors, numlines, 
+				numpolylines, numpolygons, numnumbers);
+	printf("activeMod=%d\n",activeMod);
+	curLine = 0;
 	printf("EOF reached\n");
 
 	// check that everything was defined correctly
@@ -719,13 +813,13 @@ int main(int argc, char *argv[]) {
 		polygon_print(&(pg[j]->item.polygon), stdout);
 	}
 	printf("User defined modules:\n");
+	for(j=0;j<activeMod;j++){
+		printf("module named %s\n", mod[j]->name);
+	}
 	// verify that at least one module defined
-	if(activeMod == -1){
+	if(drawMod == -1){
 		printf("no modules defined, nothing is being drawn, no side effects\n");
 	} else {
-		for(j=0;j<=activeMod;j++){
-			printf("module named %s\n", mod[j]->name);
-		}
 
 		// define view and draw state and draw last module defined
 		matrix_identity( &gtm );
@@ -739,12 +833,12 @@ int main(int argc, char *argv[]) {
 		}
 		printf("vtm in module generation:\n");
 		matrix_print(&vtm, stdout);
-		module_draw(mod[activeMod]->module, &vtm, &gtm, ds, NULL, src);
+		module_draw(mod[drawMod]->module, &vtm, &gtm, ds, NULL, src);
 		image_write(src, outfilename);
 
 		// some clean up
 		image_free(src);
-		for(j=0;j<=activeMod;j++){
+		for(j=0;j<activeMod;j++){
 			printf("freeing module named %s\n", mod[j]->name);
 			module_clear(mod[j]->module);
 			free(mod[j]);
@@ -778,3 +872,4 @@ int main(int argc, char *argv[]) {
 
 	return(0);
 }
+
