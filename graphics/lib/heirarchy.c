@@ -88,14 +88,10 @@ void element_delete(Element *e){
 	//printf("deleting element of type %d\n", e->type);
 	switch(e->type){
 		case ObjPolyline:
-			//polyline_free(&(e->obj.polyline));
-			if(e->obj.polyline.vertex)
-				free(e->obj.polyline.vertex);
+			polyline_clear(&(e->obj.polyline));
 			break;
 		case ObjPolygon:
-			//polygon_free(&(e->obj.polygon));
-			if(e->obj.polygon.vertex)
-				free(e->obj.polygon.vertex);
+			polygon_clear(&(e->obj.polygon));
 			break;
 		default:
 			//printf("ObjectType %d is not handled in element_delete\n",e->type);
@@ -665,6 +661,9 @@ void module_cube(Module *md, int solid){
 		e = element_init(ObjPolygon, &p);
 		module_insert(md, e);
 	}
+	
+	// clean up
+	polygon_clear(&p);
 }
 
 // Shading/Color Module Functions

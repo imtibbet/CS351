@@ -27,7 +27,20 @@ typedef struct{
 	Item item;
 } TableItem;
 
-static float stringToFloat(char *str, TableItem **numbs, int numnumbers){
+typedef struct{
+	char name[256];
+	float val;
+} ParamListItem;
+
+typedef struct{
+	char name[256];
+	int numparams;
+	ParamListItem *params;
+	Module *module;
+} ModuleItem;
+
+static float stringToFloat(char *str, TableItem **numbs, int numnumbers, 
+										ModuleItem *activeModule){
 	char *term1, *term2, *searchname, num[256];
 	int j;
 	strcpy(num, str);
@@ -37,12 +50,27 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers){
 		//printf("performing multiplication %s\n", num);
 		term1 = strtok(num, "*");
 		term2 = strtok(NULL, "*");
-		return(	stringToFloat(term1, numbs, numnumbers) *
-				stringToFloat(term2, numbs, numnumbers) ) ;
+		return(	stringToFloat(term1, numbs, numnumbers, activeModule) *
+				stringToFloat(term2, numbs, numnumbers, activeModule) ) ;
 	}
 
-	// check for the number as a key in the numbers table
+	// check for the number as a key in the module parameters
 	searchname = strtok (num,"()");
+	if(activeModule){
+		for(j=0;j<activeModule->numparams;j++){
+			if(strcmp(activeModule->params[j].name, searchname) == 0){
+				break;
+			}
+		}
+	
+		// if the number is found, return it
+		if(j!=(activeModule->numparams)){
+			//printf("found var %s\n", searchname);
+			return(activeModule->params[j].val);
+		}
+	}
+	
+	// check for the number as a key in the numbers table
 	for(j=0;j<numnumbers;j++){
 		if(strcmp(numbs[j]->name, searchname) == 0){
 			break;
@@ -59,12 +87,12 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers){
 	if(strcmp(searchname, "sin") == 0){
 		searchname = strtok (NULL, "()");
 		//printf("computing sin(%s)\n", searchname);
-		return(sin(M_PI*stringToFloat(searchname, numbs, numnumbers)/180.0));
+		return(sin(M_PI*stringToFloat(searchname, numbs, numnumbers, activeModule)/180.0));
 	}
 	else if(strcmp(searchname, "cos") == 0){
 		searchname = strtok (NULL, "()");
 		//printf("computing cos(%s)\n", searchname);
-		return(cos(M_PI*stringToFloat(searchname, numbs, numnumbers)/180.0));
+		return(cos(M_PI*stringToFloat(searchname, numbs, numnumbers, activeModule)/180.0));
 	} 
 	else {
 		//printf("returning\n");
@@ -83,21 +111,33 @@ int main(int argc, char *argv[]) {
 	Matrix gtm;
 
 	// variables for parsing
+	const int maxdef = 1000;
+	const int maxline = 1000;
+	const int maxpts = 50;
+	const int maxparam = 50;
 	char *infilename, *outfilename;
 	FILE *infile;
-	char buff[1000];
-	char *linein, *firstword, *secondword, *xstr, *ystr, *zstr, *nextword, *searchname, *varname;
+	char buff[maxline];
+	char linein[maxline];
+	char *params[maxparam];
+	char varname[256];
+	char tempparamval[256];
+	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
+			*searchname;
 	char *delim = " \n";
-	int i, j, solid, is2D = 0;
+	int i, j, solid, templateMod, is2D = 0;
 	int activeMod = -1;
+	int numparams = 0;
 	int numpoints = 0;
 	int numvectors = 0;
 	int numlines = 0;
 	int numpolylines = 0;
 	int numpolygons = 0;
 	int numnumbers = 0;
-	TableItem *pt[1000], *v[1000], *numbs[1000], *l[1000], *pl[1000], *pg[1000], *mod[1000];
-	Point temppts[50];
+	TableItem 	*pt[maxdef], *v[maxdef], *numbs[maxdef], *l[maxdef], 
+				*pl[maxdef], *pg[maxdef];
+	ModuleItem 	*mod[maxdef];
+	Point temppts[maxpts];
 	Vector uvw[3];
 	Line templine;
 	Polyline temppolyline;
@@ -132,8 +172,10 @@ int main(int argc, char *argv[]) {
 	while (fgets(buff,1000, infile)!=NULL){
 
 		// remove newline
-		linein = strtok (buff, "\n");
-		if(!linein || strncmp(linein,"#",1) == 0)
+		if(!strtok(buff, "\n"))
+			continue;
+		strcpy(linein, strtok (buff, "\n"));
+		if(strncmp(linein," ",1) == 0 || strncmp(linein,"#",1) == 0)
 			continue;
 		printf("reading line: %s\n", linein);
 
@@ -141,11 +183,41 @@ int main(int argc, char *argv[]) {
 		firstword = strtok (buff,delim);
 		secondword = strtok (NULL, delim);
 		if(strcmp(firstword, "def") == 0){
-			varname = strtok (NULL, delim);
+			strcpy(varname, strtok (NULL, delim));
 			if(strcmp(secondword, "module") == 0){
-				mod[++activeMod] = malloc(sizeof(TableItem));
+				printf("defining module named %s\n", varname);
+				// get space for new module
+				mod[++activeMod] = malloc(sizeof(ModuleItem));
+				mod[activeMod]->module = module_create();
+				
+				// check for any parameters
+				numparams = 0;
+				params[numparams] = strtok (NULL, delim);
+				while(params[numparams]!=NULL){
+					printf("encountered parameter %s\n", params[numparams]);
+					params[++numparams] = strtok (NULL, delim);
+				}
+				mod[activeMod]->numparams = numparams;
+				
+				// if any parameters, parse and build table of parameters
+				if(numparams){
+					printf("module has %d parameters, processing\n", numparams);
+					mod[activeMod]->params = malloc(numparams*sizeof(ParamListItem));
+					for(j=0;j<numparams;j++){
+						strcpy(mod[activeMod]->params[j].name, strtok(params[j], "="));
+						printf("processing parameter %s\n", mod[activeMod]->params[j].name);
+						strcpy(tempparamval, strtok(NULL, "="));
+						mod[activeMod]->params[j].val = atof(tempparamval);
+						sprintf(tempparamval, "%0.3f", mod[activeMod]->params[j].val);
+						printf("parameter %s has default value %f\n", 
+								mod[activeMod]->params[j].name, 
+								mod[activeMod]->params[j].val);
+						strcat(varname, tempparamval);
+					}
+				}
+				
+				// create module
 				strcpy(mod[activeMod]->name, varname);
-				mod[activeMod]->item.module = module_create();
 			}
 			else if(strcmp(secondword, "point") == 0){
 				pt[numpoints] = malloc(sizeof(TableItem));
@@ -153,12 +225,12 @@ int main(int argc, char *argv[]) {
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
 				if(zstr == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers);
+					z = stringToFloat(zstr, numbs, numnumbers, NULL);
 					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
 				}
 			}
@@ -214,12 +286,12 @@ int main(int argc, char *argv[]) {
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
 				if(zstr == NULL){
 					z = 0.0;
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers);
+					z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				}
 				vector_set(&(v[numvectors++]->item.vector), x, y, z);
 			}
@@ -227,7 +299,7 @@ int main(int argc, char *argv[]) {
 				numbs[numnumbers] = malloc(sizeof(TableItem));
 				strcpy(numbs[numnumbers]->name, varname);
 				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers);
+				x = stringToFloat(nextword, numbs, numnumbers, NULL);
 				numbs[numnumbers++]->item.number = x;
 			}
 			else {
@@ -241,7 +313,7 @@ int main(int argc, char *argv[]) {
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numnumbers;j++){
 					if(strcmp(numbs[j]->name, searchname) == 0){
-						numbs[j]->item.number = stringToFloat(strtok (NULL, delim), numbs, numnumbers);
+						numbs[j]->item.number = stringToFloat(strtok (NULL, delim), numbs, numnumbers, NULL);
 						break;
 					}
 				}
@@ -249,16 +321,78 @@ int main(int argc, char *argv[]) {
 		}*/
 		else if(strcmp(firstword, "put") == 0){
 			if(strcmp(secondword, "module") == 0){
-				searchname = strtok (NULL, delim);
+				strcpy(varname, strtok (NULL, delim));
+				// find template module if any
 				for(j=0;j<activeMod;j++){
-					if(strcmp(mod[j]->name, searchname) == 0){
+					if(strncmp(mod[j]->name, varname, strlen(varname)) == 0){
 						break;
 					}
 				}
-				if(j == activeMod)
-					printf("%s module not found\n", searchname);
-				else
-					module_module(mod[activeMod]->item.module, mod[j]->item.module);
+				
+				// done if module is found, otherwise make a new one
+				if(j == activeMod){
+					printf("no template module for %s found\n", varname);
+					continue;
+				}
+				templateMod = j;
+				
+				// check for any parameters
+				numparams = 0;
+				params[numparams] = strtok (NULL, delim);
+				while(params[numparams]!=NULL){
+					printf("encountered parameter %s\n", params[numparams]);
+					params[++numparams] = strtok (NULL, delim);
+				}
+				
+				// build varname for search
+				// loop over all defined parameters
+				for(i=0;i<mod[templateMod]->numparams;i++){
+					// loop over given params to see if new value given
+					for(j=0;j<numparams;j++){
+						strcpy(tempparamval, strtok(params[j], "="));
+						printf("processing parameter %s\n", tempparamval);
+						if(strcmp(mod[templateMod]->params[j].name, tempparamval) == 0){
+							break;
+						}
+					}
+					// if the parameter is found, overwrite the value in varname
+					if(j!=numparams){
+						printf("overwriting var %s\n", tempparamval);
+						strcpy(tempparamval, strtok(NULL, "="));
+						sprintf(tempparamval, "%0.3f", atof(tempparamval));
+						strcat(varname, tempparamval);
+					} else {
+						sprintf(tempparamval, "%0.3f", mod[templateMod]->params[j].val);
+						strcat(varname, tempparamval);
+					}
+				}
+				
+				// find matching module if any
+				for(j=0;j<activeMod;j++){
+					if(strcmp(mod[j]->name, varname) == 0){
+						break;
+					}
+				}
+				
+				// done if module is found, otherwise make a new one
+				if(j != activeMod){
+					printf("found module %s\n", varname);
+					module_module(mod[activeMod]->module, mod[j]->module);
+				}
+				else{
+					printf("make new instantiation of %s\n", varname);
+				}
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
 			} 
 			else if(strcmp(secondword, "point") == 0){
 				searchname = strtok (NULL, delim);
@@ -270,7 +404,7 @@ int main(int argc, char *argv[]) {
 				if(j==numpoints)
 					printf("%s point not found\n", searchname);
 				else
-					module_point(mod[activeMod]->item.module, &(pt[j]->item.point));
+					module_point(mod[activeMod]->module, &(pt[j]->item.point));
 			} 
 			else if(strcmp(secondword, "line") == 0){
 				searchname = strtok (NULL, delim);
@@ -282,7 +416,7 @@ int main(int argc, char *argv[]) {
 				if(j==numlines)
 					printf("%s line not found\n", searchname);
 				else
-					module_line(mod[activeMod]->item.module, &(l[j]->item.line));
+					module_line(mod[activeMod]->module, &(l[j]->item.line));
 			} 
 			else if(strcmp(secondword, "polyline") == 0){
 				searchname = strtok (NULL, delim);
@@ -294,7 +428,7 @@ int main(int argc, char *argv[]) {
 				if(j==numpolylines)
 					printf("%s polyline not found\n", searchname);
 				else
-					module_polyline(mod[activeMod]->item.module, &(pl[j]->item.polyline));
+					module_polyline(mod[activeMod]->module, &(pl[j]->item.polyline));
 			} 
 			else if(strcmp(secondword, "polygon") == 0){
 				searchname = strtok (NULL, delim);
@@ -306,7 +440,7 @@ int main(int argc, char *argv[]) {
 				if(j==numpolygons)
 					printf("%s polygon not found\n", searchname);
 				else
-					module_polygon(mod[activeMod]->item.module, &(pg[j]->item.polygon));
+					module_polygon(mod[activeMod]->module, &(pg[j]->item.polygon));
 			} 
 			else {
 				printf(	"Seond word of put not not recognized.\n"
@@ -322,15 +456,15 @@ int main(int argc, char *argv[]) {
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
 				if(zstr == NULL){
 					point_set2D(&(temppts[0]), x, y);
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers);
+					z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
 					point_set3D(&(temppts[0]), x, y, z);
 				}
-				module_point(mod[activeMod]->item.module, &(temppts[0]));
+				module_point(mod[activeMod]->module, &(temppts[0]));
 			} 
 			else if(strcmp(secondword, "line") == 0){
 				for(i=0;i<2;i++){
@@ -343,7 +477,7 @@ int main(int argc, char *argv[]) {
 					}
 				}
 				line_set(&templine, temppts[0], temppts[1]);
-				module_line(mod[activeMod]->item.module, &templine);
+				module_line(mod[activeMod]->module, &templine);
 			} 
 			else if(strcmp(secondword, "polyline") == 0){
 				searchname = strtok (NULL, delim);
@@ -358,7 +492,7 @@ int main(int argc, char *argv[]) {
 					searchname = strtok (NULL, delim);
 				}
 				polyline_set(&temppolyline, i, &(temppts[0]));
-				module_polyline(mod[activeMod]->item.module, &temppolyline);
+				module_polyline(mod[activeMod]->module, &temppolyline);
 			}
 			else if(strcmp(secondword, "polygon") == 0){
 				searchname = strtok (NULL, delim);
@@ -375,7 +509,7 @@ int main(int argc, char *argv[]) {
 				polygon_set(&temppolygon, i, &(temppts[0]));
 				printf("polygon added to module %s\n", mod[activeMod]->name);
 				polygon_print(&temppolygon, stdout);
-				module_polygon(mod[activeMod]->item.module, &temppolygon);
+				module_polygon(mod[activeMod]->module, &temppolygon);
 			} 
 			else if(strcmp(secondword, "cube") == 0){
 				nextword = strtok (NULL, delim);
@@ -383,25 +517,25 @@ int main(int argc, char *argv[]) {
 					solid = atoi(nextword);
 				else
 					solid = 1;
-				module_cube(mod[activeMod]->item.module, solid);
+				module_cube(mod[activeMod]->module, solid);
 			}
 			else if(strcmp(secondword, "identity") == 0){
-				module_identity(mod[activeMod]->item.module);
+				module_identity(mod[activeMod]->module);
 			}
 			else if(strcmp(secondword, "rotateX") == 0){
 				nextword = strtok (NULL, delim);
-				theta = M_PI*stringToFloat(nextword, numbs, numnumbers)/180.0;
-				module_rotateX(mod[activeMod]->item.module, cos(theta), sin(theta));
+				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, mod[activeMod])/180.0;
+				module_rotateX(mod[activeMod]->module, cos(theta), sin(theta));
 			}
 			else if(strcmp(secondword, "rotateY") == 0){
 				nextword = strtok (NULL, delim);
-				theta = M_PI*stringToFloat(nextword, numbs, numnumbers)/180.0;
-				module_rotateY(mod[activeMod]->item.module, cos(theta), sin(theta));
+				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, mod[activeMod])/180.0;
+				module_rotateY(mod[activeMod]->module, cos(theta), sin(theta));
 			}
 			else if(strcmp(secondword, "rotateZ") == 0){
 				nextword = strtok (NULL, delim);
-				theta = M_PI*stringToFloat(nextword, numbs, numnumbers)/180.0;
-				module_rotateZ(mod[activeMod]->item.module, cos(theta), sin(theta));
+				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, mod[activeMod])/180.0;
+				module_rotateZ(mod[activeMod]->module, cos(theta), sin(theta));
 			}
 			else if(strcmp(secondword, "rotateXYZ") == 0){
 				for(i=0;i<3;i++){
@@ -413,47 +547,47 @@ int main(int argc, char *argv[]) {
 						}
 					}
 				}
-				module_rotateXYZ(mod[activeMod]->item.module, &(uvw[0]), &(uvw[1]), &(uvw[2]));
+				module_rotateXYZ(mod[activeMod]->module, &(uvw[0]), &(uvw[1]), &(uvw[2]));
 			} 
 			else if(strcmp(secondword, "translate") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
 				if(zstr == NULL){
-					module_translate2D(mod[activeMod]->item.module, x, y);
+					module_translate2D(mod[activeMod]->module, x, y);
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers);
-					module_translate(mod[activeMod]->item.module, x, y, z);
+					z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
+					module_translate(mod[activeMod]->module, x, y, z);
 				}
 			} 
 			else if(strcmp(secondword, "scale") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
 				if(zstr == NULL){
-					module_scale2D(mod[activeMod]->item.module, x, y);
+					module_scale2D(mod[activeMod]->module, x, y);
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers);
-					module_scale(mod[activeMod]->item.module, x, y, z);
+					z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
+					module_scale(mod[activeMod]->module, x, y, z);
 				}
 			} 
 			else if(strcmp(secondword, "shear2D") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
-				module_shear2D(mod[activeMod]->item.module, x, y);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
+				module_shear2D(mod[activeMod]->module, x, y);
 			} 
 			else if(strcmp(secondword, "shearZ") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
-				module_shearZ(mod[activeMod]->item.module, x, y);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
+				module_shearZ(mod[activeMod]->module, x, y);
 			} 
 			else {
 				printf(	"Seond word of add not not recognized.\n"
@@ -467,30 +601,30 @@ int main(int argc, char *argv[]) {
 			if(strcmp(secondword, "vrp") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
 				z = 0;
 				point_set3D(&(view2D.vrp), x, y, z);
 			}
 			else if(strcmp(secondword, "x") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
 				z = 0;
 				vector_set(&(view2D.x), x, y, z);
 			}
 			else if(strcmp(secondword, "dx") == 0){
 				xstr = strtok (NULL, delim);
-				view2D.dx = stringToFloat(xstr, numbs, numnumbers);
+				view2D.dx = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
 			else if(strcmp(secondword, "screenx") == 0){
 				xstr = strtok (NULL, delim);
-				view2D.screenx = stringToFloat(xstr, numbs, numnumbers);
+				view2D.screenx = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
 			else if(strcmp(secondword, "screeny") == 0){
 				xstr = strtok (NULL, delim);
-				view2D.screeny = stringToFloat(xstr, numbs, numnumbers);
+				view2D.screeny = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
 			else{
 				printf(	"Seond word of view2D not not recognized.\n"
@@ -503,52 +637,52 @@ int main(int argc, char *argv[]) {
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
-				z = stringToFloat(zstr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				point_set3D(&(view3D.vrp), x, y, z);
 			}
 			else if(strcmp(secondword, "vpn") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
-				z = stringToFloat(zstr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				vector_set(&(view3D.vpn), x, y, z);
 			}
 			else if(strcmp(secondword, "vup") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers);
-				y = stringToFloat(ystr, numbs, numnumbers);
-				z = stringToFloat(zstr, numbs, numnumbers);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				vector_set(&(view3D.vup), x, y, z);
 			}
 			else if(strcmp(secondword, "d") == 0){
 				xstr = strtok (NULL, delim);
-				view3D.d = stringToFloat(xstr, numbs, numnumbers);
+				view3D.d = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
 			else if(strcmp(secondword, "du") == 0){
 				xstr = strtok (NULL, delim);
-				view3D.du = stringToFloat(xstr, numbs, numnumbers);
+				view3D.du = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
 			else if(strcmp(secondword, "f") == 0){
 				xstr = strtok (NULL, delim);
-				view3D.f = stringToFloat(xstr, numbs, numnumbers);
+				view3D.f = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
 			else if(strcmp(secondword, "b") == 0){
 				xstr = strtok (NULL, delim);
-				view3D.b = stringToFloat(xstr, numbs, numnumbers);
+				view3D.b = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
 			else if(strcmp(secondword, "screenx") == 0){
 				xstr = strtok (NULL, delim);
-				view3D.screenx = stringToFloat(xstr, numbs, numnumbers);
+				view3D.screenx = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
 			else if(strcmp(secondword, "screeny") == 0){
 				xstr = strtok (NULL, delim);
-				view3D.screeny = stringToFloat(xstr, numbs, numnumbers);
+				view3D.screeny = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
 			else{
 				printf(	"Seond word of view3D not not recognized.\n"
@@ -605,14 +739,14 @@ int main(int argc, char *argv[]) {
 		}
 		printf("vtm in module generation:\n");
 		matrix_print(&vtm, stdout);
-		module_draw(mod[activeMod]->item.module, &vtm, &gtm, ds, NULL, src);
+		module_draw(mod[activeMod]->module, &vtm, &gtm, ds, NULL, src);
 		image_write(src, outfilename);
 
 		// some clean up
 		image_free(src);
 		for(j=0;j<=activeMod;j++){
 			printf("freeing module named %s\n", mod[j]->name);
-			module_clear(mod[j]->item.module);
+			module_clear(mod[j]->module);
 			free(mod[j]);
 		}
 	}
@@ -633,14 +767,12 @@ int main(int argc, char *argv[]) {
 	}
 	for(j=0;j<numpolylines;j++){
 		printf("freeing polyline named %s\n", pl[j]->name);
-		if(pl[j]->item.polyline.vertex)
-			free(pl[j]->item.polyline.vertex);
+		polyline_clear(&(pl[j]->item.polyline));
 		free(pl[j]);
 	}
 	for(j=0;j<numpolygons;j++){
 		printf("freeing polygon named %s\n", pg[j]->name);
-		if(pg[j]->item.polygon.vertex)
-			free(pg[j]->item.polygon.vertex);
+		polygon_clear(&(pg[j]->item.polygon));
 		free(pg[j]);
 	}
 
