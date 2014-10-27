@@ -380,7 +380,7 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				matrix_xformLine(&LTM, &tempLine);
 				matrix_xformLine(GTM, &tempLine);
 				matrix_xformLine(VTM, &tempLine);
-				point_normalize(&(tempLine.a));
+				line_normalize(&tempLine);
 				//line_print(&tempLine, stdout);
 				line_draw(&tempLine, src, ds->color);
 				break;

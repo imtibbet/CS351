@@ -139,7 +139,6 @@ int main(int argc, char *argv[]) {
   vector_set( &(view.vup), 0, 1, 0 );
   view.d = 2.2;
   view.du = 1.6;
-  view.dv = 0.9;
   view.f = 1;
   view.b = 50;
   view.screenx = 640;

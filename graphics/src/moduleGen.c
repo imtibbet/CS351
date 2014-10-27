@@ -28,20 +28,21 @@ typedef struct{
 } TableItem;
 
 static float stringToFloat(char *str, TableItem **numbs, int numnumbers){
-	char *curterm, *searchname;
+	char *term1, *term2, *searchname, num[256];
 	int j;
-	float recresult = 1.0;
-
+	strcpy(num, str);
+	//printf("stringToFloat %s\n", num);
 	// check for multiplication and recurse through arguments
-	if(strchr(str, '*')){
-		curterm = strtok(str, "*");
-		while(curterm)
-			recresult *= stringToFloat(curterm, numbs, numnumbers);
-		return(recresult);
+	if(strchr(num, '*')){
+		//printf("performing multiplication %s\n", num);
+		term1 = strtok(num, "*");
+		term2 = strtok(NULL, "*");
+		return(	stringToFloat(term1, numbs, numnumbers) *
+				stringToFloat(term2, numbs, numnumbers) ) ;
 	}
 
 	// check for the number as a key in the numbers table
-	searchname = strtok (str,"()");
+	searchname = strtok (num,"()");
 	for(j=0;j<numnumbers;j++){
 		if(strcmp(numbs[j]->name, searchname) == 0){
 			break;
@@ -49,22 +50,28 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers){
 	}
 
 	// if the number is found, return it
-	if(j!=numnumbers)
+	if(j!=numnumbers){
+		//printf("found var %s\n", searchname);
 		return(numbs[j]->item.number);
-	printf("checking for sin and cos %s\n", str);
-	// otherwise, check for sin or cos
-	if(strncmp(str, "sin", 3) == 0){
-		searchname = strtok (NULL, "()");
-		return(sin(M_PI*atof(searchname)/180.0));
 	}
-	else if(strncmp(str, "cos", 3) == 0){
+			
+	// otherwise, check for sin or cos
+	if(strcmp(searchname, "sin") == 0){
 		searchname = strtok (NULL, "()");
-		return(cos(M_PI*atof(searchname)/180.0));
+		//printf("computing sin(%s)\n", searchname);
+		return(sin(M_PI*stringToFloat(searchname, numbs, numnumbers)/180.0));
+	}
+	else if(strcmp(searchname, "cos") == 0){
+		searchname = strtok (NULL, "()");
+		//printf("computing cos(%s)\n", searchname);
+		return(cos(M_PI*stringToFloat(searchname, numbs, numnumbers)/180.0));
 	} 
 	else {
+		//printf("returning\n");
 		return(atof(searchname));
 	}
 }
+
 int main(int argc, char *argv[]) {
 
 	// variables for the view and image
@@ -79,7 +86,7 @@ int main(int argc, char *argv[]) {
 	char *infilename, *outfilename;
 	FILE *infile;
 	char buff[1000];
-	char *linein, *firstword, *secondword, *nextword, *searchname, *varname;
+	char *linein, *firstword, *secondword, *xstr, *ystr, *zstr, *nextword, *searchname, *varname;
 	char *delim = " \n";
 	int i, j, solid, is2D = 0;
 	int activeMod = -1;
@@ -126,7 +133,7 @@ int main(int argc, char *argv[]) {
 
 		// remove newline
 		linein = strtok (buff, "\n");
-		if(!linein)
+		if(!linein || strncmp(linein,"#",1) == 0)
 			continue;
 		printf("reading line: %s\n", linein);
 
@@ -143,15 +150,15 @@ int main(int argc, char *argv[]) {
 			else if(strcmp(secondword, "point") == 0){
 				pt[numpoints] = malloc(sizeof(TableItem));
 				strcpy(pt[numpoints]->name, varname);
-				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				if(nextword == NULL){
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
+				if(zstr == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
 				} else {
-					z = stringToFloat(nextword, numbs, numnumbers);
+					z = stringToFloat(zstr, numbs, numnumbers);
 					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
 				}
 			}
@@ -204,15 +211,15 @@ int main(int argc, char *argv[]) {
 			else if(strcmp(secondword, "vector") == 0){
 				v[numvectors] = malloc(sizeof(TableItem));
 				strcpy(v[numvectors]->name, varname);
-				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				if(nextword == NULL){
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
+				if(zstr == NULL){
 					z = 0.0;
 				} else {
-					z = stringToFloat(nextword, numbs, numnumbers);
+					z = stringToFloat(zstr, numbs, numnumbers);
 				}
 				vector_set(&(v[numvectors++]->item.vector), x, y, z);
 			}
@@ -229,6 +236,17 @@ int main(int argc, char *argv[]) {
 						"polygon, or number\n");
 			}
 		}
+		/*else if(strcmp(firstword, "set") == 0){
+			if(strcmp(secondword, "number") == 0){
+				searchname = strtok (NULL, delim);
+				for(j=0;j<numnumbers;j++){
+					if(strcmp(numbs[j]->name, searchname) == 0){
+						numbs[j]->item.number = stringToFloat(strtok (NULL, delim), numbs, numnumbers);
+						break;
+					}
+				}
+			}
+		}*/
 		else if(strcmp(firstword, "put") == 0){
 			if(strcmp(secondword, "module") == 0){
 				searchname = strtok (NULL, delim);
@@ -301,15 +319,15 @@ int main(int argc, char *argv[]) {
 						"be defined with a name and then put into active module\n");
 			} 
 			else if(strcmp(secondword, "point") == 0){
-				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				if(nextword == NULL){
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
+				if(zstr == NULL){
 					point_set2D(&(temppts[0]), x, y);
 				} else {
-					z = stringToFloat(nextword, numbs, numnumbers);
+					z = stringToFloat(zstr, numbs, numnumbers);
 					point_set3D(&(temppts[0]), x, y, z);
 				}
 				module_point(mod[activeMod]->item.module, &(temppts[0]));
@@ -398,43 +416,43 @@ int main(int argc, char *argv[]) {
 				module_rotateXYZ(mod[activeMod]->item.module, &(uvw[0]), &(uvw[1]), &(uvw[2]));
 			} 
 			else if(strcmp(secondword, "translate") == 0){
-				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				if(nextword == NULL){
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
+				if(zstr == NULL){
 					module_translate2D(mod[activeMod]->item.module, x, y);
 				} else {
-					z = stringToFloat(nextword, numbs, numnumbers);
+					z = stringToFloat(zstr, numbs, numnumbers);
 					module_translate(mod[activeMod]->item.module, x, y, z);
 				}
 			} 
 			else if(strcmp(secondword, "scale") == 0){
-				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				if(nextword == NULL){
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
+				if(zstr == NULL){
 					module_scale2D(mod[activeMod]->item.module, x, y);
 				} else {
-					z = stringToFloat(nextword, numbs, numnumbers);
+					z = stringToFloat(zstr, numbs, numnumbers);
 					module_scale(mod[activeMod]->item.module, x, y, z);
 				}
 			} 
 			else if(strcmp(secondword, "shear2D") == 0){
-				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
 				module_shear2D(mod[activeMod]->item.module, x, y);
 			} 
 			else if(strcmp(secondword, "shearZ") == 0){
-				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
 				module_shearZ(mod[activeMod]->item.module, x, y);
 			} 
 			else {
@@ -446,29 +464,33 @@ int main(int argc, char *argv[]) {
 		}
 		else if(strcmp(firstword, "view2D") == 0){
 			is2D = 1;
-			nextword = strtok (NULL, delim);
 			if(strcmp(secondword, "vrp") == 0){
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
 				z = 0;
 				point_set3D(&(view2D.vrp), x, y, z);
 			}
 			else if(strcmp(secondword, "x") == 0){
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
 				z = 0;
 				vector_set(&(view2D.x), x, y, z);
 			}
 			else if(strcmp(secondword, "dx") == 0){
-				view2D.dx = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				view2D.dx = stringToFloat(xstr, numbs, numnumbers);
 			}
 			else if(strcmp(secondword, "screenx") == 0){
-				view2D.screenx = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				view2D.screenx = stringToFloat(xstr, numbs, numnumbers);
 			}
 			else if(strcmp(secondword, "screeny") == 0){
-				view2D.screeny = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				view2D.screeny = stringToFloat(xstr, numbs, numnumbers);
 			}
 			else{
 				printf(	"Seond word of view2D not not recognized.\n"
@@ -477,42 +499,56 @@ int main(int argc, char *argv[]) {
 		}
 		else if(strcmp(firstword, "view3D") == 0){
 			is2D = 0;
-			nextword = strtok (NULL, delim);
 			if(strcmp(secondword, "vrp") == 0){
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				z = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
+				z = stringToFloat(zstr, numbs, numnumbers);
 				point_set3D(&(view3D.vrp), x, y, z);
 			}
 			else if(strcmp(secondword, "vpn") == 0){
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				z = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
+				z = stringToFloat(zstr, numbs, numnumbers);
 				vector_set(&(view3D.vpn), x, y, z);
 			}
 			else if(strcmp(secondword, "vup") == 0){
-				x = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				y = stringToFloat(nextword, numbs, numnumbers);
-				nextword = strtok (NULL, delim);
-				z = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers);
+				y = stringToFloat(ystr, numbs, numnumbers);
+				z = stringToFloat(zstr, numbs, numnumbers);
 				vector_set(&(view3D.vup), x, y, z);
 			}
 			else if(strcmp(secondword, "d") == 0){
-				view3D.d = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				view3D.d = stringToFloat(xstr, numbs, numnumbers);
 			}
 			else if(strcmp(secondword, "du") == 0){
-				view3D.du = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				view3D.du = stringToFloat(xstr, numbs, numnumbers);
+			}
+			else if(strcmp(secondword, "f") == 0){
+				xstr = strtok (NULL, delim);
+				view3D.f = stringToFloat(xstr, numbs, numnumbers);
+			}
+			else if(strcmp(secondword, "b") == 0){
+				xstr = strtok (NULL, delim);
+				view3D.b = stringToFloat(xstr, numbs, numnumbers);
 			}
 			else if(strcmp(secondword, "screenx") == 0){
-				view3D.screenx = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				view3D.screenx = stringToFloat(xstr, numbs, numnumbers);
 			}
 			else if(strcmp(secondword, "screeny") == 0){
-				view3D.screeny = stringToFloat(nextword, numbs, numnumbers);
+				xstr = strtok (NULL, delim);
+				view3D.screeny = stringToFloat(xstr, numbs, numnumbers);
 			}
 			else{
 				printf(	"Seond word of view3D not not recognized.\n"
