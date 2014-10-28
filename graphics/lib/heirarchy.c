@@ -350,11 +350,12 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 	Polyline *tempPolyline = polyline_create();
 	Polygon *tempPolygon = polygon_create();
 	Element *e = md->head;
+	
 	matrix_identity(&LTM);
 	
 	// loop until the end of the linked list is reached
 	while(e){
-		printf("Handling type %d\n", e->type);
+		//printf("Handling type %d\n", e->type);
 		// draw based on type
 		switch(e->type){
 			case ObjNone:

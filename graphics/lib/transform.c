@@ -751,19 +751,19 @@ void matrix_perspective(Matrix *m, double d){
  	vector_normalize(&nvup);
  	vector_set(&nvpn, view->vpn.val[0], view->vpn.val[1], view->vpn.val[2]);
  	vector_normalize(&nvpn);
- 	printf("View reference axes\n");
- 	vector_print(&u, stdout);
- 	vector_print(&nvup, stdout);
- 	vector_print(&nvpn, stdout);
- 	printf("\n");
+ 	//printf("View reference axes\n");
+ 	// vector_print(&u, stdout);
+ 	// vector_print(&nvup, stdout);
+ 	// vector_print(&nvpn, stdout);
+ 	// printf("\n");
  	matrix_rotateXYZ(vtm, &u, &nvup, &nvpn);
-  	printf("After Rxyz\n");	
- 	matrix_print(vtm, stdout);
+  	// printf("After Rxyz\n");	
+ 	// matrix_print(vtm, stdout);
 	
 	// 5 Translate COP to origin
 	matrix_translate(vtm, 0.0, 0.0, view->d);
-  	printf("After translating to origin\n");	
- 	matrix_print(vtm, stdout);
+  	// printf("After translating to origin\n");	
+ 	// matrix_print(vtm, stdout);
  	
  	// 6 calculate DOP
  	//dopx = 
@@ -780,22 +780,22 @@ void matrix_perspective(Matrix *m, double d){
 	dp = (view->d)/bp;
 	fp = ((view->f)+(view->d))/bp;
 	matrix_scale(vtm, 2*(view->d)/(bp*(view->du)), 2*(view->d)/(bp*dv), 1/bp);
-  	printf("After scaling to CVV\n");	
- 	matrix_print(vtm, stdout);
+  	// printf("After scaling to CVV\n");	
+ 	// matrix_print(vtm, stdout);
 	
 	
 	// project the scene onto the view plane
 	matrix_perspective(vtm, dp);
-  	printf("After perspective\n");	
- 	matrix_print(vtm, stdout);
+  	// printf("After perspective\n");	
+ 	// matrix_print(vtm, stdout);
 	
 	// get to screen coordinates
 	matrix_scale2D(vtm, -1*(view->screenx)/(2*dp), -1*(view->screeny)/(2*dp));
-  	printf("After scale to image coords\n");	
- 	matrix_print(vtm, stdout);
+  	// printf("After scale to image coords\n");	
+ 	// matrix_print(vtm, stdout);
 	matrix_translate2D(vtm, (view->screenx)/2, (view->screeny)/2);
-  	printf("After final translation to image\n");	
- 	matrix_print(vtm, stdout);
+  	// printf("After final translation to image\n");	
+ 	// matrix_print(vtm, stdout);
  }
 
 

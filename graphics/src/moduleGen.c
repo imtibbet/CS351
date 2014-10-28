@@ -150,7 +150,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	
 	// if any parameters, parse and build table of parameters
 	if(numparams){
-		printf("module has %d parameters, processing\n", numparams);
+		// printf("module has %d parameters, processing\n", numparams);
 		mod[activeMod]->params = malloc(numparams*sizeof(ParamListItem));
 		for(j=0;j<numparams;j++){
 			strcpy(mod[activeMod]->params[j].name, strtok(params[j], "="));
@@ -200,25 +200,25 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				numparams = 0;
 				params[numparams] = strtok (NULL, delim);
 				while(params[numparams]!=NULL){
-					printf("encountered parameter %s\n", params[numparams]);
+					// printf("encountered parameter %s\n", params[numparams]);
 					params[++numparams] = strtok (NULL, delim);
 				}
 				
 				// build varname for search
 				// loop over all defined parameters
 				for(i=0;i<mod[templateMod]->numparams;i++){
-					printf("template parameter %s\n", mod[templateMod]->params[i].name);
+					// printf("template parameter %s\n", mod[templateMod]->params[i].name);
 					// loop over given params to see if new value given
 					for(j=0;j<numparams;j++){
 						strcpy(tempparamval, strtok(params[j], "="));
-						printf("given parameter %s\n", tempparamval);
+						// printf("given parameter %s\n", tempparamval);
 						if(strcmp(mod[templateMod]->params[i].name, tempparamval) == 0){
 							break;
 						}
 					}
 					// if the parameter is found, overwrite the value in varname
 					if(j!=numparams){
-						printf("overwriting var %s\n", tempparamval);
+						// printf("overwriting var %s\n", tempparamval);
 						strcpy(tempparamval, strtok(NULL, "="));
 						sprintf(tempparamval, "%0.3f", atof(tempparamval));
 						strcat(varname, tempparamval);
@@ -373,8 +373,6 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					searchname = strtok (NULL, delim);
 				}
 				polygon_set(&temppolygon, i, &(temppts[0]));
-				printf("polygon added to module %s\n", mod[activeMod]->name);
-				polygon_print(&temppolygon, stdout);
 				module_polygon(mod[activeMod]->module, &temppolygon);
 			} 
 			else if(strcmp(secondword, "cube") == 0){
