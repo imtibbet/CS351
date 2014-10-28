@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
     // create image
     src = image_create( rows, cols );
 
-    // use a temprary polygon to transform stuff
+    // use a temporary polygon to transform stuff
     polygon_init( &tpoly );
 
     printf("Drawing Polygons\n");

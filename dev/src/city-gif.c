@@ -13,10 +13,10 @@
 int main(int argc, char *argv[]) {
 	char command[1000];
 	char filename[1000];
-	int frames = 49;
+	int frames = 99;
 	int frame;
 	  
-	for(frame=0;frame<frames/2;frame++){
+	for(frame=0;frame<frames;frame++){
 		sprintf(command,"../bin/city 0.%02d",frame);
 		system(command);
 		sprintf(filename,"mv city.ppm %03dcity.ppm",frame);
@@ -24,13 +24,13 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// shrinking back down to give continuous loop
-	for(frame=frames-2; frame>-1; frame--){
+	for(frame=frames-5; frame>-1; frame--){
 		sprintf(command,"../bin/city 0.%02d", frame);
 		system(command);
 		sprintf(filename,"mv city.ppm %03dcity.ppm", 200-frame);
 		system(filename);
 	}
-	
+
 	printf("converting to gif...\n");
 	system("convert -delay 1.5 -loop 0 *city.ppm city.gif");
 	system("rm *city.ppm");

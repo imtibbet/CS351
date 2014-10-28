@@ -4,68 +4,33 @@ Fall 2014
 
 Example of a 3D scene model
 
-Draws a city with 3 different kinds of buildings
+Draws Egypt with Cairo + the pyramids of Giza
  */
 
 #include "graphics.h"
 #include <time.h>
 #include <stdlib.h>
 
-int main(int argc, char *argv[]) {
-	// initialize fields
-	const int rows = 500*2;
-	const int cols = 550*2;
-	Image *src;
-	int i;
+static Module* city();
+static Module* city(){
 	Module *b[40];
 	Module *city;
-	Polygon p;
-	Point pt[4];
-	View3D view;
-	Matrix vtm, gtm;
-	DrawState *ds;
-	float bodyWidth = 2.0;
 	srand(time(NULL));
-	char command[256];
-	float alpha, x[21];
-
+	int i;
+	float x[21];
 	Color c[21];
-	Color Blue = {{0.0, 0.0, 1.0}};
+
+	Color Black = {{0.0, 0.0, 0.0}};
 
 	for( i = 0; i < 22; i++){
 		x[i] = ((float)rand()/(float)(RAND_MAX));
-		printf("x=%d\n", &x[i]);
+		printf("x=%f\n", (float)x[i]);
 		color_set(&c[i], (float)x[i], (float)x[i], (float)x[i]);
 	}
 
-// grab command line argument to determine viewpoint
-    // and set up the view structure
-    if( argc > 1 ) {
-        alpha = atof( argv[1] );
-        if( alpha < 0.0 || alpha > 1.0 )
-            alpha = 0.0;
-        point_set3D( &(view.vrp), 120*alpha, 80*alpha, -80*alpha - (1.0-cos(alpha)*80) );
-    } else {
-		point_set3D( &(view.vrp), 120, 80, -80 );
-    }
-	// set up the view
-	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], 
-		-view.vrp.val[2] );
-	vector_set( &(view.vup), 0, 1, 0 );
-	view.d = 10;
-	view.du = 6;
-	view.f = 1;
-	view.b = 50;
-	view.screenx = cols;
-	view.screeny = rows;
-	int r;
+	city = module_create();
 
-	printf("set up view\n");
-
-	matrix_setView3D( &vtm, &view );
- 	matrix_identity( &gtm );
-
- 	// buildings
+	 	// buildings
  	b[0] = module_create();
  	module_scale( b[0], 4, 4, 20);
  	module_rotateX( b[0], 0, 1);
@@ -143,17 +108,17 @@ int main(int argc, char *argv[]) {
  	module_cube(b[11], 1);
 
  	b[12] = module_create();
- 	module_scale( b[12], 5, 6, 15);
+ 	module_scale( b[12], 5, 5, 15);
  	module_rotateX( b[12], 0, 1);
- 	module_translate( b[12], 0, 0, 12.5);
- 	module_color(b[12], &c[12]);
- 	module_cube(b[12], 1);
+ 	module_translate( b[12], 0, 0, 0);
+ 	module_color( b[12], &c[12]);
+ 	module_cube( b[12], 1);
  	b[13] = module_create();
- 	module_scale( b[13], 5, 5, 15);
+ 	module_scale( b[13], 5, 6, 15);
  	module_rotateX( b[13], 0, 1);
- 	module_translate( b[13], 0, 0, 0);
- 	module_color( b[13], &c[13]);
- 	module_cube( b[13], 1);
+ 	module_translate( b[13], 0, 0, 12.5);
+ 	module_color(b[13], &c[13]);
+ 	module_cube(b[13], 1);
   	b[14] = module_create();
  	module_scale( b[14], 7, 3, 2);
  	module_rotateX( b[14], 0, 1);
@@ -203,8 +168,149 @@ int main(int argc, char *argv[]) {
  	module_scale( b[21], 7, 5, 10);
  	module_rotateX( b[21], 0, 1);
  	module_translate( b[21], 30, -2.5, 10);
- 	module_color(b[21], &c[21]);
+ 	module_color(b[21], &Black);
  	module_cube(b[21], 1);
+
+	for ( i = 0; i < 22; i++){
+		module_module((Module*)city, (Module*)b[i]);
+	}
+
+	return((Module*)city);
+}
+
+static Module* sandscape(){
+	Module *sand;
+	Color sandy = {{0.68, 0.52, 0.28}};
+
+	sand = module_create();
+	module_scale(sand, 100, 2, 100);
+	module_translate(sand, 0, -6, 40);
+	module_color(sand, &sandy);
+	module_cube(sand, 1);
+
+	return((Module*)sand);
+}
+
+static Module* pyramid(){
+	Color dark_sand = {{0.65, 0.47, 0.22}};
+	Polygon side[5];
+	Polygon tpoly;
+	Point tv[4];
+    Point v[8];
+   	Module *pyra;
+    int i;
+
+	// initialize polygons
+    for(i=0;i<5;i++) {
+        polygon_init( &side[i] );
+    }
+
+    // corners of a pyramid, centered at (0, 0, 0)
+    point_set3D(&v[0], -1, -1, -1 );
+    point_set3D(&v[1],  1, -1, -1 );
+    point_set3D(&v[2],  1,  -1, 1 );
+    point_set3D(&v[3], -1,  -1, 1 );
+    point_set3D(&v[4], 0, 0, 0);
+
+    // front side
+    point_copy(&tv[0], &v[0]);
+    point_copy(&tv[1], &v[1]);
+    point_copy(&tv[2], &v[4]);
+    polygon_set(&side[0], 3, tv);
+
+    // back side
+    point_copy(&tv[0], &v[3]);
+    point_copy(&tv[1], &v[2]);
+    point_copy(&tv[2], &v[4]);
+    polygon_set(&side[1], 3, tv);
+
+    // bottom side
+    polygon_set(&side[2], 4, &(v[0]));
+
+    // left side
+    point_copy(&tv[0], &v[0]);
+    point_copy(&tv[1], &v[3]);
+    point_copy(&tv[2], &v[4]);
+    polygon_set(&side[3], 3, tv);
+
+    // right side
+    point_copy(&tv[0], &v[1]);
+    point_copy(&tv[1], &v[2]);
+    point_copy(&tv[2], &v[4]);
+    polygon_set(&side[4], 3, tv); 
+
+    pyra = module_create();
+    module_scale(pyra, 20, 20, 20);
+
+    for( i = 0; i<5; i++){
+    	polygon_copy(&tpoly, &side[i]);
+    	module_polygon(pyra, &tpoly);
+    }
+
+    return(pyra);
+}
+
+static Module* giza(){
+	Module *giza, *p1, *p2, *p3;
+
+	p1 = pyramid();
+	p2 = pyramid();
+	p3 = pyramid();
+
+	module_module(giza, p1);
+	module_module(giza, p2);
+	module_module(giza, p3);
+
+	return(giza);
+}
+
+int main(int argc, char *argv[]) {
+	// initialize fields
+	const int rows = 600*2;
+	const int cols = 660*2;
+	Image *src;
+	int i;
+	Module *cairo, *sand, *pyramids;
+	Polygon p;
+	Point pt[4];
+	View3D view;
+	Matrix vtm, gtm;
+	DrawState *ds;
+	float bodyWidth = 2.0;
+	char command[256];
+	float alpha;
+	Color Blue = {{0.0, 0.0, 1.0}};
+
+// grab command line argument to determine viewpoint
+    // and set up the view structure
+    if( argc > 1 ) {
+        alpha = atof( argv[1] );
+        if( alpha < 0.0 || alpha > 1.0 )
+            alpha = 0.0;
+        point_set3D( &(view.vrp), 120*alpha, 80*alpha, -80*alpha - (1.0-cos(alpha)*80) );
+    } else {
+		point_set3D( &(view.vrp), 300, 80, -80 );
+    }
+	// set up the view
+	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], 
+		-view.vrp.val[2] );
+	vector_set( &(view.vup), 0, 1, 0 );
+	view.d = 10;
+	view.du = 6;
+	view.f = 1;
+	view.b = 50;
+	view.screenx = cols;
+	view.screeny = rows;
+	int r;
+
+	printf("set up view\n");
+
+	matrix_setView3D( &vtm, &view );
+ 	matrix_identity( &gtm );
+
+ 	sand = (Module*)sandscape();
+ 	pyramids = (Module*)giza();
+ 	cairo = (Module*)city();
 
 	// create the image and drawstate
 	src = image_create( rows, cols );
@@ -214,16 +320,16 @@ int main(int argc, char *argv[]) {
 	printf("created the image and drawstate\n");
 
 	// draw scene
-	for ( i = 0; i < 22; i++){
-		module_draw(b[i], &vtm, &gtm, ds, NULL, src );
-	}
-
+	module_draw(sand, &vtm, &gtm, ds, NULL, src );
+	module_draw(pyramids, &vtm, &gtm, ds, NULL, src);
+	module_draw(cairo, &vtm, &gtm, ds, NULL, src);
+	
 	printf("drew the scene\n");
 
 	// write out the scene
 	printf("Writing image\n");
-	image_write( src, "city.ppm" );
-	sprintf(command, "convert -scale %03dx%03d city.ppm city.ppm", cols/2, rows/2);
+	image_write( src, "egypt.ppm" );
+	sprintf(command, "convert -scale %03dx%03d egypt.ppm egypt.ppm", cols/2, rows/2);
 	system(command);
 
 	// free the polygon data
@@ -231,9 +337,9 @@ int main(int argc, char *argv[]) {
 	printf("polygon freed\n");
 
 	// free the modules
-	for ( i = 0; i < 22; i++){
-		module_delete( b[i] );
-	}
+	module_delete(sand);
+	module_delete(pyramids);
+	module_delete(cairo);
 
 	printf("module freed\n");
 
