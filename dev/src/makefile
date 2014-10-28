@@ -26,16 +26,16 @@ LIBS = -lm -limageIO
 LFLAGS = -L$(LIBDIR)
 
 # put all of the relevant include files here
-_DEPS = ppmIO.h color.h fractals.h image.h primitives.h floodfill.h graphics.h
+_DEPS = graphics.h
 
 # convert them to point to the right place
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = 3d test4a
+EXECUTABLES = test6a test6b city city-gif egypt
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = 3d.o test4a.o
+_OBJ = test6a.o test6b.o city.o city-gif.o egypt.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -138,6 +138,12 @@ test6b: $(ODIR)/test6b.o
 moduleGen: $(ODIR)/moduleGen.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 req2: $(ODIR)/req2.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+city: $(ODIR)/city.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+city-gif: $(ODIR)/city-gif.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+egypt: $(ODIR)/egypt.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 .PHONY: clean
 
