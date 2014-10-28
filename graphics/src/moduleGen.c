@@ -41,18 +41,28 @@ typedef struct{
 	Module *module;
 } ModuleItem;
 
+// converts strings to float, allowing two term multiplication, 
+// named variables or parameters in nums or module, respectively, sin and cos. 
 static float stringToFloat(char *str, TableItem **numbs, int numnumbers, 
 										ModuleItem *activeModule){
-	char *term1, *term2, *searchname, num[256];
+	char *searchname;
+	char num[256], term1[256], term2[256];
 	int j;
 	strcpy(num, str);
-	//printf("stringToFloat %s\n", num);
+	printf("stringToFloat %s\n", num);
 	// check for multiplication and recurse through arguments
 	if(strchr(num, '*')){
 		//printf("performing multiplication %s\n", num);
-		term1 = strtok(num, "*");
-		term2 = strtok(NULL, "*");
+		strcpy(term1, strtok(num, "*"));
+		strcpy(term2, strtok(NULL, ""));
 		return(	stringToFloat(term1, numbs, numnumbers, activeModule) *
+				stringToFloat(term2, numbs, numnumbers, activeModule) ) ;
+	}
+	else if(strchr(num, '+')){
+		//printf("performing multiplication %s\n", num);
+		strcpy(term1, strtok(num, "+"));
+		strcpy(term2, strtok(NULL, ""));
+		return(	stringToFloat(term1, numbs, numnumbers, activeModule) +
 				stringToFloat(term2, numbs, numnumbers, activeModule) ) ;
 	}
 
@@ -102,16 +112,13 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 	}
 }
 
-
-
-
+// parse the active module's definition, populating its module
 static int parseModule(int activeMod, ModuleItem **mod, 
 						TableItem **pt, TableItem **v, TableItem **numbs, 
 						TableItem **l, TableItem **pl, TableItem **pg, 
 						int numparams, int numpoints, int numvectors, int numlines, 
 						int numpolylines, int numpolygons, int numnumbers){
-	// variables for parsing
-	const int maxdef = 1000;
+	// variables for parsing module definition
 	const int maxline = 1000;
 	const int maxpts = 50;
 	const int maxparam = 50;
@@ -123,7 +130,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
 			*searchname;
 	char *delim = " \n";
-	int i, j, solid, templateMod, is2D = 0;
+	int i, j, solid, templateMod = 0;
 	int curLine = 0;
 	int totalLines;
 	int numAddedMods = 1;
@@ -174,12 +181,16 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	for(curLine=1;curLine<totalLines;curLine++){
 		strcpy(buff, mod[activeMod]->definition[curLine]);
 		strcpy(linein, strtok (buff, "\n"));
-		printf("definition line %s\n",linein);
+		printf("definition line %s\n",linein); // get crazy characters here
 		
 		// get the first and second words
 		firstword = strtok (buff,delim);
 		secondword = strtok (NULL, delim);
+		
+		// put named primitive into module
 		if(strcmp(firstword, "put") == 0){
+			
+			// put module
 			if(strcmp(secondword, "module") == 0){
 				strcpy(varname, strtok (NULL, delim));
 				// find template module if any
@@ -246,20 +257,25 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					printf("numAddedMods=%d\n",numAddedMods);
 					mod[activeMod+numAddedMods] = malloc(sizeof(ModuleItem));
 					mod[activeMod+numAddedMods]->module = module_create();
-					mod[activeMod+numAddedMods]->definition[0] = malloc(strlen(linein));
+					mod[activeMod+numAddedMods]->definition[0] = malloc(2*strlen(linein));
 					strcpy(mod[activeMod+numAddedMods]->definition[0], linein);
 					for(j=1;j<mod[templateMod]->numlines;j++){
-						mod[activeMod+numAddedMods]->definition[j] = malloc(strlen(mod[templateMod]->definition[j]));
-						strcpy(mod[activeMod+numAddedMods]->definition[j], mod[templateMod]->definition[j]);
+						mod[activeMod+numAddedMods]->definition[j] = 
+							malloc(2*strlen(mod[templateMod]->definition[j]));
+						strcpy(	mod[activeMod+numAddedMods]->definition[j], 
+								mod[templateMod]->definition[j]);
 					}
 					mod[activeMod+numAddedMods]->numlines = mod[templateMod]->numlines;
-					numAddedMods += parseModule(activeMod+numAddedMods, mod, pt, v, numbs, l, pl, pg, 
+					numAddedMods += parseModule(activeMod+numAddedMods, mod, 
+								pt, v, numbs, l, pl, pg, 
 								numparams, numpoints, numvectors, numlines, 
 								numpolylines, numpolygons, numnumbers);
 					printf("made module\n");			
 					module_module(mod[activeMod]->module, mod[activeMod+numAddedMods-1]->module);
 				}				
 			} 
+			
+			// put module
 			else if(strcmp(secondword, "point") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numpoints;j++){
@@ -272,6 +288,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				else
 					module_point(mod[activeMod]->module, &(pt[j]->item.point));
 			} 
+			
+			// put line
 			else if(strcmp(secondword, "line") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numlines;j++){
@@ -284,6 +302,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				else
 					module_line(mod[activeMod]->module, &(l[j]->item.line));
 			} 
+			
+			// put polyline
 			else if(strcmp(secondword, "polyline") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numpolylines;j++){
@@ -296,6 +316,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				else
 					module_polyline(mod[activeMod]->module, &(pl[j]->item.polyline));
 			} 
+			
+			// put polygon
 			else if(strcmp(secondword, "polygon") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numpolygons;j++){
@@ -308,16 +330,24 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				else
 					module_polygon(mod[activeMod]->module, &(pg[j]->item.polygon));
 			} 
+			
+			// put not defined
 			else {
 				printf(	"Seond word of put not not recognized.\n"
 						"Must be module, point, line, polyline, polygon\n");
 			}
 		}
+		
+		// add anonymous primitive into module
 		else if(strcmp(firstword, "add") == 0){
+		
+			// add module
 			if(strcmp(secondword, "module") == 0){
 				printf(	"It is not legal to add modules. Modules must first "
 						"be defined with a name and then put into active module\n");
 			} 
+		
+			// add point
 			else if(strcmp(secondword, "point") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -332,6 +362,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				}
 				module_point(mod[activeMod]->module, &(temppts[0]));
 			} 
+		
+			// add line
 			else if(strcmp(secondword, "line") == 0){
 				for(i=0;i<2;i++){
 					searchname = strtok (NULL, delim);
@@ -345,6 +377,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				line_set(&templine, temppts[0], temppts[1]);
 				module_line(mod[activeMod]->module, &templine);
 			} 
+		
+			// add polyline
 			else if(strcmp(secondword, "polyline") == 0){
 				searchname = strtok (NULL, delim);
 				i = 0;
@@ -360,6 +394,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				polyline_set(&temppolyline, i, &(temppts[0]));
 				module_polyline(mod[activeMod]->module, &temppolyline);
 			}
+		
+			// add polygon
 			else if(strcmp(secondword, "polygon") == 0){
 				searchname = strtok (NULL, delim);
 				i = 0;
@@ -375,6 +411,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				polygon_set(&temppolygon, i, &(temppts[0]));
 				module_polygon(mod[activeMod]->module, &temppolygon);
 			} 
+		
+			// add cube
 			else if(strcmp(secondword, "cube") == 0){
 				nextword = strtok (NULL, delim);
 				if(nextword)
@@ -383,24 +421,34 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					solid = 1;
 				module_cube(mod[activeMod]->module, solid);
 			}
+		
+			// add identity
 			else if(strcmp(secondword, "identity") == 0){
 				module_identity(mod[activeMod]->module);
 			}
+		
+			// add rotateX
 			else if(strcmp(secondword, "rotateX") == 0){
 				nextword = strtok (NULL, delim);
 				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, mod[activeMod])/180.0;
 				module_rotateX(mod[activeMod]->module, cos(theta), sin(theta));
 			}
+		
+			// add rotateY
 			else if(strcmp(secondword, "rotateY") == 0){
 				nextword = strtok (NULL, delim);
 				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, mod[activeMod])/180.0;
 				module_rotateY(mod[activeMod]->module, cos(theta), sin(theta));
 			}
+		
+			// add rotateZ
 			else if(strcmp(secondword, "rotateZ") == 0){
 				nextword = strtok (NULL, delim);
 				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, mod[activeMod])/180.0;
 				module_rotateZ(mod[activeMod]->module, cos(theta), sin(theta));
 			}
+		
+			// add rotateXYZ
 			else if(strcmp(secondword, "rotateXYZ") == 0){
 				for(i=0;i<3;i++){
 					searchname = strtok (NULL, delim);
@@ -413,6 +461,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				}
 				module_rotateXYZ(mod[activeMod]->module, &(uvw[0]), &(uvw[1]), &(uvw[2]));
 			} 
+		
+			// add translate
 			else if(strcmp(secondword, "translate") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -426,6 +476,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					module_translate(mod[activeMod]->module, x, y, z);
 				}
 			} 
+		
+			// add scale
 			else if(strcmp(secondword, "scale") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -439,6 +491,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					module_scale(mod[activeMod]->module, x, y, z);
 				}
 			} 
+		
+			// add shear2D
 			else if(strcmp(secondword, "shear2D") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -446,6 +500,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
 				module_shear2D(mod[activeMod]->module, x, y);
 			} 
+		
+			// add shearZ
 			else if(strcmp(secondword, "shearZ") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -453,6 +509,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
 				module_shearZ(mod[activeMod]->module, x, y);
 			} 
+		
+			// add not defined
 			else {
 				printf(	"Seond word of add not not recognized.\n"
 						"Must be module, point, line, polyline, polygon, cube"
@@ -464,11 +522,6 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	return(numAddedMods);
 }
 
-
-
-
-
-
 int main(int argc, char *argv[]) {
 
 	// variables for the view and image
@@ -479,22 +532,19 @@ int main(int argc, char *argv[]) {
 	Matrix vtm;
 	Matrix gtm;
 
-	// variables for parsing
+	// variables for parsing input file
 	const int maxdef = 1000;
 	const int maxline = 1000;
 	const int maxpts = 50;
-	const int maxparam = 50;
 	char *infilename, *outfilename;
 	FILE *infile;
 	char buff[maxline];
 	char linein[maxline];
-	char *params[maxparam];
 	char varname[256];
-	char tempparamval[256];
 	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
 			*searchname;
 	char *delim = " \n";
-	int i, j, solid, templateMod, is2D = 0;
+	int i, j, is2D = 0;
 	int activeMod = -1;
 	int drawMod = -1;
 	int curLine = 0;
@@ -509,11 +559,9 @@ int main(int argc, char *argv[]) {
 				*pl[maxdef], *pg[maxdef];
 	ModuleItem 	*mod[maxdef];
 	Point temppts[maxpts];
-	Vector uvw[3];
-	Line templine;
 	Polyline temppolyline;
 	Polygon temppolygon;
-	float x, y, z, theta;
+	float x, y, z;
 
 	// init
 	polyline_init(&temppolyline);
@@ -536,23 +584,35 @@ int main(int argc, char *argv[]) {
 	infile =fopen(infilename,"r");
 	if (!infile){
 		printf("%s did not open for reading properly\n",infilename);
-		return 1;
+		return(1);
 	}
 
 	// loop until EOF is reached, generating modules
 	while (fgets(buff,1000, infile)!=NULL){
 
-		// remove newline
+		// skip empty lines
 		if(!strtok(buff, "\n"))
 			continue;
-		strcpy(linein, strtok (buff, "\n"));
-		if(strncmp(linein," ",1) == 0 || strncmp(linein,"#",1) == 0)
+		// skip comment lines
+		if(strncmp(buff,"#",1) == 0)
 			continue;
-		printf("reading line: %s\n", linein);
+		// parse line without newline
+		strcpy(linein, strtok (buff, "\n"));
+		printf("reading line: %s\n", linein); //dont get crazy characters here
 
 		// get the first and second words
 		firstword = strtok (buff,delim);
+		if(!firstword){
+			printf("no first word on this line, skipping\n");
+			continue;
+		}
 		secondword = strtok (NULL, delim);
+		if(!secondword){
+			printf("no second word on this line, skipping\n");
+			continue;
+		}
+		
+		// select a named module to draw
 		if(strcmp(firstword, "draw") == 0){
 			for(j=0;j<activeMod;j++){
 				if(strncmp(mod[j]->name, secondword, strlen(secondword)) == 0){
@@ -562,9 +622,13 @@ int main(int argc, char *argv[]) {
 			printf("set to draw module %s\n", secondword);
 			drawMod = j;
 		}
+		
+		// define name primitives
 		else if(strcmp(firstword, "def") == 0){
 				
 			strcpy(varname, strtok (NULL, delim));
+			
+			// def module
 			if(strcmp(secondword, "module") == 0){
 			
 				// if a module has been previously defined, parse all lines
@@ -582,9 +646,11 @@ int main(int argc, char *argv[]) {
 				// get space for new module
 				mod[activeMod] = malloc(sizeof(ModuleItem));
 				mod[activeMod]->module = module_create();
-				mod[activeMod]->definition[curLine] = malloc(strlen(linein));
+				mod[activeMod]->definition[curLine] = malloc(2*strlen(linein));
 				strcpy(mod[activeMod]->definition[curLine++], linein);
 			}
+			
+			// def point
 			else if(strcmp(secondword, "point") == 0){
 				pt[numpoints] = malloc(sizeof(TableItem));
 				strcpy(pt[numpoints]->name, varname);
@@ -600,6 +666,8 @@ int main(int argc, char *argv[]) {
 					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
 				}
 			}
+			
+			// def line
 			else if(strcmp(secondword, "line") == 0){
 				l[numlines] = malloc(sizeof(TableItem));
 				strcpy(l[numlines]->name, varname);
@@ -614,6 +682,8 @@ int main(int argc, char *argv[]) {
 				}
 				line_set(&(l[numlines++]->item.line), temppts[0], temppts[1]);
 			}
+			
+			// def polyline
 			else if(strcmp(secondword, "polyline") == 0){
 				pl[numpolylines] = malloc(sizeof(TableItem));
 				strcpy(pl[numpolylines]->name, varname);
@@ -630,6 +700,8 @@ int main(int argc, char *argv[]) {
 				}
 				pl[numpolylines++]->item.polyline = *(polyline_createp(i, &(temppts[0])));
 			}
+			
+			// def polygon
 			else if(strcmp(secondword, "polygon") == 0){
 				pg[numpolygons] = malloc(sizeof(TableItem));
 				strcpy(pg[numpolygons]->name, varname);
@@ -646,6 +718,8 @@ int main(int argc, char *argv[]) {
 				}
 				pg[numpolygons++]->item.polygon = *(polygon_createp(i, &(temppts[0])));
 			}
+			
+			// def vector
 			else if(strcmp(secondword, "vector") == 0){
 				v[numvectors] = malloc(sizeof(TableItem));
 				strcpy(v[numvectors]->name, varname);
@@ -661,6 +735,8 @@ int main(int argc, char *argv[]) {
 				}
 				vector_set(&(v[numvectors++]->item.vector), x, y, z);
 			}
+			
+			// def number
 			else if(strcmp(secondword, "number") == 0){
 				numbs[numnumbers] = malloc(sizeof(TableItem));
 				strcpy(numbs[numnumbers]->name, varname);
@@ -668,22 +744,41 @@ int main(int argc, char *argv[]) {
 				x = stringToFloat(nextword, numbs, numnumbers, NULL);
 				numbs[numnumbers++]->item.number = x;
 			}
+			
+			// def not defined
 			else {
 				printf(	"Seond word of def not not recognized.\n"
 						"Must be module, point, vector, line, polyline, "
 						"polygon, or number\n");
 			}
 		}
+			
+		// apeend put line to definition of active module
 		else if(strcmp(firstword, "put") == 0){
-			mod[activeMod]->definition[curLine] = malloc(strlen(linein));
+			if(activeMod==-1){
+				printf("put must be after a named module has been defined\n");
+				continue;
+			}
+			mod[activeMod]->definition[curLine] = malloc(2*strlen(linein));
 			strcpy(mod[activeMod]->definition[curLine++], linein);
 		}
+		
+		// append add line to definition of active module
 		else if(strcmp(firstword, "add") == 0){
-			mod[activeMod]->definition[curLine] = malloc(strlen(linein));
+			if(activeMod==-1){
+				printf("add must be after a named module has been defined\n");
+				continue;
+			}
+			mod[activeMod]->definition[curLine] = malloc(2*strlen(linein));
 			strcpy(mod[activeMod]->definition[curLine++], linein);
 		}
+		
+		// define a 2D view
 		else if(strcmp(firstword, "view2D") == 0){
+		
 			is2D = 1;
+			
+			// 2D vrp
 			if(strcmp(secondword, "vrp") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -692,6 +787,8 @@ int main(int argc, char *argv[]) {
 				z = 0;
 				point_set3D(&(view2D.vrp), x, y, z);
 			}
+			
+			// 2D x vector
 			else if(strcmp(secondword, "x") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -700,25 +797,38 @@ int main(int argc, char *argv[]) {
 				z = 0;
 				vector_set(&(view2D.x), x, y, z);
 			}
+			
+			// 2D dx
 			else if(strcmp(secondword, "dx") == 0){
 				xstr = strtok (NULL, delim);
 				view2D.dx = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
+			
+			// 2D screenx
 			else if(strcmp(secondword, "screenx") == 0){
 				xstr = strtok (NULL, delim);
 				view2D.screenx = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
+			
+			// 2D screeny
 			else if(strcmp(secondword, "screeny") == 0){
 				xstr = strtok (NULL, delim);
 				view2D.screeny = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
+			
+			// 2D not defined
 			else{
 				printf(	"Seond word of view2D not not recognized.\n"
 						"Must be vrp, x, dx, screenx, or screeny\n");
 			}
 		}
+			
+		// define a 3D view
 		else if(strcmp(firstword, "view3D") == 0){
+		
 			is2D = 0;
+			
+			// 3D vrp
 			if(strcmp(secondword, "vrp") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -728,6 +838,8 @@ int main(int argc, char *argv[]) {
 				z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				point_set3D(&(view3D.vrp), x, y, z);
 			}
+			
+			// 3D vpn
 			else if(strcmp(secondword, "vpn") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -737,6 +849,8 @@ int main(int argc, char *argv[]) {
 				z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				vector_set(&(view3D.vpn), x, y, z);
 			}
+			
+			// 3D vup
 			else if(strcmp(secondword, "vup") == 0){
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -746,50 +860,70 @@ int main(int argc, char *argv[]) {
 				z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				vector_set(&(view3D.vup), x, y, z);
 			}
+			
+			// 3D d
 			else if(strcmp(secondword, "d") == 0){
 				xstr = strtok (NULL, delim);
 				view3D.d = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
+			
+			// 3D du
 			else if(strcmp(secondword, "du") == 0){
 				xstr = strtok (NULL, delim);
 				view3D.du = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
+			
+			// 3D f
 			else if(strcmp(secondword, "f") == 0){
 				xstr = strtok (NULL, delim);
 				view3D.f = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
+			
+			// 3D b
 			else if(strcmp(secondword, "b") == 0){
 				xstr = strtok (NULL, delim);
 				view3D.b = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
+			
+			// 3D screnx
 			else if(strcmp(secondword, "screenx") == 0){
 				xstr = strtok (NULL, delim);
 				view3D.screenx = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
+			
+			// 3D screeny
 			else if(strcmp(secondword, "screeny") == 0){
 				xstr = strtok (NULL, delim);
 				view3D.screeny = stringToFloat(xstr, numbs, numnumbers, NULL);
 			}
+			
+			// 3D not defined
 			else{
 				printf(	"Seond word of view3D not not recognized.\n"
 						"Must be vrp, vpn, vup, d, du, screenx, or screeny\n");
 			}
 		}
+		
+		// firstword not defined
 		else{
 			printf(	"First word not not recognized.\n"
 					"Must be def, add, put, view2D, or view3D\n");
 		}
 	}
+	
+	// at the end of the file, parse the most recently defined module
 	mod[activeMod]->numlines = curLine;
 	activeMod += parseModule(activeMod, mod, pt, v, numbs, l, pl, pg, 
 				numparams, numpoints, numvectors, numlines, 
 				numpolylines, numpolygons, numnumbers);
-	printf("activeMod=%d\n",activeMod);
-	curLine = 0;
 	printf("EOF reached\n");
+	printf("\ntotal number of modules defined = %d\n",activeMod);
+	for(j=0;j<activeMod;j++){
+		printf("module named %s\n", mod[j]->name);
+	}
 
 	// check that everything was defined correctly
-	printf("User defined primitives:\n");
+	printf("\nUser defined primitives:\n");
 	for(j=0;j<numpoints;j++){
 		printf("point named %s\n", pt[j]->name);
 		point_print(&(pt[j]->item.point), stdout);
@@ -810,29 +944,31 @@ int main(int argc, char *argv[]) {
 		printf("polygon named %s\n", pg[j]->name);
 		polygon_print(&(pg[j]->item.polygon), stdout);
 	}
-	printf("User defined modules:\n");
-	for(j=0;j<activeMod;j++){
-		printf("module named %s\n", mod[j]->name);
-	}
+	
 	// verify that at least one module defined
 	if(drawMod == -1){
-		printf("no modules defined, nothing is being drawn, no side effects\n");
+		printf(	"Must use draw firstword to specify a module to draw.\n"
+				" No module to draw, side effects\n");
 	} else {
 
 		// define view and draw state and draw last module defined
 		matrix_identity( &gtm );
 		if(is2D){
 			matrix_setView2D( &vtm, &view2D );
+			printf("\n2D view matrix:\n");
+			matrix_print(&vtm, stdout);
 			src = image_create( view2D.screeny, view2D.screenx );
 		}
 		else {
 			matrix_setView3D( &vtm, &view3D );
+			printf("\n3D view matrix:\n");
+			matrix_print(&vtm, stdout);
 			src = image_create( view3D.screeny, view3D.screenx );
 		}
-		printf("vtm in module generation:\n");
-		matrix_print(&vtm, stdout);
+		printf("drawing module %s\n", mod[drawMod]->name);
 		module_draw(mod[drawMod]->module, &vtm, &gtm, ds, NULL, src);
 		image_write(src, outfilename);
+		printf("image %s written\n", outfilename);
 
 		// some clean up
 		image_free(src);
@@ -867,7 +1003,7 @@ int main(int argc, char *argv[]) {
 		polygon_clear(&(pg[j]->item.polygon));
 		free(pg[j]);
 	}
+	printf("\n");
 
 	return(0);
 }
-
