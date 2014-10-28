@@ -743,8 +743,8 @@ void matrix_perspective(Matrix *m, double d){
  	
  	// 3 Translate the VRP to the origin
  	matrix_translate(vtm, -view->vrp.val[0], -view->vrp.val[1], -view->vrp.val[2]);
- 	printf("After VRP transltion\n");
- 	matrix_print(vtm, stdout);
+ 	// printf("After VRP transltion\n");
+ 	// matrix_print(vtm, stdout);
  	
  	// 4 Normalize U, VUP and VPN and use the Rxyz rotation method to align the axes
  	vector_normalize(&u);
