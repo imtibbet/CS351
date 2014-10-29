@@ -348,8 +348,10 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				numparams = 0;
 				params[numparams] = strtok (NULL, delim);
 				while(params[numparams]!=NULL){
-					if(verbose) printf("encountered parameter %s\n", params[numparams]);
 					params[++numparams] = strtok (NULL, delim);
+				}
+				for(i=0;i<numparams;i++){
+					if(verbose) printf("encountered parameter %s\n", params[i]);
 				}
 				
 				// build varname for search
@@ -372,7 +374,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 							stringToFloat(tempparamval, numbs, numnumbers, NULL));
 						strcat(varname, tempparamval);
 					} else {
-						if(verbose) printf("using default for var %s\n", tempparamval);
+						if(verbose) printf("using default for var %s\n", mod[templateMod]->params[i].name);
 						sprintf(tempparamval, "%0.3f", mod[templateMod]->params[i].val);
 						strcat(varname, tempparamval);
 					}
