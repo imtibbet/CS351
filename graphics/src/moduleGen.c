@@ -131,6 +131,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	char *params[maxparam];
 	char varname[256];
 	char tempparamval[256];
+	char newmodlinein[256];
 	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
 			*searchname;
 	char *delim = " \n";
@@ -330,6 +331,12 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			// put module
 			if(strcmp(secondword, "module") == 0){
 				strcpy(varname, strtok (NULL, delim));
+				strcpy(newmodlinein, firstword);
+				strcat(newmodlinein, " ");
+				strcat(newmodlinein, secondword);
+				strcat(newmodlinein, " ");
+				strcat(newmodlinein, varname);
+
 				// find template module if any
 				for(j=0;j<activeMod;j++){
 					if(strncmp(mod[j]->name, varname, strlen(varname)) == 0){
@@ -348,16 +355,16 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				numparams = 0;
 				params[numparams] = strtok (NULL, delim);
 				while(params[numparams]!=NULL){
+					if(verbose) printf("encountered parameter %s\n", params[numparams]);
 					params[++numparams] = strtok (NULL, delim);
-				}
-				for(i=0;i<numparams;i++){
-					if(verbose) printf("encountered parameter %s\n", params[i]);
 				}
 				
 				// build varname for search
 				// loop over all defined parameters
 				for(i=0;i<mod[templateMod]->numparams;i++){
 					if(verbose) printf("template parameter %s\n", mod[templateMod]->params[i].name);
+					strcat(newmodlinein, " ");
+
 					// loop over given params to see if new value given
 					for(j=0;j<numparams;j++){
 						strcpy(tempparamval, strtok(params[j], "="));
@@ -373,10 +380,14 @@ static int parseModule(int activeMod, ModuleItem **mod,
 						sprintf(tempparamval, "%0.3f",
 							stringToFloat(tempparamval, numbs, numnumbers, NULL));
 						strcat(varname, tempparamval);
+						strcat(newmodlinein, params[j]);
 					} else {
 						if(verbose) printf("using default for var %s\n", mod[templateMod]->params[i].name);
 						sprintf(tempparamval, "%0.3f", mod[templateMod]->params[i].val);
 						strcat(varname, tempparamval);
+						strcat(newmodlinein, mod[templateMod]->params[i].name);
+						strcat(newmodlinein, "=");
+						strcat(newmodlinein, tempparamval);
 					}
 				}
 				
@@ -399,7 +410,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					mod[activeMod+numAddedMods] = malloc(sizeof(ModuleItem));
 					mod[activeMod+numAddedMods]->module = module_create();
 					mod[activeMod+numAddedMods]->definition[0] = malloc(2*strlen(linein));
-					strcpy(mod[activeMod+numAddedMods]->definition[0], linein);
+					strcpy(mod[activeMod+numAddedMods]->definition[0], newmodlinein);
 					for(j=1;j<mod[templateMod]->numlines;j++){
 						mod[activeMod+numAddedMods]->definition[j] = 
 							malloc(2*strlen(mod[templateMod]->definition[j]));
