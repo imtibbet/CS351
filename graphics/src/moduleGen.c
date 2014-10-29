@@ -1082,12 +1082,22 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		}
 		image_fillColor(src, background);
 		if(firstCall && animate){
-			for(animateIndex=animateStart;animateIndex<animateStop;animateIndex++){
-				printf("animating from %d to %d, on step %d\n",
-						animateStart, animateStop, animateIndex);
-				sprintf(outfilenamemod, "%03d%s", animateIndex, outfilename);
-				infile = fopen(infilename, "r");
-				genModule(infile, infilename, outfilenamemod, 0, animateIndex, 0);
+			if(animateStart <= animateStop){
+				for(animateIndex=animateStart;animateIndex<=animateStop;animateIndex++){
+					printf("animating from %d to %d, on step %d\n",
+							animateStart, animateStop, animateIndex);
+					sprintf(outfilenamemod, "%03d%s", animateIndex, outfilename);
+					infile = fopen(infilename, "r");
+					genModule(infile, infilename, outfilenamemod, 0, animateIndex, 0);
+				}
+			} else {
+				for(animateIndex=animateStart;animateIndex>=animateStop;animateIndex--){
+					printf("animating from %d to %d, on step %d\n",
+							animateStart, animateStop, animateIndex);
+					sprintf(outfilenamemod, "%03d%s", animateStart-animateIndex, outfilename);
+					infile = fopen(infilename, "r");
+					genModule(infile, infilename, outfilenamemod, 0, animateIndex, 0);
+				}
 			}
 			printf("converting to gif...\n");
 			sprintf(outfilenamemod, "%s.gif", strtok(outfilename, "."));
