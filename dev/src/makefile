@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = test6a test6b city city-gif egypt
+EXECUTABLES = test6a test6b city city-gif egypt egypt-gif giza-test giza-gif
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = test6a.o test6b.o city.o city-gif.o egypt.o
+_OBJ = test6a.o test6b.o city.o city-gif.o egypt.o egypt-gif.o giza-test.o giza-gif.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -145,6 +145,13 @@ city-gif: $(ODIR)/city-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 egypt: $(ODIR)/egypt.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+giza-test: $(ODIR)/giza-test.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+giza-gif: $(ODIR)/giza-gif.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+egypt-gif: $(ODIR)/egypt-gif.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+
 .PHONY: clean
 
 clean:
