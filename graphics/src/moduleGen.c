@@ -148,7 +148,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	
 	// init
 	polygon_init(&temppolygon);
-	polygon_init(&temppolyline);
+	polyline_init(&temppolyline);
 
 	// get the first and second words
 	strcpy(buff, mod[activeMod]->definition[0]);
@@ -1015,8 +1015,8 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				numpolylines, numpolygons, numnumbers, verbose);
 	if(verbose) printf("EOF reached\n");
 	fclose(infile);
-	polygon_clear(temppolygon);
-	polyline_clear(temppolyline);
+	polygon_clear(&temppolygon);
+	polyline_clear(&temppolyline);
 
 	if(verbose){
 		printf("\ntotal number of modules defined = %d\n",activeMod);
