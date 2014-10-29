@@ -627,7 +627,10 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	if(verbose) printf("looping until EOF\n");
 	while (fgets(buff,1000, infile)!=NULL){
 
-		// skip empty and comment lines
+		// skip comment lines
+		if(strncmp(buff,"#",1) == 0)
+			continue;
+		// skip empty and midline comment lines
 		if(!strtok(buff, "#\n"))
 			continue;
 		// parse line without newline
