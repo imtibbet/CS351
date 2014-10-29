@@ -366,12 +366,13 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					}
 					// if the parameter is found, overwrite the value in varname
 					if(j!=numparams){
-						// if(verbose) printf("overwriting var %s\n", tempparamval);
+						if(verbose) printf("overwriting var %s\n", tempparamval);
 						strcpy(tempparamval, strtok(NULL, "="));
 						sprintf(tempparamval, "%0.3f",
 							stringToFloat(tempparamval, numbs, numnumbers, NULL));
 						strcat(varname, tempparamval);
 					} else {
+						if(verbose) printf("using default for var %s\n", tempparamval);
 						sprintf(tempparamval, "%0.3f", mod[templateMod]->params[i].val);
 						strcat(varname, tempparamval);
 					}
