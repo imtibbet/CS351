@@ -199,7 +199,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 		secondword = strtok (NULL, delim);
 
 		// define named primitives
-		else if(strcmp(firstword, "def") == 0){
+		if(strcmp(firstword, "def") == 0){
 				
 			strcpy(varname, strtok (NULL, delim));
 			
