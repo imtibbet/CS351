@@ -348,7 +348,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				numparams = 0;
 				params[numparams] = strtok (NULL, delim);
 				while(params[numparams]!=NULL){
-					// if(verbose) printf("encountered parameter %s\n", params[numparams]);
+					if(verbose) printf("encountered parameter %s\n", params[numparams]);
 					params[++numparams] = strtok (NULL, delim);
 				}
 				
@@ -1233,7 +1233,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			}
 			printf("converting to gif...\n");
 			sprintf(outfilenamemod, "%s.gif", strtok(outfilename, "."));
-			sprintf(command, "convert -delay 20 -loop 0 *%s.ppm %s",
+			sprintf(command, "convert -delay 3 -loop 0 *%s.ppm %s",
 								outfilename, outfilenamemod);
 			printf("%s\n",command);
 			system(command);
