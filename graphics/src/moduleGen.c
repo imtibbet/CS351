@@ -49,6 +49,7 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 	char *searchname;
 	char num[256], term1[256], term2[256];
 	int j;
+	
 	strcpy(num, str);
 	//printf("stringToFloat %s\n", num);
 	// check for addition or multiplication and recurse through arguments
@@ -101,13 +102,22 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 	if(strcmp(searchname, "sin") == 0){
 		searchname = strtok (NULL, "()");
 		//printf("computing sin(%s)\n", searchname);
-		return(sin(M_PI*stringToFloat(searchname, numbs, numnumbers, activeModule)/180.0));
+		return(sin(M_PI*stringToFloat(searchname, numbs, numnumbers,
+						activeModule)/180.0));
 	}
 	else if(strcmp(searchname, "cos") == 0){
 		searchname = strtok (NULL, "()");
 		//printf("computing cos(%s)\n", searchname);
-		return(cos(M_PI*stringToFloat(searchname, numbs, numnumbers, activeModule)/180.0));
-	} 
+		return(cos(M_PI*stringToFloat(searchname, numbs, numnumbers,
+						activeModule)/180.0));
+	}
+	else if(strcmp(searchname, "rand") == 0){
+		searchname = strtok (NULL, "()");
+		if(searchname)
+			return( rand()%(atoi(searchname)+1) );
+		else
+			return( (double)rand() / (double)RAND_MAX );
+	}
 	else {
 		//printf("returning\n");
 		return(atof(num));
@@ -797,6 +807,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	int animateStart = 0;
 	int animateStop = 0;
 	int animate = 0;
+	int loop = 0;
 	int undefmod = 0;
 	TableItem 	*c[maxdef], *pt[maxdef], *v[maxdef], *numbs[maxdef], *l[maxdef], 
 				*pl[maxdef], *pg[maxdef];
@@ -841,7 +852,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			continue;
 		}
 		
-		// define an animation variable that will create a gif
+		// define an animation variable that will create a bouncing gif
 		if(strcmp(firstword, "animate") == 0){
 			numbs[numnumbers] = malloc(sizeof(TableItem));
 			strcpy(numbs[numnumbers]->name, secondword);
@@ -849,6 +860,26 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				numbs[numnumbers++]->item.number = animateIndex;
 			}
 			else {
+				loop = 1;
+				animate = 1;
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				animateStart = stringToFloat(xstr, numbs, numnumbers, NULL);
+				animateStop = stringToFloat(ystr, numbs, numnumbers, NULL);
+				animateIndex = 
+				numbs[numnumbers++]->item.number = animateStart;
+			}
+		}
+		
+		// define a manual animation variable that will create a one direction gif
+		else if(strcmp(firstword, "manimate") == 0){
+			numbs[numnumbers] = malloc(sizeof(TableItem));
+			strcpy(numbs[numnumbers]->name, secondword);
+			if(!firstCall){
+				numbs[numnumbers++]->item.number = animateIndex;
+			}
+			else {
+				loop = 0;
 				animate = 1;
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
@@ -1280,32 +1311,70 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		}
 		image_fillColor(src, background);
 		if(firstCall && animate){
-			if(animateStart <= animateStop){
-				for(animateIndex=animateStart;animateIndex<=animateStop;animateIndex++){
+			if(animateStart < animateStop){
+				for(animateIndex=animateStart;
+					animateIndex<animateStop;
+					animateIndex++){
 					printf("animating from %d to %d, on step %d\n",
 							animateStart, animateStop, animateIndex);
-					sprintf(outfilenamemod, "%03d%s", animateIndex, outfilename);
+					sprintf(outfilenamemod, "%03d%s", 
+							animateIndex, outfilename);
 					infile = fopen(infilename, "r");
-					genModule(infile, infilename, outfilenamemod, 0, animateIndex, 0);
+					genModule(infile, infilename, outfilenamemod, 
+								0, animateIndex, 0);
 				}
+				if(loop){
+					for(animateIndex=animateStop;
+						animateIndex>animateStart;
+						animateIndex--){
+						printf("animating from %d to %d, on step %d\n",
+								animateStop, animateStart, animateIndex);
+						sprintf(outfilenamemod, "%03d%s", 
+								animateStop+(animateStop-animateIndex), outfilename);
+						infile = fopen(infilename, "r");
+						genModule(infile, infilename, outfilenamemod, 
+									0, animateIndex, 0);
+					}
+				}
+			} else if(animateStart > animateStop){
+				for(animateIndex=animateStart;
+					animateIndex>animateStop;
+					animateIndex--){
+					printf("animating from %d to %d, on step %d\n",
+							animateStart, animateStop, animateIndex);
+					sprintf(outfilenamemod, "%03d%s", 
+							animateStart-animateIndex, outfilename);
+					infile = fopen(infilename, "r");
+					genModule(infile, infilename, outfilenamemod, 
+								0, animateIndex, 0);
+				}
+				if(loop){
+					for(animateIndex=animateStop;
+						animateIndex<animateStart;
+						animateIndex++){
+						printf("animating from %d to %d, on step %d\n",
+								animateStop, animateStart, animateIndex);
+						sprintf(outfilenamemod, "%03d%s", 
+								animateStart+animateIndex, outfilename);
+						infile = fopen(infilename, "r");
+						genModule(infile, infilename, outfilenamemod, 
+									0, animateIndex, 0);
+					}
+				}
+			} 
+			if(animateStart == animateStop) {
+				printf("animate index start and end must differ\n");
 			} else {
-				for(animateIndex=animateStart;animateIndex>=animateStop;animateIndex--){
-					printf("animating from %d to %d, on step %d\n",
-							animateStart, animateStop, animateIndex);
-					sprintf(outfilenamemod, "%03d%s", animateStart-animateIndex, outfilename);
-					infile = fopen(infilename, "r");
-					genModule(infile, infilename, outfilenamemod, 0, animateIndex, 0);
-				}
+				printf("converting to gif...\n");
+				sprintf(outfilenamemod, "%s.gif", strtok(outfilename, "."));
+				sprintf(command, "convert -delay 1.5 -loop 0 *%s.ppm %s",
+									outfilename, outfilenamemod);
+				printf("%s\n",command);
+				system(command);
+				sprintf(command, "rm *%s.ppm", outfilename);
+				printf("%s\n",command);
+				system(command);
 			}
-			printf("converting to gif...\n");
-			sprintf(outfilenamemod, "%s.gif", strtok(outfilename, "."));
-			sprintf(command, "convert -delay 3 -loop 0 *%s.ppm %s",
-								outfilename, outfilenamemod);
-			printf("%s\n",command);
-			system(command);
-			sprintf(command, "rm *%s.ppm", outfilename);
-			printf("%s\n",command);
-			system(command);
 		} else {
 			if(verbose) printf("drawing module %s\n", mod[drawMod]->name);
 			module_draw(mod[drawMod]->module, &vtm, &gtm, ds, NULL, src);
@@ -1358,6 +1427,7 @@ int main(int argc, char *argv[]) {
 	char *infilename;
 	char *outfilename = "moduleGen_output.ppm";
 	char *usage = "Usage: <input filename> [output filename] [verbose 0 or 1]\n";
+	srand(time(NULL));
 
 	// grab input filename from command line
 	if( argc < 2 ) {
