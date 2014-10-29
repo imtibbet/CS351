@@ -355,11 +355,11 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				// build varname for search
 				// loop over all defined parameters
 				for(i=0;i<mod[templateMod]->numparams;i++){
-					// if(verbose) printf("template parameter %s\n", mod[templateMod]->params[i].name);
+					if(verbose) printf("template parameter %s\n", mod[templateMod]->params[i].name);
 					// loop over given params to see if new value given
 					for(j=0;j<numparams;j++){
 						strcpy(tempparamval, strtok(params[j], "="));
-						// if(verbose) printf("given parameter %s\n", tempparamval);
+						if(verbose) printf("given parameter %s\n", tempparamval);
 						if(strcmp(mod[templateMod]->params[i].name, tempparamval) == 0){
 							break;
 						}
