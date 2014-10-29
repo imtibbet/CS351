@@ -147,8 +147,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	float x, y, z, theta;
 	
 	// init
-	polygon_init(temppolygon);
-	polygon_init(temppolyline);
+	polygon_init(&temppolygon);
+	polygon_init(&temppolyline);
 
 	// get the first and second words
 	strcpy(buff, mod[activeMod]->definition[0]);
@@ -564,8 +564,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	}
 
 	//clean up
-	polygon_clear(temppolygon);
-	polyline_clear(temppolyline);
+	polygon_clear(&temppolygon);
+	polyline_clear(&temppolyline);
 	return(numAddedMods);
 }
 
@@ -597,6 +597,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	int drawMod = -1;
 	int curLine = 0;
 	int numparams = 0;
+	int numcolors = 0;
 	int numpoints = 0;
 	int numvectors = 0;
 	int numlines = 0;
@@ -656,7 +657,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				}
 			}
 			if(j>activeMod){
-				printf("module %s not found for drawing\n");, secondword);
+				printf("module %s not found for drawing\n", secondword);
 			} else {
 				if(verbose) printf("set to draw module %s\n", secondword);
 				drawMod = j;
