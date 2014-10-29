@@ -316,24 +316,6 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				numbs[numnumbers++]->item.number = x;
 			}
 			
-			// def animate
-			else if(strcmp(secondword, "animate") == 0){
-				numbs[numnumbers] = malloc(sizeof(TableItem));
-				strcpy(numbs[numnumbers]->name, varname);
-				if(!firstCall){
-					numbs[numnumbers++]->item.number = animateIndex;
-				}
-				else {
-					animate = 1;
-					xstr = strtok (NULL, delim);
-					ystr = strtok (NULL, delim);
-					animateStart = stringToFloat(xstr, numbs, numnumbers, NULL);
-					animateStop = stringToFloat(ystr, numbs, numnumbers, NULL);
-					animateIndex = 
-					numbs[numnumbers++]->item.number = animateStart;
-				}
-			}
-			
 			// def not defined
 			else {
 				if(verbose) printf(	"Seond word of def not not recognized.\n"
