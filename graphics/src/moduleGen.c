@@ -197,9 +197,153 @@ static int parseModule(int activeMod, ModuleItem **mod,
 		// get the first and second words
 		firstword = strtok (buff,delim);
 		secondword = strtok (NULL, delim);
-		
+
+		// define named primitives
+		else if(strcmp(firstword, "def") == 0){
+				
+			strcpy(varname, strtok (NULL, delim));
+			
+			// def module
+			if(strcmp(secondword, "module") == 0){
+				printf("Can't define local module within module\n");
+			}
+			
+			// def color
+			else if(strcmp(secondword, "color") == 0){
+				c[numcolors] = malloc(sizeof(TableItem));
+				strcpy(c[numcolors]->name, varname);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				z = stringToFloat(zstr, numbs, numnumbers, NULL);
+				color_set(&(c[numcolors++]->item.color), x, y, z);
+			}
+			
+			// def point
+			else if(strcmp(secondword, "point") == 0){
+				pt[numpoints] = malloc(sizeof(TableItem));
+				strcpy(pt[numpoints]->name, varname);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				if(zstr == NULL){
+					point_set2D(&(pt[numpoints++]->item.point), x, y);
+				} else {
+					z = stringToFloat(zstr, numbs, numnumbers, NULL);
+					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
+				}
+			}
+			
+			// def line
+			else if(strcmp(secondword, "line") == 0){
+				l[numlines] = malloc(sizeof(TableItem));
+				strcpy(l[numlines]->name, varname);
+				for(i=0;i<2;i++){
+					searchname = strtok (NULL, delim);
+					for(j=0;j<numpoints;j++){
+						if(strcmp(pt[j]->name, searchname) == 0){
+							temppts[i] = pt[j]->item.point;
+							break;
+						}
+					}
+				}
+				line_set(&(l[numlines++]->item.line), temppts[0], temppts[1]);
+			}
+			
+			// def polyline
+			else if(strcmp(secondword, "polyline") == 0){
+				pl[numpolylines] = malloc(sizeof(TableItem));
+				strcpy(pl[numpolylines]->name, varname);
+				searchname = strtok (NULL, delim);
+				i = 0;
+				while(searchname != NULL){
+					for(j=0;j<numpoints;j++){
+						if(strcmp(pt[j]->name, searchname) == 0){
+							temppts[i++] = pt[j]->item.point;
+							break;
+						}
+					}
+					searchname = strtok (NULL, delim);
+				}
+				pl[numpolylines++]->item.polyline = *(polyline_createp(i, &(temppts[0])));
+			}
+			
+			// def polygon
+			else if(strcmp(secondword, "polygon") == 0){
+				pg[numpolygons] = malloc(sizeof(TableItem));
+				strcpy(pg[numpolygons]->name, varname);
+				searchname = strtok (NULL, delim);
+				i = 0;
+				while(searchname != NULL){
+					for(j=0;j<numpoints;j++){
+						if(strcmp(pt[j]->name, searchname) == 0){
+							temppts[i++] = pt[j]->item.point;
+							break;
+						}
+					}
+					searchname = strtok (NULL, delim);
+				}
+				pg[numpolygons++]->item.polygon = *(polygon_createp(i, &(temppts[0])));
+			}
+			
+			// def vector
+			else if(strcmp(secondword, "vector") == 0){
+				v[numvectors] = malloc(sizeof(TableItem));
+				strcpy(v[numvectors]->name, varname);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				if(zstr == NULL){
+					z = 0.0;
+				} else {
+					z = stringToFloat(zstr, numbs, numnumbers, NULL);
+				}
+				vector_set(&(v[numvectors++]->item.vector), x, y, z);
+			}
+			
+			// def number
+			else if(strcmp(secondword, "number") == 0){
+				numbs[numnumbers] = malloc(sizeof(TableItem));
+				strcpy(numbs[numnumbers]->name, varname);
+				nextword = strtok (NULL, delim);
+				x = stringToFloat(nextword, numbs, numnumbers, NULL);
+				numbs[numnumbers++]->item.number = x;
+			}
+			
+			// def animate
+			else if(strcmp(secondword, "animate") == 0){
+				numbs[numnumbers] = malloc(sizeof(TableItem));
+				strcpy(numbs[numnumbers]->name, varname);
+				if(!firstCall){
+					numbs[numnumbers++]->item.number = animateIndex;
+				}
+				else {
+					animate = 1;
+					xstr = strtok (NULL, delim);
+					ystr = strtok (NULL, delim);
+					animateStart = stringToFloat(xstr, numbs, numnumbers, NULL);
+					animateStop = stringToFloat(ystr, numbs, numnumbers, NULL);
+					animateIndex = 
+					numbs[numnumbers++]->item.number = animateStart;
+				}
+			}
+			
+			// def not defined
+			else {
+				if(verbose) printf(	"Seond word of def not not recognized.\n"
+						"Must be module, point, vector, line, polyline, "
+						"polygon, color, or number\n");
+			}
+		}
+
 		// put named primitive into module
-		if(strcmp(firstword, "put") == 0){
+		else if(strcmp(firstword, "put") == 0){
 			
 			// put module
 			if(strcmp(secondword, "module") == 0){
@@ -649,8 +793,26 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			continue;
 		}
 		
+		// define an animation variable that will create a gif
+		if(strcmp(firstword, "animate") == 0){
+			numbs[numnumbers] = malloc(sizeof(TableItem));
+			strcpy(numbs[numnumbers]->name, secondword);
+			if(!firstCall){
+				numbs[numnumbers++]->item.number = animateIndex;
+			}
+			else {
+				animate = 1;
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				animateStart = stringToFloat(xstr, numbs, numnumbers, NULL);
+				animateStop = stringToFloat(ystr, numbs, numnumbers, NULL);
+				animateIndex = 
+				numbs[numnumbers++]->item.number = animateStart;
+			}
+		}
+
 		// select a named module to draw
-		if(strcmp(firstword, "draw") == 0){
+		else if(strcmp(firstword, "draw") == 0){
 			if(undefmod){
 				mod[activeMod]->numlines = curLine;
 				activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
@@ -697,10 +859,17 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			}
 		}
 		
-		// define name primitives
+		// define named primitives
 		else if(strcmp(firstword, "def") == 0){
 				
 			strcpy(varname, strtok (NULL, delim));
+
+			// check if it should be locally defined, except if module
+			if(activeMod!=-1 && strcmp(secondword, "module") != 0){
+				mod[activeMod]->definition[curLine] = malloc(2*strlen(linein));
+				strcpy(mod[activeMod]->definition[curLine++], linein);
+				continue
+			}
 			
 			// def module
 			if(strcmp(secondword, "module") == 0){
@@ -732,9 +901,9 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
-				y = stringToFloat(ystr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
-				z = stringToFloat(zstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				color_set(&(c[numcolors++]->item.color), x, y, z);
 			}
 			
@@ -745,12 +914,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
-				y = stringToFloat(ystr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
 				if(zstr == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+					z = stringToFloat(zstr, numbs, numnumbers, NULL);
 					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
 				}
 			}
@@ -814,12 +983,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
-				y = stringToFloat(ystr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
 				if(zstr == NULL){
 					z = 0.0;
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+					z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				}
 				vector_set(&(v[numvectors++]->item.vector), x, y, z);
 			}
@@ -829,33 +998,15 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				numbs[numnumbers] = malloc(sizeof(TableItem));
 				strcpy(numbs[numnumbers]->name, varname);
 				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+				x = stringToFloat(nextword, numbs, numnumbers, NULL);
 				numbs[numnumbers++]->item.number = x;
-			}
-			
-			// def animate
-			else if(strcmp(secondword, "animate") == 0){
-				numbs[numnumbers] = malloc(sizeof(TableItem));
-				strcpy(numbs[numnumbers]->name, varname);
-				if(!firstCall){
-					numbs[numnumbers++]->item.number = animateIndex;
-				}
-				else {
-					animate = 1;
-					xstr = strtok (NULL, delim);
-					ystr = strtok (NULL, delim);
-					animateStart = stringToFloat(xstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
-					animateStop = stringToFloat(ystr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
-					animateIndex = 
-					numbs[numnumbers++]->item.number = animateStart;
-				}
-			}
+			}			
 			
 			// def not defined
 			else {
 				if(verbose) printf(	"Seond word of def not not recognized.\n"
 						"Must be module, point, vector, line, polyline, "
-						"polygon, or number\n");
+						"polygon, color, or number\n");
 			}
 		}
 			
