@@ -32,6 +32,7 @@ typedef struct {
 	float surfaceCoeff; // a float that represents the shininess of the surface.
 	ShadeMethod shade; // an enumerated type ShadeMethod.
 	int zBufferFlag; // whether to use z-buffer hidden surface removal
+	Point viewer;
 } DrawState;
 
 // Draw State

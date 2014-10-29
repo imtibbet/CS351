@@ -69,10 +69,9 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 	}
 
 	// check for the number as a key in the module parameters
-	searchname = strtok (num,"()");
 	if(activeModule){
 		for(j=0;j<activeModule->numparams;j++){
-			if(strcmp(activeModule->params[j].name, searchname) == 0){
+			if(strcmp(activeModule->params[j].name, num) == 0){
 				break;
 			}
 		}
@@ -86,7 +85,7 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 	
 	// check for the number as a key in the numbers table
 	for(j=0;j<numnumbers;j++){
-		if(strcmp(numbs[j]->name, searchname) == 0){
+		if(strcmp(numbs[j]->name, num) == 0){
 			break;
 		}
 	}
@@ -98,6 +97,7 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 	}
 			
 	// otherwise, check for sin or cos
+	searchname = strtok(num, "()");
 	if(strcmp(searchname, "sin") == 0){
 		searchname = strtok (NULL, "()");
 		//printf("computing sin(%s)\n", searchname);
@@ -110,7 +110,7 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 	} 
 	else {
 		//printf("returning\n");
-		return(atof(searchname));
+		return(atof(num));
 	}
 }
 
@@ -129,9 +129,11 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	char buff[maxline];
 	char linein[maxline];
 	char *params[maxparam];
-	char varname[256];
-	char tempparamval[256];
-	char newmodlinein[256];
+	char varname[1000];
+	char tempparam[1000];
+	char tempparamname[1000];
+	char tempparamval[1000];
+	char newmodlinein[1000];
 	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
 			*searchname;
 	char *delim = " \n";
@@ -139,6 +141,12 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	int curLine = 0;
 	int totalLines;
 	int numAddedMods = 1;
+	int initnumcolors = numcolors;
+	int initnumpoints = numpoints;
+	int initnumvectors = numvectors;
+	int initnumlines = numlines;
+	int initnumpolylines = numpolylines;
+	int initnumpolygons = numpolygons;
 	Color tempcolor;
 	Point temppts[maxpts];
 	Vector uvw[3];
@@ -177,7 +185,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			mod[activeMod]->params[j].val = 
 					stringToFloat(tempparamval, numbs, numnumbers, NULL);
 			sprintf(tempparamval, "%0.3f", mod[activeMod]->params[j].val);
-			if(verbose) printf("parameter %s has default value %f\n", 
+			if(verbose) printf("parameter %s has value %f\n", 
 					mod[activeMod]->params[j].name, 
 					mod[activeMod]->params[j].val);
 			strcat(varname, tempparamval);
@@ -216,9 +224,9 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, NULL);
-				y = stringToFloat(ystr, numbs, numnumbers, NULL);
-				z = stringToFloat(zstr, numbs, numnumbers, NULL);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
+				z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
 				color_set(&(c[numcolors++]->item.color), x, y, z);
 			}
 			
@@ -229,12 +237,12 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, NULL);
-				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
 				if(zstr == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers, NULL);
+					z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
 					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
 				}
 			}
@@ -298,12 +306,12 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, NULL);
-				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
 				if(zstr == NULL){
 					z = 0.0;
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers, NULL);
+					z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
 				}
 				vector_set(&(v[numvectors++]->item.vector), x, y, z);
 			}
@@ -313,7 +321,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				numbs[numnumbers] = malloc(sizeof(TableItem));
 				strcpy(numbs[numnumbers]->name, varname);
 				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers, NULL);
+				x = stringToFloat(nextword, numbs, numnumbers, mod[activeMod]);
 				numbs[numnumbers++]->item.number = x;
 			}
 			
@@ -355,41 +363,49 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				numparams = 0;
 				params[numparams] = strtok (NULL, delim);
 				while(params[numparams]!=NULL){
-					if(verbose) printf("encountered parameter %s\n", params[numparams]);
+					if(verbose) printf("encountered in put parameter %s\n", 
+										params[numparams]);
 					params[++numparams] = strtok (NULL, delim);
 				}
 				
 				// build varname for search
 				// loop over all defined parameters
 				for(i=0;i<mod[templateMod]->numparams;i++){
-					if(verbose) printf("template parameter %s\n", mod[templateMod]->params[i].name);
+					if(verbose) printf("template has %d parameters, on %s\n", 
+										mod[templateMod]->numparams,
+										mod[templateMod]->params[i].name);
 					strcat(newmodlinein, " ");
 
 					// loop over given params to see if new value given
 					for(j=0;j<numparams;j++){
-						strcpy(tempparamval, strtok(params[j], "="));
-						if(verbose) printf("given parameter %s\n", tempparamval);
-						if(strcmp(mod[templateMod]->params[i].name, tempparamval) == 0){
+						strcpy(tempparam, params[j]);
+						strcpy(tempparamname, strtok(tempparam, "="));
+						strcpy(tempparamval, strtok(NULL, "="));
+						//if(verbose) printf("given parameter %s\n", tempparamname);
+						if(strcmp(	mod[templateMod]->params[i].name, 
+									tempparamname) == 0){
 							break;
 						}
 					}
 					// if the parameter is found, overwrite the value in varname
 					if(j!=numparams){
-						if(verbose) printf("overwriting var %s\n", tempparamval);
-						strcpy(tempparamval, strtok(NULL, "="));
+						if(verbose) printf("overwriting var %s\n", tempparamname);
 						sprintf(tempparamval, "%0.3f",
 							stringToFloat(tempparamval, numbs, numnumbers, NULL));
 						strcat(varname, tempparamval);
 						strcat(newmodlinein, params[j]);
 					} else {
-						if(verbose) printf("using default for var %s\n", mod[templateMod]->params[i].name);
-						sprintf(tempparamval, "%0.3f", mod[templateMod]->params[i].val);
+						if(verbose) printf("using default for var %s\n", 
+											mod[templateMod]->params[i].name);
+						sprintf(tempparamval, "%0.3f", 
+											mod[templateMod]->params[i].val);
 						strcat(varname, tempparamval);
 						strcat(newmodlinein, mod[templateMod]->params[i].name);
 						strcat(newmodlinein, "=");
 						strcat(newmodlinein, tempparamval);
 					}
 				}
+				if(verbose) printf("new mod put line is %s\n", newmodlinein);
 				
 				// find matching module if any
 				for(j=0;j<activeMod;j++){
@@ -405,11 +421,12 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				}
 				else{
 					if(verbose) printf("make new instantiation of %s\n", varname);
+					
 					// get space for new module
-					if(verbose) printf("numAddedMods=%d\n",numAddedMods);
 					mod[activeMod+numAddedMods] = malloc(sizeof(ModuleItem));
 					mod[activeMod+numAddedMods]->module = module_create();
-					mod[activeMod+numAddedMods]->definition[0] = malloc(2*strlen(linein));
+					mod[activeMod+numAddedMods]->definition[0] = 
+												malloc(2*strlen(newmodlinein));
 					strcpy(mod[activeMod+numAddedMods]->definition[0], newmodlinein);
 					for(j=1;j<mod[templateMod]->numlines;j++){
 						mod[activeMod+numAddedMods]->definition[j] = 
@@ -417,13 +434,16 @@ static int parseModule(int activeMod, ModuleItem **mod,
 						strcpy(	mod[activeMod+numAddedMods]->definition[j], 
 								mod[templateMod]->definition[j]);
 					}
-					mod[activeMod+numAddedMods]->numlines = mod[templateMod]->numlines;
+					mod[activeMod+numAddedMods]->numlines = 
+								mod[templateMod]->numlines;
 					numAddedMods += parseModule(activeMod+numAddedMods, mod, 
 								c, pt, v, numbs, l, pl, pg, 
-								numparams, numcolors, numpoints, numvectors, numlines, 
-								numpolylines, numpolygons, numnumbers, verbose);
+								numparams, numcolors, numpoints, numvectors,
+								numlines, numpolylines, numpolygons, numnumbers,
+								verbose);
 					if(verbose) printf("made module\n");			
-					module_module(mod[activeMod]->module, mod[activeMod+numAddedMods-1]->module);
+					module_module(	mod[activeMod]->module, 
+									mod[activeMod+numAddedMods-1]->module);
 				}				
 			} 
 			
@@ -613,21 +633,24 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			// add rotateX
 			else if(strcmp(secondword, "rotateX") == 0){
 				nextword = strtok (NULL, delim);
-				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, mod[activeMod])/180.0;
+				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, 
+							mod[activeMod])/180.0;
 				module_rotateX(mod[activeMod]->module, cos(theta), sin(theta));
 			}
 		
 			// add rotateY
 			else if(strcmp(secondword, "rotateY") == 0){
 				nextword = strtok (NULL, delim);
-				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, mod[activeMod])/180.0;
+				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, 
+							mod[activeMod])/180.0;
 				module_rotateY(mod[activeMod]->module, cos(theta), sin(theta));
 			}
 		
 			// add rotateZ
 			else if(strcmp(secondword, "rotateZ") == 0){
 				nextword = strtok (NULL, delim);
-				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, mod[activeMod])/180.0;
+				theta = M_PI*stringToFloat(nextword, numbs, numnumbers, 
+							mod[activeMod])/180.0;
 				module_rotateZ(mod[activeMod]->module, cos(theta), sin(theta));
 			}
 		
@@ -642,7 +665,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 						}
 					}
 				}
-				module_rotateXYZ(mod[activeMod]->module, &(uvw[0]), &(uvw[1]), &(uvw[2]));
+				module_rotateXYZ(mod[activeMod]->module, 
+								&(uvw[0]), &(uvw[1]), &(uvw[2]));
 			} 
 		
 			// add translate
@@ -703,7 +727,33 @@ static int parseModule(int activeMod, ModuleItem **mod,
 		}
 	}
 
-	//clean up
+	// clean up
+	for(j=initnumcolors;j<numcolors;j++){
+		if(verbose) printf("freeing color named %s\n", c[j]->name);
+		free(c[j]);
+	}
+	for(j=initnumpoints;j<numpoints;j++){
+		if(verbose) printf("freeing point named %s\n", pt[j]->name);
+		free(pt[j]);
+	}
+	for(j=initnumvectors;j<numvectors;j++){
+		if(verbose) printf("freeing vector named %s\n", v[j]->name);
+		free(v[j]);
+	}
+	for(j=initnumlines;j<numlines;j++){
+		if(verbose) printf("freeing line named %s\n", l[j]->name);
+		free(l[j]);
+	}
+	for(j=initnumpolylines;j<numpolylines;j++){
+		if(verbose) printf("freeing polyline named %s\n", pl[j]->name);
+		polyline_clear(&(pl[j]->item.polyline));
+		free(pl[j]);
+	}
+	for(j=initnumpolygons;j<numpolygons;j++){
+		if(verbose) printf("freeing polygon named %s\n", pg[j]->name);
+		polygon_clear(&(pg[j]->item.polygon));
+		free(pg[j]);
+	}
 	polygon_clear(&temppolygon);
 	polyline_clear(&temppolyline);
 	return(numAddedMods);
@@ -768,8 +818,10 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	while (fgets(buff,1000, infile)!=NULL){
 
 		// skip comment lines
-		if(strncmp(buff,"#",1) == 0)
+		if(strncmp(buff,"#",1) == 0){
+			if(verbose) printf("skipping comment line %s", buff);
 			continue;
+		}
 		// skip empty and midline comment lines
 		if(!strtok(buff, "#\n"))
 			continue;
@@ -1270,6 +1322,10 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	}
 
 	// rest of the clean up
+	for(j=0;j<numcolors;j++){
+		if(verbose) printf("freeing color named %s\n", c[j]->name);
+		free(c[j]);
+	}
 	for(j=0;j<numpoints;j++){
 		if(verbose) printf("freeing point named %s\n", pt[j]->name);
 		free(pt[j]);

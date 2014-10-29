@@ -7,6 +7,9 @@
 	The comparison function must return value < 0 if A < B, 0 if A = B
 	and value > 0 if A > B
 */
+#ifndef LIST_H
+
+#define LIST_H
 
 // Node data structure
 typedef struct {
@@ -43,3 +46,5 @@ void *ll_pop( LinkedList *ll );
 
 // returns true if the list is empty
 int ll_empty( LinkedList *ll );
+
+#endif

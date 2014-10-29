@@ -18,7 +18,15 @@ DrawState *drawstate_create(){
 		printf("malloc failed in drawstate_create\n");
 		return NULL;
 	}
+	
+	// set defaults
+	ds->shade = ShadeConstant;
+	color_set(&(ds->flatColor), 1.0, 1.0, 1.0);
+	color_set(&(ds->body), 1.0, 1.0, 1.0);
+	color_set(&(ds->surface), 1.0, 1.0, 1.0);
 	color_set(&(ds->color), 1.0, 1.0, 1.0);
+	ds->zBufferFlag = 0;
+	point_set3D(&(ds->viewer), 0.0, 0.0, 0.0);
 	return ds;
 }
 
