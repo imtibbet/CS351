@@ -607,6 +607,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	int animateStart = 0;
 	int animateStop = 0;
 	int animate = 0;
+	int undefmod = 0;
 	TableItem 	*c[maxdef], *pt[maxdef], *v[maxdef], *numbs[maxdef], *l[maxdef], 
 				*pl[maxdef], *pg[maxdef];
 	ModuleItem 	*mod[maxdef];
@@ -651,12 +652,20 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		
 		// select a named module to draw
 		if(strcmp(firstword, "draw") == 0){
-			for(j=0;j<=activeMod;j++){
+			if(undefmod){
+				mod[activeMod]->numlines = curLine;
+				activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
+							numparams, numcolors, numpoints, numvectors, numlines, 
+							numpolylines, numpolygons, numnumbers, verbose);
+				if(verbose) printf("activeMod=%d\n",activeMod);
+				curLine = undefline = 0;
+			}
+			for(j=0;j<activeMod;j++){
 				if(strncmp(mod[j]->name, secondword, strlen(secondword)) == 0){
 					break;
 				}
 			}
-			if(j>activeMod){
+			if(j==activeMod){
 				printf("module %s not found for drawing\n", secondword);
 			} else {
 				if(verbose) printf("set to draw module %s\n", secondword);
@@ -665,7 +674,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		}
 
 		// set a background color
-		if(strcmp(firstword, "background") == 0){
+		else if(strcmp(firstword, "background") == 0){
 			for(j=0;j<numcolors;j++){
 				if(strncmp(c[j]->name, secondword, strlen(secondword)) == 0){
 					break;
@@ -700,13 +709,13 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				// if a module has been previously defined, parse all lines
 				if(activeMod == -1)
 					activeMod++;
-				else{
+				else if(undefmod){
 					mod[activeMod]->numlines = curLine;
 					activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
 								numparams, numcolors, numpoints, numvectors, numlines, 
 								numpolylines, numpolygons, numnumbers, verbose);
 					if(verbose) printf("activeMod=%d\n",activeMod);
-					curLine = 0;
+					curLine = undefline = 0;
 				}
 			
 				// get space for new module
@@ -714,6 +723,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				mod[activeMod]->module = module_create();
 				mod[activeMod]->definition[curLine] = malloc(2*strlen(linein));
 				strcpy(mod[activeMod]->definition[curLine++], linein);
+				undefmod = 1;
 			}
 			
 			// def color
@@ -1004,15 +1014,17 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		// firstword not defined
 		else{
 			if(verbose) printf(	"First word not not recognized.\n"
-					"Must be def, add, put, view2D, or view3D\n");
+					"Must be backfround, draw, def, add, put, view2D, or view3D\n");
 		}
 	}
 	
 	// at the end of the file, parse the most recently defined module
-	mod[activeMod]->numlines = curLine;
-	activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
-				numparams, numcolors, numpoints, numvectors, numlines, 
-				numpolylines, numpolygons, numnumbers, verbose);
+	if(undefmod){
+		mod[activeMod]->numlines = curLine;
+		activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
+					numparams, numcolors, numpoints, numvectors, numlines, 
+					numpolylines, numpolygons, numnumbers, verbose);
+	}
 	if(verbose) printf("EOF reached\n");
 	fclose(infile);
 	polygon_clear(&temppolygon);
@@ -1050,7 +1062,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	
 	// verify that at least one module defined
 	if(drawMod == -1){
-		if(verbose) printf(	"Must use draw firstword to specify a module to draw.\n"
+		printf(	"Must use draw firstword to specify a module to draw.\n"
 				" No module to draw, side effects\n");
 	} else {
 
