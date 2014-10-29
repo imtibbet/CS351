@@ -732,9 +732,9 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, NULL);
-				y = stringToFloat(ystr, numbs, numnumbers, NULL);
-				z = stringToFloat(zstr, numbs, numnumbers, NULL);
+				x = stringToFloat(xstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+				y = stringToFloat(ystr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+				z = stringToFloat(zstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
 				color_set(&(c[numcolors++]->item.color), x, y, z);
 			}
 			
@@ -745,12 +745,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, NULL);
-				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				x = stringToFloat(xstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+				y = stringToFloat(ystr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
 				if(zstr == NULL){
 					point_set2D(&(pt[numpoints++]->item.point), x, y);
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers, NULL);
+					z = stringToFloat(zstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
 					point_set3D(&(pt[numpoints++]->item.point), x, y, z);
 				}
 			}
@@ -814,12 +814,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
 				zstr = strtok (NULL, delim);
-				x = stringToFloat(xstr, numbs, numnumbers, NULL);
-				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				x = stringToFloat(xstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+				y = stringToFloat(ystr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
 				if(zstr == NULL){
 					z = 0.0;
 				} else {
-					z = stringToFloat(zstr, numbs, numnumbers, NULL);
+					z = stringToFloat(zstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
 				}
 				vector_set(&(v[numvectors++]->item.vector), x, y, z);
 			}
@@ -829,7 +829,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				numbs[numnumbers] = malloc(sizeof(TableItem));
 				strcpy(numbs[numnumbers]->name, varname);
 				nextword = strtok (NULL, delim);
-				x = stringToFloat(nextword, numbs, numnumbers, NULL);
+				x = stringToFloat(nextword, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
 				numbs[numnumbers++]->item.number = x;
 			}
 			
@@ -844,8 +844,8 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 					animate = 1;
 					xstr = strtok (NULL, delim);
 					ystr = strtok (NULL, delim);
-					animateStart = stringToFloat(xstr, numbs, numnumbers, NULL);
-					animateStop = stringToFloat(ystr, numbs, numnumbers, NULL);
+					animateStart = stringToFloat(xstr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
+					animateStop = stringToFloat(ystr, numbs, numnumbers, (activeMod==-1 ? NULL : mod[activeMod]));
 					animateIndex = 
 					numbs[numnumbers++]->item.number = animateStart;
 				}
@@ -1013,7 +1013,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		// firstword not defined
 		else{
 			if(verbose) printf(	"First word not not recognized.\n"
-					"Must be backfround, draw, def, add, put, view2D, or view3D\n");
+					"Must be background, draw, def, add, put, view2D, or view3D\n");
 		}
 	}
 	
