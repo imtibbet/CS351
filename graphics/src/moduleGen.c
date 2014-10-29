@@ -617,7 +617,6 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	float x, y, z;
 	Color background;
 
-
 	// init
 	polyline_init(&temppolyline);
 	polygon_init(&temppolygon);
@@ -628,15 +627,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	if(verbose) printf("looping until EOF\n");
 	while (fgets(buff,1000, infile)!=NULL){
 
-		// skip empty lines
-		if(!strtok(buff, "\n"))
-			continue;
-		// skip comment lines
-		if(strncmp(buff,"#",1) == 0)
+		// skip empty and comment lines
+		if(!strtok(buff, "#\n"))
 			continue;
 		// parse line without newline
-		strcpy(linein, strtok (buff, "\n"));
-		if(verbose) printf("reading line: %s\n", linein); //dont get crazy characters here
+		strcpy(linein, strtok (buff, "#\n"));
+		if(verbose) printf("reading line: %s\n", linein); 
 
 		// get the first and second words
 		firstword = strtok (buff,delim);
