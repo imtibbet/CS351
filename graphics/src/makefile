@@ -139,6 +139,10 @@ moduleGen: $(ODIR)/moduleGen.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 req2: $(ODIR)/req2.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+city: $(ODIR)/city.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+city-gif: $(ODIR)/city-gif.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 .PHONY: clean
 
 clean:

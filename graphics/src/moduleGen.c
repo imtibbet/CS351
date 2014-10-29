@@ -44,7 +44,8 @@ typedef struct{
 // converts strings to float, allowing two term multiplication, 
 // named variables or parameters in nums or module, respectively, sin and cos. 
 static float stringToFloat(char *str, TableItem **numbs, int numnumbers, 
-										ModuleItem *activeModule){
+	ModuleItem *activeModule){
+	
 	char *searchname;
 	char num[256], term1[256], term2[256];
 	int j;
@@ -115,11 +116,12 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 
 // parse the active module's definition, populating its module
 static int parseModule(int activeMod, ModuleItem **mod, 
-						TableItem **pt, TableItem **v, TableItem **numbs, 
-						TableItem **l, TableItem **pl, TableItem **pg, 
-						int numparams, int numpoints, int numvectors, int numlines, 
-						int numpolylines, int numpolygons, int numnumbers, 
-						int verbose){
+	TableItem **c, TableItem **pt, TableItem **v, TableItem **numbs, 
+	TableItem **l, TableItem **pl, TableItem **pg, 
+	int numparams, int numcolors, int numpoints, int numvectors, int numlines, 
+	int numpolylines, int numpolygons, int numnumbers, 
+	int verbose){
+
 	// variables for parsing module definition
 	const int maxline = 1000;
 	const int maxpts = 50;
@@ -136,6 +138,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	int curLine = 0;
 	int totalLines;
 	int numAddedMods = 1;
+	Color tempcolor;
 	Point temppts[maxpts];
 	Vector uvw[3];
 	Line templine;
@@ -143,34 +146,39 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	Polygon temppolygon;
 	float x, y, z, theta;
 	
+	// init
+	polygon_init(temppolygon);
+	polygon_init(temppolyline);
+
 	// get the first and second words
 	strcpy(buff, mod[activeMod]->definition[0]);
 	firstword = strtok (buff,delim);
 	secondword = strtok (NULL, delim);
 	strcpy(varname, strtok (NULL, delim));
+
 	// check for any parameters
 	numparams = 0;
 	params[numparams] = strtok (NULL, delim);
 	while(params[numparams]!=NULL){
-		//if(verbose) printf("encountered parameter %s\n", params[numparams]);
+		if(verbose) printf("encountered parameter %s\n", params[numparams]);
 		params[++numparams] = strtok (NULL, delim);
 	}
 	mod[activeMod]->numparams = numparams;
 	
 	// if any parameters, parse and build table of parameters
 	if(numparams){
-		// if(verbose) printf("module has %d parameters, processing\n", numparams);
+		if(verbose) printf("module has %d parameters, processing\n", numparams);
 		mod[activeMod]->params = malloc(numparams*sizeof(ParamListItem));
 		for(j=0;j<numparams;j++){
 			strcpy(mod[activeMod]->params[j].name, strtok(params[j], "="));
-			//if(verbose) printf("processing parameter %s\n", mod[activeMod]->params[j].name);
+			if(verbose) printf("processing parameter %s\n", mod[activeMod]->params[j].name);
 			strcpy(tempparamval, strtok(NULL, "="));
 			mod[activeMod]->params[j].val = 
 					stringToFloat(tempparamval, numbs, numnumbers, NULL);
 			sprintf(tempparamval, "%0.3f", mod[activeMod]->params[j].val);
-			/*if(verbose) printf("parameter %s has default value %f\n", 
+			if(verbose) printf("parameter %s has default value %f\n", 
 					mod[activeMod]->params[j].name, 
-					mod[activeMod]->params[j].val);*/
+					mod[activeMod]->params[j].val);
 			strcat(varname, tempparamval);
 		}
 	}
@@ -184,7 +192,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	for(curLine=1;curLine<totalLines;curLine++){
 		strcpy(buff, mod[activeMod]->definition[curLine]);
 		strcpy(linein, strtok (buff, "\n"));
-		if(verbose) printf("definition line %s\n",linein); // get crazy characters here
+		if(verbose) printf("definition line %s\n",linein);
 		
 		// get the first and second words
 		firstword = strtok (buff,delim);
@@ -271,15 +279,30 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					}
 					mod[activeMod+numAddedMods]->numlines = mod[templateMod]->numlines;
 					numAddedMods += parseModule(activeMod+numAddedMods, mod, 
-								pt, v, numbs, l, pl, pg, 
-								numparams, numpoints, numvectors, numlines, 
+								c, pt, v, numbs, l, pl, pg, 
+								numparams, numcolors, numpoints, numvectors, numlines, 
 								numpolylines, numpolygons, numnumbers, verbose);
 					if(verbose) printf("made module\n");			
 					module_module(mod[activeMod]->module, mod[activeMod+numAddedMods-1]->module);
 				}				
 			} 
 			
-			// put module
+			// put color
+			else if(strcmp(secondword, "color") == 0){
+				searchname = strtok (NULL, delim);
+				for(j=0;j<numcolors;j++){
+					if(strcmp(c[j]->name, searchname) == 0){
+						break;
+					}
+				}
+				if(j==numcolors){
+					if(verbose) printf("%s color not found\n", searchname);
+				}
+				else
+					module_color(mod[activeMod]->module, &(c[j]->item.color));
+			} 
+			
+			// put point
 			else if(strcmp(secondword, "point") == 0){
 				searchname = strtok (NULL, delim);
 				for(j=0;j<numpoints;j++){
@@ -369,6 +392,18 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					point_set3D(&(temppts[0]), x, y, z);
 				}
 				module_point(mod[activeMod]->module, &(temppts[0]));
+			} 
+		
+			// add color
+			else if(strcmp(secondword, "color") == 0){
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
+				z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
+				color_set(&tempcolor, x, y, z);
+				module_color(mod[activeMod]->module, &tempcolor);
 			} 
 		
 			// add line
@@ -527,11 +562,16 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			}
 		}
 	}
+
+	//clean up
+	polygon_clear(temppolygon);
+	polyline_clear(temppolyline);
 	return(numAddedMods);
 }
 
 static void genModule(FILE *infile, char *infilename, char *outfilename, 
-						int firstCall, int animateIndex, int verbose){
+	int firstCall, int animateIndex, int verbose){
+	
 	// variables for the view and image
 	DrawState *ds;
 	Image *src;
@@ -566,18 +606,21 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	int animateStart = 0;
 	int animateStop = 0;
 	int animate = 0;
-	TableItem 	*pt[maxdef], *v[maxdef], *numbs[maxdef], *l[maxdef], 
+	TableItem 	*c[maxdef], *pt[maxdef], *v[maxdef], *numbs[maxdef], *l[maxdef], 
 				*pl[maxdef], *pg[maxdef];
 	ModuleItem 	*mod[maxdef];
 	Point temppts[maxpts];
 	Polyline temppolyline;
 	Polygon temppolygon;
 	float x, y, z;
+	Color background;
+
 
 	// init
 	polyline_init(&temppolyline);
 	polygon_init(&temppolygon);
 	ds = drawstate_create();
+	color_set(&background, 0.0, 0.0, 0.0);
 
 	// loop until EOF is reached, generating modules
 	if(verbose) printf("looping until EOF\n");
@@ -607,13 +650,42 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		
 		// select a named module to draw
 		if(strcmp(firstword, "draw") == 0){
-			for(j=0;j<activeMod;j++){
+			for(j=0;j<=activeMod;j++){
 				if(strncmp(mod[j]->name, secondword, strlen(secondword)) == 0){
 					break;
 				}
 			}
-			if(verbose) printf("set to draw module %s\n", secondword);
-			drawMod = j;
+			if(j>activeMod){
+				printf("module %s not found for drawing\n");, secondword);
+			} else {
+				if(verbose) printf("set to draw module %s\n", secondword);
+				drawMod = j;
+			}
+		}
+
+		// set a background color
+		if(strcmp(firstword, "background") == 0){
+			for(j=0;j<numcolors;j++){
+				if(strncmp(c[j]->name, secondword, strlen(secondword)) == 0){
+					break;
+				}
+			}
+			if(j<numcolors){
+				if(verbose) printf("set background to color %s\n", secondword);
+				color_copy(&background, &(c[j]->item.color));
+			}
+			else{
+				ystr = strtok(NULL, delim);
+				if(ystr){
+					zstr = strtok(NULL, delim);
+					if(zstr){
+						x = stringToFloat(secondword, numbs, numnumbers, NULL);
+						y = stringToFloat(ystr, numbs, numnumbers, NULL);
+						z = stringToFloat(zstr, numbs, numnumbers, NULL);
+						color_set(&background, x, y, z);
+					}
+				}
+			}
 		}
 		
 		// define name primitives
@@ -629,8 +701,8 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 					activeMod++;
 				else{
 					mod[activeMod]->numlines = curLine;
-					activeMod += parseModule(activeMod, mod, pt, v, numbs, l, pl, pg, 
-								numparams, numpoints, numvectors, numlines, 
+					activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
+								numparams, numcolors, numpoints, numvectors, numlines, 
 								numpolylines, numpolygons, numnumbers, verbose);
 					if(verbose) printf("activeMod=%d\n",activeMod);
 					curLine = 0;
@@ -641,6 +713,19 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				mod[activeMod]->module = module_create();
 				mod[activeMod]->definition[curLine] = malloc(2*strlen(linein));
 				strcpy(mod[activeMod]->definition[curLine++], linein);
+			}
+			
+			// def color
+			else if(strcmp(secondword, "color") == 0){
+				c[numcolors] = malloc(sizeof(TableItem));
+				strcpy(c[numcolors]->name, varname);
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, NULL);
+				y = stringToFloat(ystr, numbs, numnumbers, NULL);
+				z = stringToFloat(zstr, numbs, numnumbers, NULL);
+				color_set(&(c[numcolors++]->item.color), x, y, z);
 			}
 			
 			// def point
@@ -924,11 +1009,14 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	
 	// at the end of the file, parse the most recently defined module
 	mod[activeMod]->numlines = curLine;
-	activeMod += parseModule(activeMod, mod, pt, v, numbs, l, pl, pg, 
-				numparams, numpoints, numvectors, numlines, 
+	activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
+				numparams, numcolors, numpoints, numvectors, numlines, 
 				numpolylines, numpolygons, numnumbers, verbose);
 	if(verbose) printf("EOF reached\n");
 	fclose(infile);
+	polygon_clear(temppolygon);
+	polyline_clear(temppolyline);
+
 	if(verbose){
 		printf("\ntotal number of modules defined = %d\n",activeMod);
 		for(j=0;j<activeMod;j++){
@@ -979,7 +1067,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			if(verbose) matrix_print(&vtm, stdout);
 			src = image_create( view3D.screeny, view3D.screenx );
 		}
-		image_fillrgb(src, 0.0, 0.0, 0.0);
+		image_fillColor(src, background);
 		if(firstCall && animate){
 			for(animateIndex=animateStart;animateIndex<animateStop;animateIndex++){
 				printf("animating from %d to %d, on step %d\n",
