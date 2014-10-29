@@ -850,7 +850,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			if(activeMod!=-1 && strcmp(secondword, "module") != 0){
 				mod[activeMod]->definition[curLine] = malloc(2*strlen(linein));
 				strcpy(mod[activeMod]->definition[curLine++], linein);
-				continue
+				continue;
 			}
 			
 			// def module
