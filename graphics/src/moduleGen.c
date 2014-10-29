@@ -658,7 +658,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 							numparams, numcolors, numpoints, numvectors, numlines, 
 							numpolylines, numpolygons, numnumbers, verbose);
 				if(verbose) printf("activeMod=%d\n",activeMod);
-				curLine = undefline = 0;
+				curLine = undefmod = 0;
 			}
 			for(j=0;j<activeMod;j++){
 				if(strncmp(mod[j]->name, secondword, strlen(secondword)) == 0){
@@ -715,7 +715,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 								numparams, numcolors, numpoints, numvectors, numlines, 
 								numpolylines, numpolygons, numnumbers, verbose);
 					if(verbose) printf("activeMod=%d\n",activeMod);
-					curLine = undefline = 0;
+					curLine = undefmod = 0;
 				}
 			
 				// get space for new module
