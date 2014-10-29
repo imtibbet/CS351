@@ -1,0 +1,113 @@
+animate i 0 99
+
+# numbers
+def number rand1 rand()
+def number rand2 rand()
+def number rand3 rand()
+def number rand4 rand()
+def number rand5 rand()
+
+# colors
+def color Blue 0.2 0.2 0.6
+def color Red 0.6 0.2 0.2
+def color Green 0.2 0.6 0.2
+def color randc1 rand1 rand2 rand3
+def color randc2 rand2 rand3 rand4
+def color randc3 rand3 rand4 rand5
+
+# view
+def number xvrp 9*cos(i)
+def number yvrp 9*sin(i)
+def number zvrp 6
+view3D vrp xvrp yvrp zvrp
+view3D vpn -1*xvrp -1*yvrp -1*zvrp
+view3D vup 0 1 0
+view3D d 1
+view3D du 2
+view3D screenx 300
+view3D screeny 300
+#view2D vrp 1 1
+#view2D x 1 0
+#view2D dx 10
+#view2D screenx 300
+#view2D screeny 300
+
+# person
+def module person headsize=0.5 leglen=1 llang=30 rlang=30 bodylen=1 armlen=1 laang=30 raang=30
+# points
+def point origin 0 0
+def point leftleg 0 leglen
+def point rightleg 0 -1*leglen
+def point body 0 bodylen
+def point arm 0 -1*armlen
+# left leg
+add rotateZ -1*llang
+add line origin leftleg
+# right leg
+add identity
+add rotateZ rlang
+add translate leglen*sin(llang) leglen*cos(llang)
+add line origin rightleg
+# body
+add identity
+add translate leglen*sin(llang) leglen*cos(llang)
+add line origin body
+# left arm
+add identity
+add rotateZ -1*laang
+add translate leglen*sin(llang) leglen*cos(llang)
+add translate 0 bodylen
+add line origin arm
+# right arm
+add identity
+add rotateZ raang
+add translate leglen*sin(llang) leglen*cos(llang)
+add translate 0 bodylen
+add line origin arm
+# head
+add identity
+put color Randcol
+add scale headsize headsize headsize
+add translate leglen*sin(llang) leglen*cos(llang)
+add translate 0 bodylen
+add translate 0 headsize*0.5
+add circle
+
+# row
+def module row spacing=3
+add rotateY i
+add translate -2*spacing 0
+put module person bodylen=5 laang=i raang=i
+add identity
+add rotateY -1*i
+add translate -1*spacing 0
+put module person bodylen=4 laang=i raang=i
+add identity
+put module person bodylen=3 llang=i rlang=i
+add rotateY i
+add translate spacing 0
+put module person bodylen=2 laang=100+-1*i raang=100+-1*i
+add identity
+add rotateY -1*i
+add translate 2*spacing 0
+put module person bodylen=1 laang=100+-1*i raang=100+-1*i
+
+# people
+def module people xspacing=0 yspacing=0.5 zspacing=3
+add identity
+add translate xspacing yspacing -2*zspacing
+put module row
+add identity
+add translate -1*xspacing -1*yspacing -1*zspacing
+put module row 
+add identity
+put module row
+add identity
+add translate xspacing yspacing zspacing
+put module row
+add identity
+add translate -1*xspacing -1*yspacing 2*zspacing
+put module row
+
+background Blue
+draw people

@@ -436,6 +436,7 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 	// clean up
 	polygon_free(tempPolygon);
 	polyline_free(tempPolyline);
+	free(tempds);
 }
 
 // 3D Module functions

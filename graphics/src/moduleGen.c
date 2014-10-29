@@ -635,6 +635,16 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				module_cube(mod[activeMod]->module, solid);
 			}
 		
+			// add circle
+			else if(strcmp(secondword, "circle") == 0){
+				for(j=0;j<maxpts;j++){
+					point_set2D(&(temppts[j]), 	cos(j*(2*M_PI/maxpts)), 
+												sin(j*(2*M_PI/maxpts)));
+				}
+				polygon_set(&temppolygon, maxpts, &(temppts[0]));
+				module_polygon(mod[activeMod]->module, &temppolygon);
+			}
+		
 			// add identity
 			else if(strcmp(secondword, "identity") == 0){
 				module_identity(mod[activeMod]->module);
@@ -1256,8 +1266,6 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	}
 	if(verbose) printf("EOF reached\n");
 	fclose(infile);
-	polygon_clear(&temppolygon);
-	polyline_clear(&temppolyline);
 
 	if(verbose){
 		printf("\ntotal number of modules defined = %d\n",activeMod);
@@ -1391,6 +1399,9 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	}
 
 	// rest of the clean up
+	free(ds);
+	polygon_clear(&temppolygon);
+	polyline_clear(&temppolyline);
 	for(j=0;j<numcolors;j++){
 		if(verbose) printf("freeing color named %s\n", c[j]->name);
 		free(c[j]);
