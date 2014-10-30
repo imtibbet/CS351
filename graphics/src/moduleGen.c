@@ -52,21 +52,34 @@ static float stringToFloat(char *str, TableItem **numbs, int numnumbers,
 	
 	strcpy(num, str);
 	//printf("stringToFloat %s\n", num);
-	// check for addition or multiplication and recurse through arguments
-	// follows order of operations :-)
-	if(strchr(num, '+')){
+	// check for math and recurse through arguments
+	if(strchr(num, '-') && strncmp(num, "-", 1) != 0){
+		//printf("performing subtraction %s\n", num);
+		strcpy(term1, strtok(num, "-"));
+		strcpy(term2, strtok(NULL, ""));
+		return(	stringToFloat(term1, numbs, numnumbers, activeModule) -
+				stringToFloat(term2, numbs, numnumbers, activeModule) );
+	}
+	else if(strchr(num, '+')){
 		//printf("performing addition %s\n", num);
 		strcpy(term1, strtok(num, "+"));
 		strcpy(term2, strtok(NULL, ""));
 		return(	stringToFloat(term1, numbs, numnumbers, activeModule) +
-				stringToFloat(term2, numbs, numnumbers, activeModule) ) ;
+				stringToFloat(term2, numbs, numnumbers, activeModule) );
+	}
+	else if(strchr(num, '/')){
+		//printf("performing division %s\n", num);
+		strcpy(term1, strtok(num, "/"));
+		strcpy(term2, strtok(NULL, ""));
+		return(	stringToFloat(term1, numbs, numnumbers, activeModule) /
+				stringToFloat(term2, numbs, numnumbers, activeModule) );
 	}
 	else if(strchr(num, '*')){
 		//printf("performing multiplication %s\n", num);
 		strcpy(term1, strtok(num, "*"));
 		strcpy(term2, strtok(NULL, ""));
 		return(	stringToFloat(term1, numbs, numnumbers, activeModule) *
-				stringToFloat(term2, numbs, numnumbers, activeModule) ) ;
+				stringToFloat(term2, numbs, numnumbers, activeModule) );
 	}
 
 	// check for the number as a key in the module parameters
@@ -816,6 +829,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	int numnumbers = 0;
 	int animateStart = 0;
 	int animateStop = 0;
+	int animateStep = 1;
 	int animate = 0;
 	int loop = 0;
 	int undefmod = 0;
@@ -874,8 +888,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				animate = 1;
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
-				animateStart = stringToFloat(xstr, numbs, numnumbers, NULL);
-				animateStop = stringToFloat(ystr, numbs, numnumbers, NULL);
+				zstr = strtok (NULL, delim);
+				animateStart = atoi(xstr);
+				animateStop = atoi(ystr);
+				if(zstr){
+					animateStep = atoi(zstr);
+				}
 				animateIndex = 
 				numbs[numnumbers++]->item.number = animateStart;
 			}
@@ -893,8 +911,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				animate = 1;
 				xstr = strtok (NULL, delim);
 				ystr = strtok (NULL, delim);
-				animateStart = stringToFloat(xstr, numbs, numnumbers, NULL);
-				animateStop = stringToFloat(ystr, numbs, numnumbers, NULL);
+				zstr = strtok (NULL, delim);
+				animateStart = atoi(xstr);
+				animateStop = atoi(ystr);
+				if(zstr){
+					animateStep = atoi(zstr);
+				}
 				animateIndex = 
 				numbs[numnumbers++]->item.number = animateStart;
 			}
@@ -1322,9 +1344,9 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			if(animateStart < animateStop){
 				for(animateIndex=animateStart;
 					animateIndex<animateStop;
-					animateIndex++){
+					animateIndex+=animateStep){
 					printf("animating from %d to %d, on step %d\n",
-							animateStart, animateStop, animateIndex);
+							animateStart, animateStop-1, animateIndex);
 					sprintf(outfilenamemod, "%03d%s", 
 							animateIndex, outfilename);
 					infile = fopen(infilename, "r");
@@ -1334,9 +1356,9 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				if(loop){
 					for(animateIndex=animateStop;
 						animateIndex>animateStart;
-						animateIndex--){
+						animateIndex-=animateStep){
 						printf("animating from %d to %d, on step %d\n",
-								animateStop, animateStart, animateIndex);
+								animateStop, animateStart+1, animateIndex);
 						sprintf(outfilenamemod, "%03d%s", 
 								animateStop+(animateStop-animateIndex), outfilename);
 						infile = fopen(infilename, "r");
@@ -1347,9 +1369,9 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			} else if(animateStart > animateStop){
 				for(animateIndex=animateStart;
 					animateIndex>animateStop;
-					animateIndex--){
+					animateIndex-=animateStep){
 					printf("animating from %d to %d, on step %d\n",
-							animateStart, animateStop, animateIndex);
+							animateStart, animateStop+1, animateIndex);
 					sprintf(outfilenamemod, "%03d%s", 
 							animateStart-animateIndex, outfilename);
 					infile = fopen(infilename, "r");
@@ -1359,9 +1381,9 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 				if(loop){
 					for(animateIndex=animateStop;
 						animateIndex<animateStart;
-						animateIndex++){
+						animateIndex+=animateStep){
 						printf("animating from %d to %d, on step %d\n",
-								animateStop, animateStart, animateIndex);
+								animateStop, animateStart-1, animateIndex);
 						sprintf(outfilenamemod, "%03d%s", 
 								animateStart+animateIndex, outfilename);
 						infile = fopen(infilename, "r");
