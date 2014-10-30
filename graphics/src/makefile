@@ -151,6 +151,13 @@ egypt: $(ODIR)/egypt.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 egypt-gif: $(ODIR)/egypt-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+# proj 7
+test7a: $(ODIR)/test7a.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+test7b: $(ODIR)/test7b.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+test7c: $(ODIR)/test7c.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 .PHONY: clean
 
 clean:

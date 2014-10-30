@@ -62,6 +62,9 @@ void point_print(Point *p, FILE *fp);
 /** Normalize the point. Do not modify the homogeneous coordinate. **/
 void point_normalize(Point *p);
 
+/** average p1 and p2 x, y, z values and put results in dest, set homogeneous to 1 **/
+void point_avg(Point *dest, Point *p1, Point *p2);
+
 // Line functions
 
 /** Initialize a 2D line. **/

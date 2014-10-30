@@ -95,6 +95,16 @@ void point_normalize(Point *p){
 	p->val[1] = p->val[1] / p->val[3]; // y=y/h
 }
 
+/*
+ * average p1 and p2 x, y, z values and put results in dest, set homogeneous to 1
+ */
+void point_avg(Point *dest, Point *p1, Point *p2){
+	dest->val[0] = (p1->val[0] + p2->val[0])/2.0;
+	dest->val[1] = (p1->val[1] + p2->val[1])/2.0;
+	dest->val[2] = (p1->val[2] + p2->val[2])/2.0;
+	dest->val[3] = 1.0;
+}
+
 // LINE
 
 /*

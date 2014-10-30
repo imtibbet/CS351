@@ -15,6 +15,7 @@
 #include "list.h"
 #include "transform.h"
 #include "drawstate.h"
+#include "bezier.h"
 #include "heirarchy.h"
 
 #endif

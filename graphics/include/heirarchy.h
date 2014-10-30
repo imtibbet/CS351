@@ -192,6 +192,22 @@ void module_cube(Module *md, int solid);
 /*
  * Adds the foreground color value to the tail of the module’s list
  */
-void module_color(Module *md, Color *c);
+void module_color(Module *md, Color *c); 
+
+// Bezier Curve and Surface Module Functions
+
+/*
+ * use the de Casteljau algorithm to subdivide the Bezier curve divisions times,
+ * then add the lines connecting the control points to the module.
+ */
+void module_bezierCurve(Module *m, BezierCurve *b, int divisions);
+
+/*
+ * use the de Casteljau algorithm to subdivide the Bezier surface divisions times,
+ * then draw either the lines connecting the control points, if solid is 0, 
+ * or draw triangles connecting the surface.
+ */
+void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid);
+
 
 #endif
