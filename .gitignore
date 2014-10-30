@@ -1,5 +1,5 @@
-.txt
-.zip
+*.txt
+*.zip
 graphics/images/*
 graphics/bin/*
 graphics/src/proj*
@@ -223,4 +223,3 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
-*.txt
