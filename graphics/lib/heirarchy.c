@@ -755,7 +755,7 @@ void module_bezierCurve(Module *m, BezierCurve *b, int divisions){
  * or draw triangles connecting the surface.
  */
 void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid){
-	int i, j, k l;
+	int i, j, k, l;
 	Line templine;
 	BezierCurve bezCurves[4][2];
 	Point deCast[4];
@@ -772,9 +772,9 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 	// compute all avg points for 3 orders, down to just one point 3rd order
 	// do for each of the four bezier curves
 	for(i=0;i<4;i++){
-		point_avg(&(order1[0]), &(b->c[i][0]), 	&([i]b->c[1]));
-		point_avg(&(order1[1]), &(b->c[i][1]), 	&([i]b->c[2]));
-		point_avg(&(order1[2]), &(b->c[i][2]), 	&([i]b->c[3]));
+		point_avg(&(order1[0]), &(b->c[i][0]), 	&(b->c[i][1]));
+		point_avg(&(order1[1]), &(b->c[i][1]), 	&(b->c[i][2]));
+		point_avg(&(order1[2]), &(b->c[i][2]), 	&(b->c[i][3]));
 		point_avg(&(order2[0]), &(order1[0]), 	&(order1[1]));
 		point_avg(&(order2[1]), &(order1[1]), 	&(order1[2]));
 		point_avg(&(order3), 	&(order2[0]), 	&(order2[1]));
