@@ -535,7 +535,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			// put not defined
 			else {
 				if(verbose) printf(	"Seond word of put not not recognized.\n"
-						"Must be module, point, line, polyline, polygon\n");
+						"Must be module, color, point, line, polyline, polygon\n");
 			}
 		}
 		
@@ -740,8 +740,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			// add not defined
 			else {
 				if(verbose) printf(	"Seond word of add not not recognized.\n"
-						"Must be module, point, line, polyline, polygon, cube"
-						", rotateX, rotateY, rotateZ, rotateXYZ"
+						"Must be module, color, point, line, polyline, polygon"
+						", cube, circle, rotateX, rotateY, rotateZ, rotateXYZ"
 						", translate, scale, shear2D, or shearZ\n");
 			}
 		}
