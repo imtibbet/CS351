@@ -87,11 +87,12 @@ int main(int argc, char *argv[]) {
 
 	// put the curve into a module
 	module_color(curve, &green);
-	module_bezierSurface(curve, &bc, divisions, 0);
+	module_bezierSurface(curve, &bc, divisions, 1);
 
 	// set up the drawstate
 	drawstate_setColor(&ds, white);
-
+	ds.shade = ShadeFrame;
+	
 	// set up the view
 	point_set3D(&(view.vrp), 0.0, 1.2, -3.0 );
 	vector_set( &(view.vpn), 0.0, -0.8, 2.5 );

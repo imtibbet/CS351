@@ -689,64 +689,60 @@ void module_color(Module *md, Color *c){
 
 // Bezier Curve and Surface Module Functions
 
+static void deCasteljau(Point *dest, Point *controls){	
+	Point order1[3];
+	Point order2[2];
+	Point order3;
+	
+	point_avg(&(order1[0]), &(controls[0]), &(controls[1]));
+	point_avg(&(order1[1]), &(controls[1]), &(controls[2]));
+	point_avg(&(order1[2]), &(controls[2]), &(controls[3]));
+	point_avg(&(order2[0]), &(order1[0]), 	&(order1[1]));
+	point_avg(&(order2[1]), &(order1[1]), 	&(order1[2]));
+	point_avg(&(order3), 	&(order2[0]), 	&(order2[1]));
+	// left half
+	point_copy(&(dest[0]), &(controls[0]));
+	point_copy(&(dest[1]), &(order1[0]));
+	point_copy(&(dest[2]), &(order2[0]));
+	point_copy(&(dest[3]), &(order3));
+	// right half
+	point_copy(&(dest[4]), &(order2[1]));
+	point_copy(&(dest[5]), &(order1[2]));
+	point_copy(&(dest[6]), &(controls[3]));
+}
+
 /*
  * use the de Casteljau algorithm to subdivide the Bezier curve divisions times,
  * then add the lines connecting the control points to the module.
  */
 void module_bezierCurve(Module *m, BezierCurve *b, int divisions){
 	Line tempLine;
-	Point deCast[4];
-	Point order1[3];
-	Point order2[2];
-	Point order3;
+	Point deCast[7];
 	BezierCurve tempbez;
 	if(!m || !b){
 		printf("Null passed to module_bezierCurve\n");
 		return;
 	}
 	
-	// compute all avg points for 3 orders, down to just one point 3rd order
-	point_avg(&(order1[0]), &(b->c[0]), &(b->c[1]));
-	point_avg(&(order1[1]), &(b->c[1]), &(b->c[2]));
-	point_avg(&(order1[2]), &(b->c[2]), &(b->c[3]));
-	point_avg(&(order2[0]), &(order1[0]), &(order1[1]));
-	point_avg(&(order2[1]), &(order1[1]), &(order1[2]));
-	point_avg(&order3, &(order2[0]), &(order2[1]));
-
 	// base case, add six lines to module
-	if(divisions == 1){
-		// left half
-		line_set(&tempLine, b->c[0], order1[0]);
+	if(divisions == 0){
+		line_set(&tempLine, b->c[0], b->c[1]);
 		module_line(m, &tempLine);
-		line_set(&tempLine, order1[0], order2[0]);
+		line_set(&tempLine, b->c[1], b->c[2]);
 		module_line(m, &tempLine);
-		line_set(&tempLine, order2[0], order3);
+		line_set(&tempLine, b->c[2], b->c[3]);
 		module_line(m, &tempLine);
-		// right half
-		line_set(&tempLine, order3, order2[1]);
-		module_line(m, &tempLine);
-		line_set(&tempLine, order2[1], order1[2]);
-		module_line(m, &tempLine);
-		line_set(&tempLine, order1[2], b->c[3]);
-		module_line(m, &tempLine);
-	} 
-	// recursively add left and right half bezier curves
-	else {
-		// left half
-		point_copy(&(deCast[0]), &(b->c[0]));
-		point_copy(&(deCast[1]), &(order1[0]));
-		point_copy(&(deCast[2]), &(order2[0]));
-		point_copy(&(deCast[3]), &(order3));
-		bezierCurve_set(&tempbez, &(deCast[0]));
-		module_bezierCurve(m, &tempbez, divisions-1);
-		// right half
-		point_copy(&(deCast[0]), &(order3));
-		point_copy(&(deCast[1]), &(order2[1]));
-		point_copy(&(deCast[2]), &(order1[2]));
-		point_copy(&(deCast[3]), &(b->c[3]));
-		bezierCurve_set(&tempbez, &(deCast[0]));
-		module_bezierCurve(m, &tempbez, divisions-1);
+		return;
 	}
+	
+	// compute all avg points for 3 orders, down to just one point 3rd order
+	deCasteljau(&(deCast[0]), &(b->c[0]));
+	// left half
+	bezierCurve_set(&tempbez, &(deCast[0]));
+	module_bezierCurve(m, &tempbez, divisions-1);
+	// right half
+	bezierCurve_set(&tempbez, &(deCast[3]));
+	module_bezierCurve(m, &tempbez, divisions-1);
 }
 
 /*
@@ -755,22 +751,20 @@ void module_bezierCurve(Module *m, BezierCurve *b, int divisions){
  * or draw triangles connecting the surface.
  */
 void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid){
-	int i, j;
+	int i, j, k, l;
 	Line tempLine;
-	BezierCurve tempBezCurves[4][2];
-	BezierCurve totBezCurves[8][2];
-	Point deCast[4];
-	Point order1[3];
-	Point order2[2];
-	Point order3;
+	Point grid[7][7];
+	Point controls[7];
+	Point deCast[7];
 	Point surfacePoints[16];
 	BezierSurface tempBezSurf;
+	Polygon *temptri = polygon_create();
 	if(!m || !b){
 		printf("Null passed to module_bezierSurface\n");
 		return;
 	}
 	
-	printf("module_bezierSurface with divisions %d\n", divisions);
+	// base case
 	if(divisions == 0){
 		// lines
 		if(solid == 0){
@@ -785,80 +779,56 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 		} 
 		// triangles
 		else {
-			printf("triangle not implemented for module_bezierSurface\n");
+			point_copy(&(controls[0]), &(b->c[0][0]));
+			point_copy(&(controls[1]), &(b->c[0][3]));
+			point_copy(&(controls[2]), &(b->c[3][3]));
+			point_copy(&(controls[3]), &(b->c[3][0]));
+			point_copy(&(controls[4]), &(b->c[0][0]));
+			polygon_set(temptri, 3, &(controls[0]));
+			module_polygon(m, temptri);
+			polygon_set(temptri, 3, &(controls[2]));
+			module_polygon(m, temptri);
 		}
-		return;
-	}
+	} 
+	
+	// divide and recurse
+	else {
 
-	// compute all avg points for 3 orders, down to just one point 3rd order
-	// do for each of the four bezier curves
-	for(i=0;i<4;i++){
-		point_avg(&(order1[0]), &(b->c[i][0]), 	&(b->c[i][1]));
-		point_avg(&(order1[1]), &(b->c[i][1]), 	&(b->c[i][2]));
-		point_avg(&(order1[2]), &(b->c[i][2]), 	&(b->c[i][3]));
-		point_avg(&(order2[0]), &(order1[0]), 	&(order1[1]));
-		point_avg(&(order2[1]), &(order1[1]), 	&(order1[2]));
-		point_avg(&(order3), 	&(order2[0]), 	&(order2[1]));
-		// left half
-		point_copy(&(deCast[0]), &(b->c[i][0]));
-		point_copy(&(deCast[1]), &(order1[0]));
-		point_copy(&(deCast[2]), &(order2[0]));
-		point_copy(&(deCast[3]), &(order3));
-		bezierCurve_set(&(tempBezCurves[i][0]), &(deCast[0]));
-		// right half
-		point_copy(&(deCast[0]), &(order3));
-		point_copy(&(deCast[1]), &(order2[1]));
-		point_copy(&(deCast[2]), &(order1[2]));
-		point_copy(&(deCast[3]), &(b->c[i][3]));
-		bezierCurve_set(&(tempBezCurves[i][1]), &(deCast[0]));
-	}
-
-	// now traverse the other direction, making 16 curves
-	for(j=0;j<2;j++){
+		// compute all avg points for 3 orders, down to just one point 3rd order
+		// do for each of the four bezier curves
 		for(i=0;i<4;i++){
-			point_avg(&(order1[0]), &(tempBezCurves[i][j].c[0]), &(tempBezCurves[i][j].c[1]));
-			point_avg(&(order1[1]), &(tempBezCurves[i][j].c[1]), &(tempBezCurves[i][j].c[2]));
-			point_avg(&(order1[2]), &(tempBezCurves[i][j].c[2]), 	&(tempBezCurves[i][j].c[3]));
-			point_avg(&(order2[0]), &(order1[0]), 	&(order1[1]));
-			point_avg(&(order2[1]), &(order1[1]), 	&(order1[2]));
-			point_avg(&(order3), 	&(order2[0]), 	&(order2[1]));
-			// left half
-			point_copy(&(deCast[0]), &(b->c[i][0]));
-			point_copy(&(deCast[1]), &(order1[0]));
-			point_copy(&(deCast[2]), &(order2[0]));
-			point_copy(&(deCast[3]), &(order3));
-			bezierCurve_set(&(totBezCurves[i][0]), &(deCast[0]));
-			// right half
-			point_copy(&(deCast[0]), &(order3));
-			point_copy(&(deCast[1]), &(order2[1]));
-			point_copy(&(deCast[2]), &(order1[2]));
-			point_copy(&(deCast[3]), &(b->c[i][3]));
-			bezierCurve_set(&(totBezCurves[i][1]), &(deCast[0]));
+			deCasteljau(&(deCast[0]), &(b->c[i][0]));
+			for(j=0;j<7;j++){
+				point_copy(&(grid[2*i][j]), &(deCast[j]));
+			}
 		}
-	}
 
-	// now make the four new bezier surfaces by subdividing across
-	for(i=0;i<2;i++){
-		for(j=0;j<2;j++){
-			point_copy(&(surfacePoints[0]), 	&(totBezCurves[0+4*i][j].c[0]));
-			point_copy(&(surfacePoints[1]), 	&(totBezCurves[0+4*i][j].c[1]));
-			point_copy(&(surfacePoints[2]), 	&(totBezCurves[0+4*i][j].c[2]));
-			point_copy(&(surfacePoints[3]), 	&(totBezCurves[0+4*i][j].c[3]));
-			point_copy(&(surfacePoints[4]), 	&(totBezCurves[1+4*i][j].c[0]));
-			point_copy(&(surfacePoints[5]), 	&(totBezCurves[1+4*i][j].c[1]));
-			point_copy(&(surfacePoints[6]), 	&(totBezCurves[1+4*i][j].c[2]));
-			point_copy(&(surfacePoints[7]), 	&(totBezCurves[1+4*i][j].c[3]));
-			point_copy(&(surfacePoints[8]), 	&(totBezCurves[2+4*i][j].c[0]));
-			point_copy(&(surfacePoints[9]), 	&(totBezCurves[2+4*i][j].c[1]));
-			point_copy(&(surfacePoints[10]),	&(totBezCurves[2+4*i][j].c[2]));
-			point_copy(&(surfacePoints[11]), 	&(totBezCurves[2+4*i][j].c[3]));
-			point_copy(&(surfacePoints[12]), 	&(totBezCurves[3+4*i][j].c[0]));
-			point_copy(&(surfacePoints[13]), 	&(totBezCurves[3+4*i][j].c[1]));
-			point_copy(&(surfacePoints[14]), 	&(totBezCurves[3+4*i][j].c[2]));
-			point_copy(&(surfacePoints[15]), 	&(totBezCurves[3+4*i][j].c[3]));
-			bezierSurface_set(&tempBezSurf, &(surfacePoints[0]));
-			module_bezierSurface(m, &tempBezSurf, divisions-1, solid);
+		// now traverse the other direction, making populating grid
+		for(i=0;i<7;i++){
+			for(j=0;j<4;j++){
+				point_copy(&(controls[j]), &(grid[2*j][i]));
+			}
+			deCasteljau(&(deCast[0]), &(controls[0]));
+			for(j=0;j<7;j++){
+				point_copy(&(grid[j][i]), &(deCast[j]));
+			}
+		}
+
+		// now make the four new bezier surfaces by subdividing across
+		for(i=0;i<2;i++){
+			for(j=0;j<2;j++){
+				for(k=0;k<4;k++){
+					for(l=0;l<4;l++){
+						point_copy(&(surfacePoints[4*k+l]), &(grid[k+3*i][l+3*j]));
+					}
+				}
+				bezierSurface_set(&tempBezSurf, &(surfacePoints[0]));
+				module_bezierSurface(m, &tempBezSurf, divisions-1, solid);
+			}
 		}
 	}
+	
+	// clean up
+	polygon_free(temptri);
 }
 
