@@ -770,8 +770,8 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 		return;
 	}
 	
+	printf("module_bezierSurface with divisions %d\n", divisions);
 	if(divisions == 0){
-		printf("adding lines in module_bezierSurface with divisions %d\n", divisions);
 		// lines
 		if(solid == 0){
 			for(i=0;i<4;i++){
@@ -840,8 +840,6 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 	// now make the four new bezier surfaces by subdividing across
 	for(i=0;i<2;i++){
 		for(j=0;j<2;j++){
-
-			// consider 0, 0 surface
 			point_copy(&(surfacePoints[0]), 	&(totBezCurves[0+4*i][j].c[0]));
 			point_copy(&(surfacePoints[1]), 	&(totBezCurves[0+4*i][j].c[1]));
 			point_copy(&(surfacePoints[2]), 	&(totBezCurves[0+4*i][j].c[2]));
