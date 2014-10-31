@@ -771,6 +771,7 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 	}
 	
 	if(divisions == 0){
+		printf("adding lines in module_bezierSurface with divisions %d\n", divisions);
 		// lines
 		if(solid == 0){
 			for(i=0;i<4;i++){
@@ -786,6 +787,7 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 		else {
 			printf("triangle not implemented for module_bezierSurface\n");
 		}
+		return;
 	}
 
 	// compute all avg points for 3 orders, down to just one point 3rd order
