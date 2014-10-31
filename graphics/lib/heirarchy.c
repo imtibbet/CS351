@@ -761,7 +761,7 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 	BezierCurve totBezCurves[8][2];
 	Point deCast[4];
 	Point order1[3];
-	Point order2[2];tempLine
+	Point order2[2];
 	Point order3;
 	Point surfacePoints[16];
 	BezierSurface tempBezSurf;
@@ -814,9 +814,9 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 	// now traverse the other direction, making 16 curves
 	for(j=0;j<2;j++){
 		for(i=0;i<4;i++){
-			point_avg(&(order1[0]), &(tempBezCurves[i][j]->c[0]), &(tempBezCurves[i][j]->c[1]));
-			point_avg(&(order1[1]), &(tempBezCurves[i][j]->c[1]), &(tempBezCurves[i][j]->c[2]));
-			point_avg(&(order1[2]), &(tempBezCurves[i][j]->c[2]), 	&(tempBezCurves[i][j]->c[3]));
+			point_avg(&(order1[0]), &(tempBezCurves[i][j].c[0]), &(tempBezCurves[i][j].c[1]));
+			point_avg(&(order1[1]), &(tempBezCurves[i][j].c[1]), &(tempBezCurves[i][j].c[2]));
+			point_avg(&(order1[2]), &(tempBezCurves[i][j].c[2]), 	&(tempBezCurves[i][j].c[3]));
 			point_avg(&(order2[0]), &(order1[0]), 	&(order1[1]));
 			point_avg(&(order2[1]), &(order1[1]), 	&(order1[2]));
 			point_avg(&(order3), 	&(order2[0]), 	&(order2[1]));
@@ -857,7 +857,7 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 			point_copy(&(surfacePoints[14]), 	&(totBezCurves[3+4*i][j].c[2]));
 			point_copy(&(surfacePoints[15]), 	&(totBezCurves[3+4*i][j].c[3]));
 			bezierSurface_set(&tempBezSurf, &(surfacePoints[0]));
-			module_bezierSurface(m, tempBezSurf, divisions-1, solid);
+			module_bezierSurface(m, &tempBezSurf, divisions-1, solid);
 		}
 	}
 }
