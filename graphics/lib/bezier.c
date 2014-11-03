@@ -141,7 +141,7 @@ void bezierCurve_draw(BezierCurve *b, Image *src, Color c){
 		return;
 	}
 	
-	// compute maximum dimension, either dx or dy
+	// compute maximum dimension among 4 control points, either dx or dy
 	curdim = b->c[0].val[0] - b->c[1].val[0];
 	curdim = maxdim = curdim*curdim;
 	for(i=0;i<3;i++){
@@ -178,18 +178,18 @@ void bezierCurve_draw(BezierCurve *b, Image *src, Color c){
 		point_avg(&order3, &(order2[0]), &(order2[1]));
 		
 		// left half curve has first point of each order as control points
-		point_copy(&(deCast[0]), &(b->c[0]));
-		point_copy(&(deCast[1]), &(order1[0]));
-		point_copy(&(deCast[2]), &(order2[0]));
-		point_copy(&(deCast[3]), &(order3));
+		deCast[0] = b->c[0];
+		deCast[1] = order1[0];
+		deCast[2] = order2[0];
+		deCast[3] = order3;
 		bezierCurve_set(&tempbez, &(deCast[0]));
 		bezierCurve_draw(&tempbez, src, c);
 		
 		// right half curve has last point of each order as control points
-		point_copy(&(deCast[0]), &(order3));
-		point_copy(&(deCast[1]), &(order2[1]));
-		point_copy(&(deCast[2]), &(order1[2]));
-		point_copy(&(deCast[3]), &(b->c[3]));
+		deCast[0] = order3;
+		deCast[1] = order2[1];
+		deCast[2] = order1[2];
+		deCast[3] = b->c[3];
 		bezierCurve_set(&tempbez, &(deCast[0]));
 		bezierCurve_draw(&tempbez, src, c);
 	}

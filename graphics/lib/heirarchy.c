@@ -552,6 +552,7 @@ void module_cube(Module *md, int solid){
 	Point v[8];
 	Point tv[4];
 	Line l;
+	int i;
 	
 	// initialize polygon
 	polygon_init( &p );
@@ -570,29 +571,21 @@ void module_cube(Module *md, int solid){
 		// add only lines ( 12 of them )
 		
 		// front face lines
-		line_set( &l, v[0], v[1] );
-		e = element_init(ObjLine, &l);
-		module_insert(md, e);
-		line_set( &l, v[1], v[2] );
-		e = element_init(ObjLine, &l);
-		module_insert(md, e);
-		line_set( &l, v[2], v[3] );
-		e = element_init(ObjLine, &l);
-		module_insert(md, e);
+		for(i=0;i<3;i++){
+			line_set( &l, v[i], v[i+1] );
+			e = element_init(ObjLine, &l);
+			module_insert(md, e);
+		}
 		line_set( &l, v[3], v[0] );
 		e = element_init(ObjLine, &l);
 		module_insert(md, e);
 		
 		// back face lines
-		line_set( &l, v[4], v[5] );
-		e = element_init(ObjLine, &l);
-		module_insert(md, e);
-		line_set( &l, v[5], v[6] );
-		e = element_init(ObjLine, &l);
-		module_insert(md, e);
-		line_set( &l, v[6], v[7] );
-		e = element_init(ObjLine, &l);
-		module_insert(md, e);
+		for(i=4;i<7;i++){
+			line_set( &l, v[i], v[i+1] );
+			e = element_init(ObjLine, &l);
+			module_insert(md, e);
+		}
 		line_set( &l, v[7], v[4] );
 		e = element_init(ObjLine, &l);
 		module_insert(md, e);
@@ -689,7 +682,7 @@ void module_color(Module *md, Color *c){
 
 // Bezier Curve and Surface Module Functions
 
-static void deCasteljau(Point *dest, Point *controls){	
+static inline void deCasteljau(Point *dest, Point *controls){	
 	Point order1[3];
 	Point order2[2];
 	Point order3;
@@ -701,14 +694,14 @@ static void deCasteljau(Point *dest, Point *controls){
 	point_avg(&(order2[1]), &(order1[1]), 	&(order1[2]));
 	point_avg(&(order3), 	&(order2[0]), 	&(order2[1]));
 	// left half
-	point_copy(&(dest[0]), &(controls[0]));
-	point_copy(&(dest[1]), &(order1[0]));
-	point_copy(&(dest[2]), &(order2[0]));
-	point_copy(&(dest[3]), &(order3));
+	dest[0] = controls[0];
+	dest[1] = order1[0];
+	dest[2] = order2[0];
+	dest[3] = order3;
 	// right half
-	point_copy(&(dest[4]), &(order2[1]));
-	point_copy(&(dest[5]), &(order1[2]));
-	point_copy(&(dest[6]), &(controls[3]));
+	dest[4] = order2[1];
+	dest[5] = order1[2];
+	dest[6] = controls[3];
 }
 
 /*
@@ -779,11 +772,11 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 		} 
 		// triangles
 		else {
-			point_copy(&(controls[0]), &(b->c[0][0]));
-			point_copy(&(controls[1]), &(b->c[0][3]));
-			point_copy(&(controls[2]), &(b->c[3][3]));
-			point_copy(&(controls[3]), &(b->c[3][0]));
-			point_copy(&(controls[4]), &(b->c[0][0]));
+			controls[0] = b->c[0][0];
+			controls[1] = b->c[0][3];
+			controls[2] = b->c[3][3];
+			controls[3] = b->c[3][0];
+			controls[4] = b->c[0][0];
 			polygon_set(temptri, 3, &(controls[0]));
 			module_polygon(m, temptri);
 			polygon_set(temptri, 3, &(controls[2]));
@@ -799,18 +792,18 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 		for(i=0;i<4;i++){
 			deCasteljau(&(deCast[0]), &(b->c[i][0]));
 			for(j=0;j<7;j++){
-				point_copy(&(grid[2*i][j]), &(deCast[j]));
+				grid[2*i][j] = deCast[j];
 			}
 		}
 
-		// now traverse the other direction, making populating grid
+		// now traverse the other direction, populating grid
 		for(i=0;i<7;i++){
 			for(j=0;j<4;j++){
-				point_copy(&(controls[j]), &(grid[2*j][i]));
+				controls[j] = grid[2*j][i];
 			}
 			deCasteljau(&(deCast[0]), &(controls[0]));
 			for(j=0;j<7;j++){
-				point_copy(&(grid[j][i]), &(deCast[j]));
+				grid[j][i] = deCast[j];
 			}
 		}
 
@@ -819,10 +812,11 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 			for(j=0;j<2;j++){
 				for(k=0;k<4;k++){
 					for(l=0;l<4;l++){
-						point_copy(&(surfacePoints[4*k+l]), &(grid[k+3*i][l+3*j]));
+						surfacePoints[4*k+l] = grid[k+3*i][l+3*j];
 					}
 				}
 				bezierSurface_set(&tempBezSurf, &(surfacePoints[0]));
+				// recursive call
 				module_bezierSurface(m, &tempBezSurf, divisions-1, solid);
 			}
 		}
