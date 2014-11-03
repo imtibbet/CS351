@@ -665,7 +665,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					divisions = 4;
 				}
 				bezierCurve_set(&tempcurve, &(temppts[0]));
-				module_bezierCurve(mod[activeMod]->module, &tempcurve, divisions);
+				module_bezierCurve(mod[activeMod]->module, &tempcurve, 
+									divisions);
 			}
 		
 			// add surface
@@ -685,13 +686,17 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					bezierSurface_init(&tempsurface);
 				}
 
+				solid = 1;
+				divisions = 4;
 				if(searchname){
 					divisions = atoi(searchname);
-				} else {
-					divisions = 4;
+					searchname = strtok (NULL, delim);
+					if(searchname)
+						solid = atoi(searchname);
 				}
 				bezierSurface_set(&tempsurface, &(temppts[0]));
-				module_bezierSurface(mod[activeMod]->module, &tempsurface, divisions);
+				module_bezierSurface(mod[activeMod]->module, &tempsurface, 
+									divisions, solid);
 			}
 		
 			// add cube
