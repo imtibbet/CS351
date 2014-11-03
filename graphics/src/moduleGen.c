@@ -160,7 +160,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
 			*searchname;
 	char *delim = " \n";
-	int i, j, solid, templateMod = 0;
+	int i, j, solid, divisions, templateMod = 0;
 	int curLine = 0;
 	int totalLines;
 	int numAddedMods = 1;
@@ -176,11 +176,15 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	Line templine;
 	Polyline temppolyline;
 	Polygon temppolygon;
+	BezierCurve tempcurve;
+	BezierSurface tempsurface;
 	float x, y, z, theta;
 	
 	// init
 	polygon_init(&temppolygon);
 	polyline_init(&temppolyline);
+	bezierCurve_init(&tempcurve);
+	bezierSurface_init(&tempsurface);
 
 	// get the first and second words
 	strcpy(buff, mod[activeMod]->definition[0]);
@@ -637,6 +641,58 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				polygon_set(&temppolygon, i, &(temppts[0]));
 				module_polygon(mod[activeMod]->module, &temppolygon);
 			} 
+		
+			// add curve
+			else if(strcmp(secondword, "curve") == 0){
+				searchname = strtok (NULL, delim);
+				if(searchname){
+					for(i=0;i<4;i++){
+						for(j=0;j<numpoints;j++){
+							if(strcmp(pt[j]->name, searchname) == 0){
+								temppts[i] = pt[j]->item.point;
+								break;
+							}
+						}
+						searchname = strtok (NULL, delim);
+					}
+				} else {
+					bezierCurve_init(&tempcurve);
+				}
+
+				if(searchname){
+					divisions = atoi(searchname);
+				} else {
+					divisions = 4;
+				}
+				bezierCurve_set(&tempcurve, &(temppts[0]));
+				module_bezierCurve(mod[activeMod]->module, &tempcurve, divisions);
+			}
+		
+			// add surface
+			else if(strcmp(secondword, "surface") == 0){
+				searchname = strtok (NULL, delim);
+				if(searchname){
+					for(i=0;i<16;i++){
+						for(j=0;j<numpoints;j++){
+							if(strcmp(pt[j]->name, searchname) == 0){
+								temppts[i] = pt[j]->item.point;
+								break;
+							}
+						}
+						searchname = strtok (NULL, delim);
+					}
+				} else {
+					bezierSurface_init(&tempsurface);
+				}
+
+				if(searchname){
+					divisions = atoi(searchname);
+				} else {
+					divisions = 4;
+				}
+				bezierSurface_set(&tempsurface, &(temppts[0]));
+				module_bezierSurface(mod[activeMod]->module, &tempsurface, divisions);
+			}
 		
 			// add cube
 			else if(strcmp(secondword, "cube") == 0){
