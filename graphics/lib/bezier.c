@@ -62,10 +62,10 @@ void bezierCurve_set(BezierCurve *b, Point *vlist){
 		printf("Null passed to bezierCurve_set\n");
 		return;
 	}
-	point_copy(&(b->c[0]), &(vlist[0]));
-	point_copy(&(b->c[1]), &(vlist[1]));
-	point_copy(&(b->c[2]), &(vlist[2]));
-	point_copy(&(b->c[3]), &(vlist[3]));
+	b->c[0] = vlist[0];
+	b->c[1] = vlist[1];
+	b->c[2] = vlist[2];
+	b->c[3] = vlist[3];
 }
 
 /*
@@ -76,25 +76,25 @@ void bezierSurface_set(BezierSurface *b, Point *vlist){
 		printf("Null passed to bezierSurface_set\n");
 		return;
 	}
-	point_copy(&(b->c[0][0]), &(vlist[0]));
-	point_copy(&(b->c[1][0]), &(vlist[1]));
-	point_copy(&(b->c[2][0]), &(vlist[2]));
-	point_copy(&(b->c[3][0]), &(vlist[3]));
+	b->c[0][0] = vlist[0];
+	b->c[1][0] = vlist[1];
+	b->c[2][0] = vlist[2];
+	b->c[3][0] = vlist[3];
 	
-	point_copy(&(b->c[0][1]), &(vlist[4]));
-	point_copy(&(b->c[1][1]), &(vlist[5]));
-	point_copy(&(b->c[2][1]), &(vlist[6]));
-	point_copy(&(b->c[3][1]), &(vlist[7]));
+	b->c[0][1] = vlist[4];
+	b->c[1][1] = vlist[5];
+	b->c[2][1] = vlist[6];
+	b->c[3][1] = vlist[7];
 	
-	point_copy(&(b->c[0][2]), &(vlist[8]));
-	point_copy(&(b->c[1][2]), &(vlist[9]));
-	point_copy(&(b->c[2][2]), &(vlist[10]));
-	point_copy(&(b->c[3][2]), &(vlist[11]));
+	b->c[0][2] = vlist[8];
+	b->c[1][2] = vlist[9];
+	b->c[2][2] = vlist[10];
+	b->c[3][2] = vlist[11];
 	
-	point_copy(&(b->c[0][3]), &(vlist[12]));
-	point_copy(&(b->c[1][3]), &(vlist[13]));
-	point_copy(&(b->c[2][3]), &(vlist[14]));
-	point_copy(&(b->c[3][3]), &(vlist[15]));
+	b->c[0][3] = vlist[12];
+	b->c[1][3] = vlist[13];
+	b->c[2][3] = vlist[14];
+	b->c[3][3] = vlist[15];
 }
 
 /*

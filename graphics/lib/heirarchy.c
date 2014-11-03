@@ -682,7 +682,7 @@ void module_color(Module *md, Color *c){
 
 // Bezier Curve and Surface Module Functions
 
-static inline void deCasteljau(Point *dest, Point *controls){	
+static inline void deCasteljau(Point *dest, Point *controls){
 	Point order1[3];
 	Point order2[2];
 	Point order3;
