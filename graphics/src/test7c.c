@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 		if( tmp >= 0 && tmp < 10 )
 			divisions = tmp;
 	}
-	printf("Creating Bezier curves with %d subdivisions\n", divisions);
+	printf("Creating Bezier surface with %d subdivisions\n", divisions);
 
 	color_set(&white, 1.0, 1.0, 1.0 );
 	color_set(&blue, .1, .2, .8);
@@ -119,6 +119,10 @@ int main(int argc, char *argv[]) {
 		image_write(src, buffer);
 		image_reset(src);
 	}
+	
+	printf("converting to gif...\n");
+	system("convert -delay 1.5 -loop 0 bezSurf-frame*.ppm bezSurf.gif");
+	system("rm bezSurf-frame*.ppm");
 
 	// clean up
 	image_free( src );

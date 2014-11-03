@@ -104,6 +104,10 @@ int main(int argc, char *argv[]) {
 		image_write(src, buffer);
 		image_reset(src);
 	}
+	
+	printf("converting to gif...\n");
+	system("convert -delay 1.5 -loop 0 bez3d-frame*.ppm bez3d.gif");
+	system("rm bez3d-frame*.ppm");
 
 	// clean up
 	image_free( src );
