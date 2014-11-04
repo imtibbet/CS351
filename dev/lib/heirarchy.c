@@ -1,7 +1,7 @@
 /*
- * Author: Ian Tibbetts and Astrid Moore
+ * Author: Ian Tibbetts and Astrid (Bruce Maxwell)
  * Date: 10/17/14
- *
+ * 
  * The heirarchical model
  */
 
@@ -762,6 +762,71 @@ void module_pyramid(Module *md, int solid, float size, float x,
 
     polygon_clear(&side);
 }
+
+/*
+* Sourced from coursework file test6b.c (Bruce Maxwell)
+*/
+void module_cylinder( Module *mod, int sides, int size, float x, float y,
+	float z, Color c ) {
+	Polygon p;
+	Point xtop, xbot;
+	Element *e;
+	double x1, x2, z1, z2;
+	int i;
+
+	if(!mod){
+		printf("Null md passed to module_cylinder\n");
+		return;
+	}
+
+	// set cylinder parameters
+    module_scale(mod, (int)size, (int)size, (int)size);
+	module_translate(mod, (float)x, (float)y, (float)z);
+	module_color(mod, &c);
+	printf("parameters set\n");
+
+	polygon_init( &p );
+	point_set3D( &xtop, 0, 1.0, 0.0 );
+	point_set3D( &xbot, 0, 0.0, 0.0 );
+
+	// make a fan for the top and bottom sides
+	// and quadrilaterals for the sides
+	for(i=0;i<sides;i++) {
+		Point pt[4];
+
+		x1 = cos( i * M_PI * 2.0 / sides );
+		z1 = sin( i * M_PI * 2.0 / sides );
+		x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+		z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+
+		point_copy( &pt[0], &xtop );
+		point_set3D( &pt[1], x1, 1.0, z1 );
+		point_set3D( &pt[2], x2, 1.0, z2 );
+
+		polygon_set( &p, 3, pt );
+		e = element_init(ObjPolygon, &p);
+		module_insert(mod, e);
+
+		point_copy( &pt[0], &xbot );
+		point_set3D( &pt[1], x1, 0.0, z1 );
+		point_set3D( &pt[2], x2, 0.0, z2 );
+
+		polygon_set( &p, 3, pt );
+		e = element_init(ObjPolygon, &p);
+		module_insert(mod, e);
+
+		point_set3D( &pt[0], x1, 0.0, z1 );
+		point_set3D( &pt[1], x2, 0.0, z2 );
+		point_set3D( &pt[2], x2, 1.0, z2 );
+		point_set3D( &pt[3], x1, 1.0, z1 );
+
+		polygon_set( &p, 4, pt );
+		e = element_init(ObjPolygon, &p);
+		module_insert(mod, e);
+	}
+
+	polygon_clear( &p );
+} 
 
 // Shading/Color Module Functions
 

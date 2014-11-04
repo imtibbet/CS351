@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = pyramid-test pyramid-test-gif
+EXECUTABLES = pyramid-test pyramid-test-gif cylinder-test cylinder-test-gif
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = pyramid-test.o pyramid-test-gif.o
+_OBJ = pyramid-test.o pyramid-test-gif.o cylinder-test.o cylinder-test-gif.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -162,6 +162,11 @@ pyramid-test: $(ODIR)/pyramid-test.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 pyramid-test-gif: $(ODIR)/pyramid-test-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+cylinder-test: $(ODIR)/cylinder-test.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+cylinder-test-gif: $(ODIR)/cylinder-test-gif.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+
 .PHONY: clean
 
 clean:
