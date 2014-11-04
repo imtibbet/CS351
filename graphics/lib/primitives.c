@@ -11,7 +11,7 @@ const float epsilon = 0.000001;
 // POINT
 
 /* 
- * Sets the first two values of the vector to x and y. 
+ * Sets the first two values of the point to x and y. 
  * Sets the third value to 0.0 and the fourth value to 1.0 
  */
 void point_set2D(Point *p, double x, double y){
@@ -41,7 +41,7 @@ void point_set3D(Point *p, double x, double y, double z){
 }
 
 /*
- * Set the four values of the vector to x, y, z, and h, respectively. 
+ * Set the four values of the point to x, y, z, and h, respectively. 
  */
 void point_set(Point *p, double x, double y, double z, double h){
 	if(!p){

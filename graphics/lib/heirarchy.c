@@ -342,6 +342,12 @@ void module_shear2D(Module *md, double shx, double shy){
 void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds, 
 				Lighting *lighting, Image *src){
 				
+	/* for antialiasing
+	Module *thickLineMod = module_create();			
+	Element *thickLineE;
+	float dx, dy, dz, lineLength;
+	Vector u, v, w;*/
+	
 	// all locally needed variables
 	Matrix LTM, tempGTM;
 	Line tempLine;
@@ -371,15 +377,37 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				point_draw(&tempPointVTM, src, ds->color);
 				break;
 			case ObjLine:
+				line_copy(&tempLine, &(e->obj.line));
 				//printf("drawing line ");
 				// copy, xform, normalize, draw
-				line_copy(&tempLine, &(e->obj.line));
 				matrix_xformLine(&LTM, &tempLine);
 				matrix_xformLine(GTM, &tempLine);
 				matrix_xformLine(VTM, &tempLine);
 				line_normalize(&tempLine);
-				//line_print(&tempLine, stdout);
 				line_draw(&tempLine, src, ds->color);
+				//line_print(&tempLine, stdout);
+				/*if(antialias){
+					dx = tempLine.b.val[0]-tempLine.a.val[0];
+					dy = tempLine.b.val[1]-tempLine.a.val[1];
+					dz = tempLine.b.val[2]-tempLine.a.val[2];
+					lineLength = sqrt(dx*dx+dy*dy+dz*dz);
+					module_scale( thickLineMod, 1, lineLength, 1 );
+					vector_set(&v, dx, dy, dz);
+					vector_normalize(&v);
+					vector_set(&u, -dz, dx, dy);
+					vector_cross(&u, &v, &w);
+					vector_cross(&v, &w, &u);
+					vector_normalize(&u);
+					vector_normalize(&w);
+					module_rotateXYZ( thickLineMod, &u, &v, &w );
+					module_translate( thickLineMod,	tempLine.a.val[0], 
+													tempLine.a.val[1], 
+													tempLine.a.val[2] );
+					module_cylinder( thickLineMod, 4, 1, 1, 0, 0, 0 );
+					thickLineE = element_init(ObjModule, thickLineMod);
+					thickLineE->next = e->next;
+					e->next = thickLineE;
+				}*/
 				break;
 			case ObjPolyline:
 				//printf("drawing polyline ");

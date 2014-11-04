@@ -889,7 +889,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	return(numAddedMods);
 }
 
-static void genModule(FILE *infile, char *infilename, char *outfilename, 
+static void genModules(FILE *infile, char *infilename, char *outfilename, 
 	int firstCall, int animateIndex, int verbose){
 	
 	// variables for the view and image
@@ -912,7 +912,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
 			*searchname;
 	char *delim = " \n";
-	int i, j, is2D = 0;
+	int i, j;
+	int is2D = 0;
+	int is3D = 0;
+	int antialias = 0;
+	int imageWidth = 0;
+	int imageHeight = 0;
 	int activeMod = -1;
 	int drawMod = -1;
 	int curLine = 0;
@@ -961,17 +966,28 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		strcpy(linein, strtok (buff, "#\n"));
 		if(verbose) printf("reading line: %s\n", linein); 
 
-		// get the first and second words
+		// get the first word
 		firstword = strtok (buff,delim);
 		if(!firstword){
 			if(verbose) printf("no first word on this line, skipping\n");
 			continue;
 		}
+		
+		// check for anti alis (only keyword without second word
+		if(strcmp(firstword, "antialias") == 0){
+			if(verbose) printf("anti aliasing on\n");
+			antialias = 1;
+			continue;
+		}
+		
+		// get the second word
 		secondword = strtok (NULL, delim);
 		if(!secondword){
 			if(verbose) printf("no second word on this line, skipping\n");
 			continue;
 		}
+		
+		// process first-second word keywords
 		
 		// define an animation variable that will create a bouncing gif
 		if(strcmp(firstword, "animate") == 0){
@@ -1021,6 +1037,8 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 
 		// select a named module to draw
 		else if(strcmp(firstword, "draw") == 0){
+		
+			// define the module currently recording
 			if(undefmod){
 				mod[activeMod]->numlines = curLine;
 				activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
@@ -1082,9 +1100,11 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			// def module
 			if(strcmp(secondword, "module") == 0){
 			
-				// if a module has been previously defined, parse all lines
+				// first module
 				if(activeMod == -1)
 					activeMod++;
+					
+				// define the module currently recording
 				else if(undefmod){
 					mod[activeMod]->numlines = curLine;
 					activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
@@ -1291,7 +1311,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		// define a 3D view
 		else if(strcmp(firstword, "view3D") == 0){
 		
-			is2D = 0;
+			is3D = 1;
 			
 			// 3D vrp
 			if(strcmp(secondword, "vrp") == 0){
@@ -1425,16 +1445,31 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		// define view and draw state and draw last module defined
 		matrix_identity( &gtm );
 		if(is2D){
+			if(antialias){
+				imageWidth = view2D.screenx;
+				imageHeight = view2D.screeny;
+				view2D.screenx = 3*imageWidth;
+				view2D.screeny = 3*imageHeight;
+			}
 			matrix_setView2D( &vtm, &view2D );
 			if(verbose) printf("\n2D view matrix:\n");
 			if(verbose) matrix_print(&vtm, stdout);
 			src = image_create( view2D.screeny, view2D.screenx );
 		}
-		else {
+		else if (is3D){
+			if(antialias){
+				imageWidth = view3D.screenx;
+				imageHeight = view3D.screeny;
+				view3D.screenx = 3*view3D.screenx;
+				view3D.screeny = 3*view3D.screeny;
+			}
 			matrix_setView3D( &vtm, &view3D );
 			if(verbose) printf("\n3D view matrix:\n");
 			if(verbose) matrix_print(&vtm, stdout);
 			src = image_create( view3D.screeny, view3D.screenx );
+		} else {
+			printf("no view defined, use view2D or view3D keyword\n");
+			exit(0);
 		}
 		image_fillColor(src, background);
 		if(firstCall && animate){
@@ -1447,7 +1482,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 					sprintf(outfilenamemod, "%03d%s", 
 							animateIndex, outfilename);
 					infile = fopen(infilename, "r");
-					genModule(infile, infilename, outfilenamemod, 
+					genModules(infile, infilename, outfilenamemod, 
 								0, animateIndex, 0);
 				}
 				if(loop){
@@ -1459,7 +1494,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 						sprintf(outfilenamemod, "%03d%s", 
 								animateStop+(animateStop-animateIndex), outfilename);
 						infile = fopen(infilename, "r");
-						genModule(infile, infilename, outfilenamemod, 
+						genModules(infile, infilename, outfilenamemod, 
 									0, animateIndex, 0);
 					}
 				}
@@ -1472,7 +1507,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 					sprintf(outfilenamemod, "%03d%s", 
 							animateStart-animateIndex, outfilename);
 					infile = fopen(infilename, "r");
-					genModule(infile, infilename, outfilenamemod, 
+					genModules(infile, infilename, outfilenamemod, 
 								0, animateIndex, 0);
 				}
 				if(loop){
@@ -1484,7 +1519,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 						sprintf(outfilenamemod, "%03d%s", 
 								animateStart+animateIndex, outfilename);
 						infile = fopen(infilename, "r");
-						genModule(infile, infilename, outfilenamemod, 
+						genModules(infile, infilename, outfilenamemod, 
 									0, animateIndex, 0);
 					}
 				}
@@ -1507,6 +1542,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			module_draw(mod[drawMod]->module, &vtm, &gtm, ds, NULL, src);
 			image_write(src, outfilename);
 			if(verbose) printf("image %s written\n", outfilename);
+			if(antialias){
+				sprintf(command, "convert -scale %dx%d %s %s", 
+									imageWidth, imageHeight, 
+									outfilename, outfilename);
+				system(command);
+			}
 		}
 		// some clean up
 		image_free(src);
@@ -1580,6 +1621,6 @@ int main(int argc, char *argv[]) {
 		printf("%s did not open for reading properly\n",infilename);
 		return(1);
 	}
-	genModule(infile, infilename, outfilename, 1, 0, verbose);
+	genModules(infile, infilename, outfilename, 1, 0, verbose);
 	return(0);
 }
