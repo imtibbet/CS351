@@ -4,7 +4,7 @@ Fall 2014
 
 Example of a 3D scene model
 
-Draws a city with 3 different kinds of buildings
+Draws a city with different kinds of buildings
  */
 
 #include "graphics.h"
@@ -26,7 +26,7 @@ static Module* pyramid(int size, float x, float y, float z){
         polygon_init( &side[i] );
     }
 
-    // corners of a pyramid, centered at (0, 0, 0)
+    // corners of a pyramid 
     point_set3D(&v[0], -1, -1, -1 );
     point_set3D(&v[1],  1, -1, -1 );
     point_set3D(&v[2],  1,  -1, 1 );
