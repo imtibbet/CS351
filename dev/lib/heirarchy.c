@@ -766,11 +766,12 @@ void module_pyramid(Module *md, int solid, float size, float x,
 /*
 * Sourced from coursework file test6b.c (Bruce Maxwell)
 */
-void module_cylinder( Module *mod, int sides, int size, float x, float y,
+void module_cylinder( Module *mod, int sides, int fill, int size, float x, float y,
 	float z, Color c ) {
 	Polygon p;
 	Point xtop, xbot;
 	Element *e;
+	Line l;
 	double x1, x2, z1, z2;
 	int i;
 
@@ -789,40 +790,99 @@ void module_cylinder( Module *mod, int sides, int size, float x, float y,
 	point_set3D( &xtop, 0, 1.0, 0.0 );
 	point_set3D( &xbot, 0, 0.0, 0.0 );
 
-	// make a fan for the top and bottom sides
-	// and quadrilaterals for the sides
-	for(i=0;i<sides;i++) {
-		Point pt[4];
+	if (fill == 1){
+		// make a fan for the top and bottom sides
+		// and quadrilaterals for the sides
+		for(i=0;i<sides;i++) {
+			Point pt[4];
 
-		x1 = cos( i * M_PI * 2.0 / sides );
-		z1 = sin( i * M_PI * 2.0 / sides );
-		x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
-		z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+			x1 = cos( i * M_PI * 2.0 / sides );
+			z1 = sin( i * M_PI * 2.0 / sides );
+			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
 
-		point_copy( &pt[0], &xtop );
-		point_set3D( &pt[1], x1, 1.0, z1 );
-		point_set3D( &pt[2], x2, 1.0, z2 );
+			point_copy( &pt[0], &xtop );
+			point_set3D( &pt[1], x1, 1.0, z1 );
+			point_set3D( &pt[2], x2, 1.0, z2 );
 
-		polygon_set( &p, 3, pt );
-		e = element_init(ObjPolygon, &p);
-		module_insert(mod, e);
+			polygon_set( &p, 3, pt );
+			e = element_init(ObjPolygon, &p);
+			module_insert(mod, e);
 
-		point_copy( &pt[0], &xbot );
-		point_set3D( &pt[1], x1, 0.0, z1 );
-		point_set3D( &pt[2], x2, 0.0, z2 );
+			point_copy( &pt[0], &xbot );
+			point_set3D( &pt[1], x1, 0.0, z1 );
+			point_set3D( &pt[2], x2, 0.0, z2 );
 
-		polygon_set( &p, 3, pt );
-		e = element_init(ObjPolygon, &p);
-		module_insert(mod, e);
+			polygon_set( &p, 3, pt );
+			e = element_init(ObjPolygon, &p);
+			module_insert(mod, e);
 
-		point_set3D( &pt[0], x1, 0.0, z1 );
-		point_set3D( &pt[1], x2, 0.0, z2 );
-		point_set3D( &pt[2], x2, 1.0, z2 );
-		point_set3D( &pt[3], x1, 1.0, z1 );
+			point_set3D( &pt[0], x1, 0.0, z1 );
+			point_set3D( &pt[1], x2, 0.0, z2 );
+			point_set3D( &pt[2], x2, 1.0, z2 );
+			point_set3D( &pt[3], x1, 1.0, z1 );
 
-		polygon_set( &p, 4, pt );
-		e = element_init(ObjPolygon, &p);
-		module_insert(mod, e);
+			polygon_set( &p, 4, pt );
+			e = element_init(ObjPolygon, &p);
+			module_insert(mod, e);
+		}
+	} else{
+		// make a fan for the top and bottom sides
+		// and quadrilaterals for the sides
+		for(i=0;i<sides;i++) {
+			Point pt[4];
+
+			x1 = cos( i * M_PI * 2.0 / sides );
+			z1 = sin( i * M_PI * 2.0 / sides );
+			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+
+			point_copy( &pt[0], &xtop );
+			point_set3D( &pt[1], x1, 1.0, z1 );
+			point_set3D( &pt[2], x2, 1.0, z2 );
+
+			line_set( &l, pt[0], pt[1] );
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+			line_set( &l, pt[1], pt[2] );
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+			line_set( &l, pt[2], pt[0]);
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+
+			point_copy( &pt[0], &xbot );
+			point_set3D( &pt[1], x1, 0.0, z1 );
+			point_set3D( &pt[2], x2, 0.0, z2 );
+
+			line_set( &l, pt[0], pt[1] );
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+			line_set( &l, pt[1], pt[2] );
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+			line_set( &l, pt[2], pt[0]);
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+
+			point_set3D( &pt[0], x1, 0.0, z1 );
+			point_set3D( &pt[1], x2, 0.0, z2 );
+			point_set3D( &pt[2], x2, 1.0, z2 );
+			point_set3D( &pt[3], x1, 1.0, z1 );
+
+			line_set( &l, pt[0], pt[1] );
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+			line_set( &l, pt[1], pt[2] );
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+			line_set( &l, pt[2], pt[3]);
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+			line_set( &l, pt[3], pt[0]);
+			e = element_init(ObjLine, &l);
+			module_insert(mod, e);
+		}
 	}
 
 	polygon_clear( &p );

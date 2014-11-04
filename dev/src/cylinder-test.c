@@ -14,20 +14,22 @@ int main(int argc, char *argv[]) {
 	const int rows = 600*2;
 	const int cols = 660*2;
 	Image *src;
-	Module *test;
+	Module *test0, *test1;
 	Polygon p;
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
 	char command[256];
 	float alpha;
-	Color blue, green, white, black;
+	Color blue, ltBlue, green, white, black;
 	color_set(&blue, 0, 0, 1);
+	color_set(&ltBlue, 0, 0, 0.5);
 	color_set(&green, 0, 1, 0);
 	color_set(&white, 1, 1, 1);
 	color_set(&black, 0, 0, 0);
 
-	test = module_create();
+	test0 = module_create();
+	test1 = module_create();
 
 	// grab command line argument to determine viewpoint
     // and set up the view structure
@@ -55,8 +57,8 @@ int main(int argc, char *argv[]) {
 	matrix_setView3D( &vtm, &view );
  	matrix_identity( &gtm );
 
-	module_cylinder(test, 10, 6, 0, 0, 0, blue);
-
+ 	module_cylinder(test1, 10, 1, 6, 0, 0, 0, ltBlue);
+	module_cylinder(test0, 10, 0, 6, 0, 0, 0, blue);
 
 	// create the image and drawstate
 	src = image_create( rows, cols );
@@ -66,8 +68,8 @@ int main(int argc, char *argv[]) {
 	printf("created the image and drawstate\n");
 
 	// draw scene
-	module_draw(test, &vtm, &gtm, ds, NULL, src);
-
+	module_draw(test1, &vtm, &gtm, ds, NULL, src);
+	module_draw(test0, &vtm, &gtm, ds, NULL, src);
 	printf("drew the scene\n");
 
 	// write out the scene
@@ -81,7 +83,8 @@ int main(int argc, char *argv[]) {
 	printf("polygon freed\n");
 
 	// free the modules
-	module_delete(test);
+	module_delete(test0);
+	module_delete(test1);
 
 	printf("module freed\n");
 

@@ -21,9 +21,10 @@ int main(int argc, char *argv[]) {
 	DrawState *ds;
 	char command[256];
 	float alpha;
-	Color blue, green, white, black;
+	Color blue, green, ltGreen, white, black;
 	color_set(&blue, 0, 0, 1);
 	color_set(&green, 0, 1, 0);
+	color_set(&ltGreen, 0, 0.5, 0);
 	color_set(&white, 1, 1, 1);
 	color_set(&black, 0, 0, 0);
 
@@ -57,9 +58,9 @@ int main(int argc, char *argv[]) {
  	matrix_identity( &gtm );
 
  	// module made out of lines
-	module_pyramid(test0, 0, 10, 0, 0, 0, black);
+	module_pyramid(test0, 0, 10, 0, 0, 0, green);
 	// module made out of polygons
-	module_pyramid(test1, 1, 10, 0, 0, 0, green);
+	module_pyramid(test1, 1, 10, 0, 0, 0, ltGreen);
 
 	// create the image and drawstate
 	src = image_create( rows, cols );

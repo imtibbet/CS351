@@ -200,7 +200,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y,
  * If solid is zero, add only lines. If solid is non-zero, use polygons.
  * Make sure each polygon has surface normals defined for it.
  */
-void module_cylinder(Module *mod, int sides, int size, float x, float y,
+void module_cylinder(Module *mod, int sides, int fill, int size, float x, float y,
 	float z, Color c );
 
 // Shading/Color Module Functions
