@@ -187,6 +187,18 @@ void module_shearZ(Module *md, double shx, double shy);
  */
 void module_cube(Module *md, int solid);
 
+/*
+ * insert a pyramid into the module
+ */
+void module_pyramid(Module *md, int solid, float size, 
+					float x, float y, float z);
+
+/*
+* Sourced from coursework file test6b.c (Bruce Maxwell)
+*/
+void module_cylinder( Module *mod, int sides, int fill, int size, 
+					float x, float y, float z);
+
 // Shading/Color Module Functions
 
 /*

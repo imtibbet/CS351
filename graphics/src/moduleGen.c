@@ -646,6 +646,13 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			else if(strcmp(secondword, "curve") == 0){
 				searchname = strtok (NULL, delim);
 				if(searchname){
+					divisions = atoi(searchname);
+				} else {
+					divisions = 4;
+				}
+
+				searchname = strtok (NULL, delim);
+				if(searchname){
 					for(i=0;i<4;i++){
 						for(j=0;j<numpoints;j++){
 							if(strcmp(pt[j]->name, searchname) == 0){
@@ -659,18 +666,22 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				} else {
 					bezierCurve_init(&tempcurve);
 				}
-
-				if(searchname){
-					divisions = atoi(searchname);
-				} else {
-					divisions = 4;
-				}
 				module_bezierCurve(mod[activeMod]->module, &tempcurve, 
 									divisions);
 			}
 		
 			// add surface
 			else if(strcmp(secondword, "surface") == 0){
+				solid = 1;
+				divisions = 4;
+				searchname = strtok (NULL, delim);
+				if(searchname){
+					divisions = atoi(searchname);
+					searchname = strtok (NULL, delim);
+					if(searchname)
+						solid = atoi(searchname);
+				}
+
 				searchname = strtok (NULL, delim);
 				if(searchname){
 					for(i=0;i<16;i++){
@@ -686,15 +697,6 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				} else {
 					bezierSurface_init(&tempsurface);
 				}
-
-				solid = 1;
-				divisions = 4;
-				if(searchname){
-					divisions = atoi(searchname);
-					searchname = strtok (NULL, delim);
-					if(searchname)
-						solid = atoi(searchname);
-				}
 				module_bezierSurface(mod[activeMod]->module, &tempsurface, 
 									divisions, solid);
 			}
@@ -707,6 +709,26 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				else
 					solid = 1;
 				module_cube(mod[activeMod]->module, solid);
+			}
+		
+			// add pyramid
+			else if(strcmp(secondword, "pyramid") == 0){
+				nextword = strtok (NULL, delim);
+				if(nextword)
+					solid = atoi(nextword);
+				else
+					solid = 1;
+				module_pyramid(mod[activeMod]->module, solid, 1, 0, 0, 0);
+			}
+		
+			// add cylinder
+			else if(strcmp(secondword, "cylinder") == 0){
+				nextword = strtok (NULL, delim);
+				if(nextword)
+					solid = atoi(nextword);
+				else
+					solid = 1;
+				module_cylinder(mod[activeMod]->module, maxpts, solid, 1, 0, 0, 0);
 			}
 		
 			// add circle
