@@ -160,7 +160,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
 			*searchname;
 	char *delim = " \n";
-	int i, j, solid, divisions, templateMod = 0;
+	int i, j, solid, divisions, numsides, templateMod = 0;
 	int curLine = 0;
 	int totalLines;
 	int numAddedMods = 1;
@@ -646,7 +646,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			else if(strcmp(secondword, "curve") == 0){
 				searchname = strtok (NULL, delim);
 				if(searchname){
-					divisions = atoi(searchname);
+					divisions = stringToFloat(searchname, numbs, numnumbers, 
+												mod[activeMod]);
 				} else {
 					divisions = 4;
 				}
@@ -676,7 +677,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				divisions = 4;
 				searchname = strtok (NULL, delim);
 				if(searchname){
-					divisions = atoi(searchname);
+					divisions = stringToFloat(searchname, numbs, numnumbers, 
+												mod[activeMod]);
 					searchname = strtok (NULL, delim);
 					if(searchname)
 						solid = atoi(searchname);
@@ -711,6 +713,22 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				module_cube(mod[activeMod]->module, solid);
 			}
 		
+			// add circle
+			else if(strcmp(secondword, "circle") == 0){
+				nextword = strtok (NULL, delim);
+				numsides = maxpts;
+				if(nextword)
+					numsides = stringToFloat(nextword, numbs, numnumbers, 
+											mod[activeMod]);
+					
+				for(j=0;j<numsides;j++){
+					point_set2D(&(temppts[j]), 	cos(j*(2*M_PI/numsides)), 
+												sin(j*(2*M_PI/numsides)));
+				}
+				polygon_set(&temppolygon, numsides, &(temppts[0]));
+				module_polygon(mod[activeMod]->module, &temppolygon);
+			}
+		
 			// add pyramid
 			else if(strcmp(secondword, "pyramid") == 0){
 				nextword = strtok (NULL, delim);
@@ -724,21 +742,17 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			// add cylinder
 			else if(strcmp(secondword, "cylinder") == 0){
 				nextword = strtok (NULL, delim);
-				if(nextword)
+				numsides = maxpts;
+				if(nextword){
 					solid = atoi(nextword);
-				else
+					nextword = strtok (NULL, delim);
+					if(nextword)
+						numsides = stringToFloat(nextword, numbs, numnumbers, 
+												mod[activeMod]);
+				} else {
 					solid = 1;
-				module_cylinder(mod[activeMod]->module, maxpts, solid, 1, 0, 0, 0);
-			}
-		
-			// add circle
-			else if(strcmp(secondword, "circle") == 0){
-				for(j=0;j<maxpts;j++){
-					point_set2D(&(temppts[j]), 	cos(j*(2*M_PI/maxpts)), 
-												sin(j*(2*M_PI/maxpts)));
 				}
-				polygon_set(&temppolygon, maxpts, &(temppts[0]));
-				module_polygon(mod[activeMod]->module, &temppolygon);
+				module_cylinder(mod[activeMod]->module, numsides, solid, 1, 0, 0, 0);
 			}
 		
 			// add identity

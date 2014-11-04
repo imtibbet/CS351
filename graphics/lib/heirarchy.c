@@ -685,12 +685,12 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
     point_set3D(&v[2],  1,  -1, 1 );
     point_set3D(&v[3], -1,  -1, 1 );
     point_set3D(&v[4], 0, 0, 0);
-    printf("points created\n");
+    //printf("points created\n");
 
     // set pyramid parameters
     module_scale(md, (int)size, (int)size, (int)size);
 	module_translate(md, (float)x, (float)y, (float)z);
-	printf("parameters set\n");
+	//printf("parameters set\n");
 
     if (solid == 0){
     	// add only lines
@@ -718,7 +718,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 		e = element_init(ObjLine, &l);
 		module_insert(md, e);
 
-		printf("successfully passed to module\n");
+		//printf("successfully passed to module\n");
     } else{
 
     	// front side
@@ -758,7 +758,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 		e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
-		printf("successfully passed to module\n");
+		//printf("successfully passed to module\n");
     }
 
     polygon_clear(&side);
@@ -783,7 +783,7 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 	// set cylinder parameters
     module_scale(mod, (int)size, (int)size, (int)size);
 	module_translate(mod, (float)x, (float)y, (float)z);
-	printf("parameters set\n");
+	//printf("parameters set\n");
 
 	polygon_init( &p );
 	point_set3D( &xtop, 0, 1.0, 0.0 );
