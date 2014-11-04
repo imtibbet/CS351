@@ -57,8 +57,10 @@ int main(int argc, char *argv[]) {
 	matrix_setView3D( &vtm, &view );
  	matrix_identity( &gtm );
 
- 	module_cylinder(test1, 10, 1, 6, 0, 0, 0, ltBlue);
-	module_cylinder(test0, 10, 0, 6, 0, 0, 0, blue);
+	module_color(test1, &ltBlue);
+ 	module_cylinder(test1, 10, 1, 6, 0, 0, 0);
+	module_color(test0, &blue);
+	module_cylinder(test0, 10, 0, 6, 0, 0, 0);
 
 	// create the image and drawstate
 	src = image_create( rows, cols );
