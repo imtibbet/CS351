@@ -16,6 +16,7 @@ const float epsilon = 0.000001;
  */
 void point_set2D(Point *p, double x, double y){
 	if(!p){
+		printf("null point passed to point_set2D\n");
 		return;
 	}
 	p->val[0] = x;
@@ -30,6 +31,7 @@ void point_set2D(Point *p, double x, double y){
  */
 void point_set3D(Point *p, double x, double y, double z){
 	if(!p){
+		printf("null point passed to point_set3D\n");
 		return;
 	}
 	p->val[0] = x;
@@ -43,6 +45,7 @@ void point_set3D(Point *p, double x, double y, double z){
  */
 void point_set(Point *p, double x, double y, double z, double h){
 	if(!p){
+		printf("null point passed to point_set\n");
 		return;
 	}
 	p->val[0] = x;
@@ -55,6 +58,9 @@ void point_set(Point *p, double x, double y, double z, double h){
  * Copy the point data structure. 
  */
 void point_copy(Point *to, Point *from){
+	if(!to || !from){
+		printf("null passed to point_copy\n");
+	}
 	*to = *from;
 }
 
@@ -62,7 +68,8 @@ void point_copy(Point *to, Point *from){
  * Draw the point into src using Color c. 
  */
 void point_draw(Point *p, Image *src, Color c){
-	if(!p){
+	if(!pm || !src){
+		printf("null passed to point_draw\n");
 		return;
 	}
 	image_setColor( src, p->val[1], p->val[0], c );
@@ -72,7 +79,8 @@ void point_draw(Point *p, Image *src, Color c){
  * Draw the p into src using FPixel c. 
  */
 void point_drawf(Point *p, Image *src, FPixel c){
-	if(!p){
+	if(!p || !src){
+		printf("null passed to point_drawf\n");
 		return;
 	}
 	
@@ -83,6 +91,10 @@ void point_drawf(Point *p, Image *src, FPixel c){
  * Print the point to the stream designated by FILE pointer 
  */
 void point_print(Point *p, FILE *fp){
+	if(!p || !fp){
+		printf("null passed to point_print\n");
+		return;
+	}
 	fprintf(fp,"(%.3f, %.3f, %.3f, %.3f)\n", 
 				p->val[0], p->val[1], p->val[2], p->val[3]);
 }

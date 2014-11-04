@@ -17,8 +17,8 @@ void bezierCurve_init(BezierCurve *b){
 	}
 	b->zBuffer = 1;
 	point_set2D(&(b->c[0]), 0, 0);
-	point_set2D(&(b->c[1]), 0.3, 0);
-	point_set2D(&(b->c[2]), 0.6, 0);
+	point_set2D(&(b->c[1]), 0.3, 1);
+	point_set2D(&(b->c[2]), 0.6, 1);
 	point_set2D(&(b->c[3]), 1, 0);
 }
 

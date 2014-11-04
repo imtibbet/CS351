@@ -1514,7 +1514,6 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	if(verbose) printf("\n");
 }
 
-
 int main(int argc, char *argv[]) {
 	FILE *infile;
 	int verbose = 0;
