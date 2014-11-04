@@ -68,7 +68,7 @@ void point_copy(Point *to, Point *from){
  * Draw the point into src using Color c. 
  */
 void point_draw(Point *p, Image *src, Color c){
-	if(!pm || !src){
+	if(!p || !src){
 		printf("null passed to point_draw\n");
 		return;
 	}

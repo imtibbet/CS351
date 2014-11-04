@@ -655,6 +655,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 						}
 						searchname = strtok (NULL, delim);
 					}
+					bezierCurve_set(&tempcurve, &(temppts[0]));
 				} else {
 					bezierCurve_init(&tempcurve);
 				}
@@ -664,7 +665,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				} else {
 					divisions = 4;
 				}
-				bezierCurve_set(&tempcurve, &(temppts[0]));
+				bezierCurve_print(&tempcurve);
 				module_bezierCurve(mod[activeMod]->module, &tempcurve, 
 									divisions);
 			}
@@ -682,6 +683,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 						}
 						searchname = strtok (NULL, delim);
 					}
+					bezierSurface_set(&tempsurface, &(temppts[0]));
 				} else {
 					bezierSurface_init(&tempsurface);
 				}
@@ -694,7 +696,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					if(searchname)
 						solid = atoi(searchname);
 				}
-				bezierSurface_set(&tempsurface, &(temppts[0]));
+				bezierSurface_print(&tempsurface);
 				module_bezierSurface(mod[activeMod]->module, &tempsurface, 
 									divisions, solid);
 			}
