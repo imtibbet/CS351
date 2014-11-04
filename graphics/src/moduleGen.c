@@ -665,7 +665,6 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				} else {
 					divisions = 4;
 				}
-				bezierCurve_print(&tempcurve);
 				module_bezierCurve(mod[activeMod]->module, &tempcurve, 
 									divisions);
 			}
@@ -696,7 +695,6 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					if(searchname)
 						solid = atoi(searchname);
 				}
-				bezierSurface_print(&tempsurface);
 				module_bezierSurface(mod[activeMod]->module, &tempsurface, 
 									divisions, solid);
 			}
