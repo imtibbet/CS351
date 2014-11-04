@@ -645,27 +645,25 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			// add curve
 			else if(strcmp(secondword, "curve") == 0){
 				searchname = strtok (NULL, delim);
+				divisions = 4;
 				if(searchname){
-					divisions = stringToFloat(searchname, numbs, numnumbers, 
-												mod[activeMod]);
-				} else {
-					divisions = 4;
-				}
+					divisions = atoi(searchname);
 
-				searchname = strtok (NULL, delim);
-				if(searchname){
-					for(i=0;i<4;i++){
-						for(j=0;j<numpoints;j++){
-							if(strcmp(pt[j]->name, searchname) == 0){
-								temppts[i] = pt[j]->item.point;
-								break;
+					searchname = strtok (NULL, delim);
+					if(searchname){
+						for(i=0;i<4;i++){
+							for(j=0;j<numpoints;j++){
+								if(strcmp(pt[j]->name, searchname) == 0){
+									temppts[i] = pt[j]->item.point;
+									break;
+								}
 							}
+							searchname = strtok (NULL, delim);
 						}
-						searchname = strtok (NULL, delim);
+						bezierCurve_set(&tempcurve, &(temppts[0]));
+					} else {
+						bezierCurve_init(&tempcurve);
 					}
-					bezierCurve_set(&tempcurve, &(temppts[0]));
-				} else {
-					bezierCurve_init(&tempcurve);
 				}
 				module_bezierCurve(mod[activeMod]->module, &tempcurve, 
 									divisions);
@@ -677,27 +675,27 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				divisions = 4;
 				searchname = strtok (NULL, delim);
 				if(searchname){
-					divisions = stringToFloat(searchname, numbs, numnumbers, 
-												mod[activeMod]);
+					divisions = atoi(searchname);
 					searchname = strtok (NULL, delim);
-					if(searchname)
+					if(searchname){
 						solid = atoi(searchname);
-				}
-
-				searchname = strtok (NULL, delim);
-				if(searchname){
-					for(i=0;i<16;i++){
-						for(j=0;j<numpoints;j++){
-							if(strcmp(pt[j]->name, searchname) == 0){
-								temppts[i] = pt[j]->item.point;
-								break;
-							}
-						}
+						
 						searchname = strtok (NULL, delim);
+						if(searchname){
+							for(i=0;i<16;i++){
+								for(j=0;j<numpoints;j++){
+									if(strcmp(pt[j]->name, searchname) == 0){
+										temppts[i] = pt[j]->item.point;
+										break;
+									}
+								}
+								searchname = strtok (NULL, delim);
+							}
+							bezierSurface_set(&tempsurface, &(temppts[0]));
+						} else {
+							bezierSurface_init(&tempsurface);
+						}
 					}
-					bezierSurface_set(&tempsurface, &(temppts[0]));
-				} else {
-					bezierSurface_init(&tempsurface);
 				}
 				module_bezierSurface(mod[activeMod]->module, &tempsurface, 
 									divisions, solid);
