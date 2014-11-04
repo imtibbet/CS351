@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
             alpha = 0.0;
         point_set3D( &(view.vrp), 40*alpha, 5*alpha, -20*alpha - (alpha*20-cos(alpha)*20) );
     } else {
-		point_set3D( &(view.vrp), -40, 0, 100);
+		point_set3D( &(view.vrp), -40, -200, 100);
     }
 
 	// set up the view
