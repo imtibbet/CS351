@@ -221,5 +221,9 @@ void module_bezierCurve(Module *m, BezierCurve *b, int divisions);
  */
 void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid);
 
+/*
+ * add a teapot to the module with the specified number of divisions
+ */
+void module_teapot(Module *m, int divisions, int solid);
 
 #endif
