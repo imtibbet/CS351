@@ -753,6 +753,19 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				module_cylinder(mod[activeMod]->module, numsides, solid, 1, 0, 0, 0);
 			}
 		
+			// add teapot
+			else if(strcmp(secondword, "teapot") == 0){
+				nextword = strtok (NULL, delim);
+				solid = 1;
+				divisions = 4;
+				if(nextword){
+					divisions = atoi(nextword);
+					nextword = strtok (NULL, delim);
+					if(nextword)
+						solid = atoi(nextword);
+				}
+			}
+		
 			// add identity
 			else if(strcmp(secondword, "identity") == 0){
 				module_identity(mod[activeMod]->module);
