@@ -1,0 +1,216 @@
+# Author: Ian Tibbetts (CS351 Fall 2014 Bruce Maxwell)
+# API for the moduleGen.c text file parse
+# every command is listed with examples
+#
+# NOTES: 
+#	'#' is the comment character
+#	' ' delimits words on a line
+#	'\n' is the end of line marker
+#	blank lines or lines containing fewer than two words are ignored
+#	mandatory arguments with <> and optional arguments with []
+#	'num' type means the argument can be:
+#		literal numbers, optionally negated
+#		named numbers
+#		sin/cos/rand functions followed immediately by ([args])
+#		any of above can be combined using math operation, precedence:
+#			multiplication
+#			division
+#			addition
+#			subtraction
+#
+#	all other types (point, color, etc) must first be defined with a name
+#	then the primitive can be passed by name
+
+###############################################################################
+
+# Usage: moduleGen <inputfilename> [outputfilename] [int verbose]
+
+###############################################################################
+
+# animate <varname> <int start> <int stop> [int step]
+# -> use varname as a num that will vary in increments of step between frames
+# -> creates 2*|start-stop|/step ppm files to create smooth animation 
+# -> from start to stop and back, then compresses to make gif. 
+# -> All ppm files for frames are removed.
+# -> start and stop cannot be equal, but either can be the larger value
+animate i 0 100
+
+# manimate <varname> <int start> <int stop> [int step]
+# -> like animate, but only makes |start-stop|/step ppm files
+# -> does not smooth the animation by returning to start
+# -> use either animate OR manimate, more recently parsed will be used
+manimate i 0 360
+
+###############################################################################
+
+# background <color c>
+# -> sets the background color of the image on which the scene will be drawn
+background Blue
+
+###############################################################################
+
+# draw <modulename>
+# -> must come after a module has been defined, specifies the module to draw
+# -> drawing only occurs after the EOF has been reached
+draw people
+
+###############################################################################
+
+# view3D <field> [args]
+# -> sets up a 3D view, all fields must be supplied
+view3D vrp xvrp yvrp zvrp
+view3D vpn -1*xvrp -1*yvrp -1*zvrp
+view3D vup 0 1 0
+view3D d 1
+view3D du 2
+view3D screenx 300
+view3D screeny 300
+
+# view2D <field> [args]
+# -> sets up a 2D view, all fields must be supplied
+view2D vrp 1 1
+view2D x 1 0
+view2D dx 10
+view2D screenx 300
+view2D screeny 300
+
+###############################################################################
+
+# def <type> <varname> [args]
+# -> globally define named primitives if used before defining a module
+# -> locally define named primitives if used after defining a module
+
+# def module <varname> [<param1name>=<num param1val> <param2...> ...]
+# -> parameters are usable in the scope of the module, until next module def
+def module person headsize=0.5 armlen=2 leglen=3
+
+# def number <varname> <num value>
+def number rand1 rand()
+def number xvrp -9*cos(i)+-1*5
+
+# def color <varname> <num r> <num g> <num b>
+def color Blue 0.2 0.2 0.6
+
+# def point <varname> <num x> <num y> [num z]
+def point origin 0 0
+
+# def vector <varname> <num x> <num y> [num z]
+def vector oneoneone 1 1 1
+
+# def line <varname> <point p1> <point p2>
+def line rightline origin onezero
+
+# def polygon <varname> <point p1> <point p2> <point p3> [points...]
+def polygon triangle origin onezero oneone
+
+# def polyline <varname> <point p1> <point p2> <point p3> [points...]
+def polyline backwardsl origin onezero oneone
+
+###############################################################################
+
+# put <type> <varname> [args]
+# -> put named primitives into the active module heirarchy
+# -> only legal after the first named module has been defined
+
+# put module <varname> [<param1name>=<num param1val> <param2...> ...]
+# -> module must already be defined, may have all or fewer parameters than def
+# -> parameters given will replace defaults given in def
+put module person headsize=0.5
+put module person leglen=1.5
+
+# put color <varname>
+put color Blue
+
+# put point <varname>
+put point origin
+
+# put vector <varname>
+put vector oneoneone
+
+# put line <varname>
+put line rightline
+
+# put polygon <varname> <point p1> <point p2> <point p3> [points...]
+put polygon triangle
+
+# put polyline <varname> <point p1> <point p2> <point p3> [points...]
+put polyline backwardsl
+
+###############################################################################
+
+# add <type> [args]
+# -> put anonymous primitives into the active module heirarchy
+# -> only legal after the first named module has been defined
+
+# add color <num r> <num g> <num b>
+add color 0.2 0.2 0.6
+
+# add point <num x> <num y> [num z]
+add point 0 0
+
+# add vector <num x> <num y> [num z]
+add vector 1 1 1
+
+# add line <point p1> <point p2>
+add line origin onezero
+
+# add polygon <point p1> <point p2> <point p3> [points...]
+add polygon origin onezero oneone
+
+# add polyline <point p1> <point p2> <point p3> [points...]
+add polyline origin onezero oneone
+
+# add curve [num divisions] [<point p1> <point p2> <point p3> <point p4>]
+add curve origin onezero oneone zeroone
+
+# add surface 	[num divisions] [int solid] 
+				[	<point p1> <point p2> <point p3> <point p4>
+					<point p5> <point p6> <point p7> <point p8>
+					<point p9> <point p10> <point p11> <point p12>
+					<point p13> <point p12> <point p13> <point p14>	]
+add surface zzz zzo zzw zzt
+			zoz ooo oow zot
+			zwz owo oww zwt
+			ztz zto ztw ztt
+
+
+# add cube [int solid]
+add cube 0
+
+# add circle [num numsides]
+add circle
+
+# add pyramid [int solid]
+add pyramid
+
+# add cylinder [int solid] [num numsides]
+add cylinder
+
+# add identity
+add identity
+
+# add rotateX <num angle(degrees)>
+add rotateX 60
+
+# add rotateY <num angle(degrees)>
+add rotateY 60
+
+# add rotateZ <num angle(degrees)>
+add rotateZ 60
+
+# add rotateXYZ <vector u> <vector v> <vector w>
+add rotateXYZ vu vv vw
+
+# add translate <num x> <num y> [num z]
+add translate 1 1 1
+
+# add scale <num x> <num y> [num z]
+add scale 1 1 1
+
+# add shear2D <num x> <num y>
+add shear2D 1 1
+
+# add shearZ <num x> <num y>
+add shearZ 1 1
+
+###############################################################################
