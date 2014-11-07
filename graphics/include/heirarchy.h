@@ -199,6 +199,12 @@ void module_pyramid(Module *md, int solid, float size,
 void module_cylinder( Module *mod, int sides, int fill, int size, 
 					float x, float y, float z);
 
+/*
+ * insert cone into the module
+ */
+ void module_cone(Module *mod, int sides, int fill, int size, float x, 
+ 	float y, float z);
+
 // Shading/Color Module Functions
 
 /*
