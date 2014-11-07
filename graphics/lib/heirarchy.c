@@ -1217,7 +1217,7 @@ void module_teapot(Module *m, int divisions, int solid){
 	module_bezierSurface(m, &handle2Surf, divisions, solid);
 	module_bezierSurface(m, &spout1Surf, divisions, solid);
 	module_bezierSurface(m, &spout2Surf, divisions, solid);
-	for(i=0;i<4;i++){
+	for(i=0;i<4;i++){ // reflect handle over xz plane
 		for(j=0;j<4;j++){
 			handle1Surf.c[i][j].val[1] = -1*handle1Surf.c[i][j].val[1];
 			handle2Surf.c[i][j].val[1] = -1*handle2Surf.c[i][j].val[1];
