@@ -58,9 +58,11 @@ int main(int argc, char *argv[]) {
  	matrix_identity( &gtm );
 
  	// module made out of lines
-	module_pyramid(test0, 0, 10, 0, 0, 0, green);
+ 	module_color(test0, &green);
+	module_pyramid(test0, 0, 10, 0, 0, 0);
 	// module made out of polygons
-	module_pyramid(test1, 1, 10, 0, 0, 0, ltGreen);
+ 	module_color(test0, &ltGreen);
+	module_pyramid(test1, 1, 10, 0, 0, 0);
 
 	// create the image and drawstate
 	src = image_create( rows, cols );

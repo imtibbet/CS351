@@ -24,6 +24,16 @@ void bezierCurve_init(BezierCurve *b);
 void bezierSurface_init(BezierSurface *b);
 
 /*
+ * prints the BezierCurve
+ */
+void bezierCurve_print(BezierCurve *b);
+
+/*
+ * prints the BezierSurface
+ */
+void bezierSurface_print(BezierSurface *b);
+
+/*
  * sets the control points of the BezierCurve to the four points in the vlist array.
  */
 void bezierCurve_set(BezierCurve *b, Point *vlist);

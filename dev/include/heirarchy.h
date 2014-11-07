@@ -188,20 +188,23 @@ void module_shearZ(Module *md, double shx, double shy);
 void module_cube(Module *md, int solid);
 
 /*
- * Adds a unit pyramid. 
- * If solid is zero, add only lines. If solid is non-zero, use polygons. 
- * Make sure each polygon has surface normals defined for it.
+ * insert a pyramid into the module
  */
-void module_pyramid(Module *md, int solid, float size, float x, float y, 
-	float z, Color c);
+void module_pyramid(Module *md, int solid, float size, 
+					float x, float y, float z);
 
 /*
- * Adds a unit cylinder.
- * If solid is zero, add only lines. If solid is non-zero, use polygons.
- * Make sure each polygon has surface normals defined for it.
+* Sourced from coursework file test6b.c (Bruce Maxwell)
+*/
+void module_cylinder( Module *mod, int sides, int fill, int size, 
+					float x, float y, float z);
+
+/*
+ * insert cone into the module
  */
-void module_cylinder(Module *mod, int sides, int fill, int size, float x, float y,
-	float z, Color c );
+ void module_cone(Module *mod, int sides, int fill, int size, float x, 
+ 	float y, float z);
+
 
 // Shading/Color Module Functions
 
@@ -225,5 +228,9 @@ void module_bezierCurve(Module *m, BezierCurve *b, int divisions);
  */
 void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid);
 
+/*
+ * add a teapot to the module with the specified number of divisions
+ */
+void module_teapot(Module *m, int divisions, int solid);
 
 #endif

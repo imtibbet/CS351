@@ -2,7 +2,7 @@
 Astrid Moore (Bruce Maxwell)
 Fall 2014
 
-Unit cylinder test.
+Unit cone test.
  */
 
 #include "graphics.h"
@@ -21,12 +21,14 @@ int main(int argc, char *argv[]) {
 	DrawState *ds;
 	char command[256];
 	float alpha;
-	Color blue, ltBlue, green, white, black;
+	Color blue, ltBlue, green, white, black, red, ltRed;
 	color_set(&blue, 0, 0, 1);
 	color_set(&ltBlue, 0, 0, 0.5);
 	color_set(&green, 0, 1, 0);
 	color_set(&white, 1, 1, 1);
 	color_set(&black, 0, 0, 0);
+	color_set(&red, 1, 0, 0);
+	color_set(&ltRed, 0.5, 0, 0);
 
 	test0 = module_create();
 	test1 = module_create();
@@ -57,10 +59,10 @@ int main(int argc, char *argv[]) {
 	matrix_setView3D( &vtm, &view );
  	matrix_identity( &gtm );
 
-	module_color(test1, &ltBlue);
- 	module_cylinder(test1, 10, 1, 6, 0, 0, 0);
-	module_color(test0, &blue);
-	module_cylinder(test0, 10, 0, 6, 0, 0, 0);
+	module_color(test1, &red);
+	module_cone(test1, 10, 0, 6, 0, 0, 0);
+	module_color(test0, &ltRed);
+	module_cone(test0, 10, 1, 6, 0, 0, 0);
 
 	// create the image and drawstate
 	src = image_create( rows, cols );
@@ -70,14 +72,14 @@ int main(int argc, char *argv[]) {
 	printf("created the image and drawstate\n");
 
 	// draw scene
-	module_draw(test1, &vtm, &gtm, ds, NULL, src);
 	module_draw(test0, &vtm, &gtm, ds, NULL, src);
+	module_draw(test1, &vtm, &gtm, ds, NULL, src);
 	printf("drew the scene\n");
 
 	// write out the scene
 	printf("Writing image\n");
-	image_write( src, "cylinder.ppm" );
-	sprintf(command, "convert -scale %03dx%03d cylinder.ppm cylinder.ppm", cols/2, rows/2);
+	image_write( src, "cone.ppm" );
+	sprintf(command, "convert -scale %03dx%03d cone.ppm cone.ppm", cols/2, rows/2);
 	system(command);
 
 	// free the polygon data
@@ -85,8 +87,8 @@ int main(int argc, char *argv[]) {
 	printf("polygon freed\n");
 
 	// free the modules
-	module_delete(test0);
 	module_delete(test1);
+	module_delete(test0);
 
 	printf("module freed\n");
 

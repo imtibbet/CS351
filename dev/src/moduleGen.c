@@ -160,7 +160,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
 			*searchname;
 	char *delim = " \n";
-	int i, j, solid, divisions, templateMod = 0;
+	int i, j, solid, divisions, numsides, templateMod = 0;
 	int curLine = 0;
 	int totalLines;
 	int numAddedMods = 1;
@@ -645,56 +645,58 @@ static int parseModule(int activeMod, ModuleItem **mod,
 			// add curve
 			else if(strcmp(secondword, "curve") == 0){
 				searchname = strtok (NULL, delim);
-				if(searchname){
-					for(i=0;i<4;i++){
-						for(j=0;j<numpoints;j++){
-							if(strcmp(pt[j]->name, searchname) == 0){
-								temppts[i] = pt[j]->item.point;
-								break;
-							}
-						}
-						searchname = strtok (NULL, delim);
-					}
-				} else {
-					bezierCurve_init(&tempcurve);
-				}
-
+				divisions = 4;
 				if(searchname){
 					divisions = atoi(searchname);
-				} else {
-					divisions = 4;
+
+					searchname = strtok (NULL, delim);
+					if(searchname){
+						for(i=0;i<4;i++){
+							for(j=0;j<numpoints;j++){
+								if(strcmp(pt[j]->name, searchname) == 0){
+									temppts[i] = pt[j]->item.point;
+									break;
+								}
+							}
+							searchname = strtok (NULL, delim);
+						}
+						bezierCurve_set(&tempcurve, &(temppts[0]));
+					} else {
+						bezierCurve_init(&tempcurve);
+					}
 				}
-				bezierCurve_set(&tempcurve, &(temppts[0]));
 				module_bezierCurve(mod[activeMod]->module, &tempcurve, 
 									divisions);
 			}
 		
 			// add surface
 			else if(strcmp(secondword, "surface") == 0){
-				searchname = strtok (NULL, delim);
-				if(searchname){
-					for(i=0;i<16;i++){
-						for(j=0;j<numpoints;j++){
-							if(strcmp(pt[j]->name, searchname) == 0){
-								temppts[i] = pt[j]->item.point;
-								break;
-							}
-						}
-						searchname = strtok (NULL, delim);
-					}
-				} else {
-					bezierSurface_init(&tempsurface);
-				}
-
 				solid = 1;
 				divisions = 4;
+				searchname = strtok (NULL, delim);
 				if(searchname){
 					divisions = atoi(searchname);
 					searchname = strtok (NULL, delim);
-					if(searchname)
+					if(searchname){
 						solid = atoi(searchname);
+						
+						searchname = strtok (NULL, delim);
+						if(searchname){
+							for(i=0;i<16;i++){
+								for(j=0;j<numpoints;j++){
+									if(strcmp(pt[j]->name, searchname) == 0){
+										temppts[i] = pt[j]->item.point;
+										break;
+									}
+								}
+								searchname = strtok (NULL, delim);
+							}
+							bezierSurface_set(&tempsurface, &(temppts[0]));
+						} else {
+							bezierSurface_init(&tempsurface);
+						}
+					}
 				}
-				bezierSurface_set(&tempsurface, &(temppts[0]));
 				module_bezierSurface(mod[activeMod]->module, &tempsurface, 
 									divisions, solid);
 			}
@@ -711,12 +713,57 @@ static int parseModule(int activeMod, ModuleItem **mod,
 		
 			// add circle
 			else if(strcmp(secondword, "circle") == 0){
-				for(j=0;j<maxpts;j++){
-					point_set2D(&(temppts[j]), 	cos(j*(2*M_PI/maxpts)), 
-												sin(j*(2*M_PI/maxpts)));
+				nextword = strtok (NULL, delim);
+				numsides = maxpts;
+				if(nextword)
+					numsides = stringToFloat(nextword, numbs, numnumbers, 
+											mod[activeMod]);
+					
+				for(j=0;j<numsides;j++){
+					point_set2D(&(temppts[j]), 	cos(j*(2*M_PI/numsides)), 
+												sin(j*(2*M_PI/numsides)));
 				}
-				polygon_set(&temppolygon, maxpts, &(temppts[0]));
+				polygon_set(&temppolygon, numsides, &(temppts[0]));
 				module_polygon(mod[activeMod]->module, &temppolygon);
+			}
+		
+			// add pyramid
+			else if(strcmp(secondword, "pyramid") == 0){
+				nextword = strtok (NULL, delim);
+				if(nextword)
+					solid = atoi(nextword);
+				else
+					solid = 1;
+				module_pyramid(mod[activeMod]->module, solid, 1, 0, 0, 0);
+			}
+		
+			// add cylinder
+			else if(strcmp(secondword, "cylinder") == 0){
+				nextword = strtok (NULL, delim);
+				numsides = maxpts;
+				if(nextword){
+					solid = atoi(nextword);
+					nextword = strtok (NULL, delim);
+					if(nextword)
+						numsides = stringToFloat(nextword, numbs, numnumbers, 
+												mod[activeMod]);
+				} else {
+					solid = 1;
+				}
+				module_cylinder(mod[activeMod]->module, numsides, solid, 1, 0, 0, 0);
+			}
+		
+			// add teapot
+			else if(strcmp(secondword, "teapot") == 0){
+				nextword = strtok (NULL, delim);
+				solid = 1;
+				divisions = 4;
+				if(nextword){
+					divisions = atoi(nextword);
+					nextword = strtok (NULL, delim);
+					if(nextword)
+						solid = atoi(nextword);
+				}
 			}
 		
 			// add identity
@@ -853,7 +900,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	return(numAddedMods);
 }
 
-static void genModule(FILE *infile, char *infilename, char *outfilename, 
+static void genModules(FILE *infile, char *infilename, char *outfilename, 
 	int firstCall, int animateIndex, int verbose){
 	
 	// variables for the view and image
@@ -876,7 +923,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	char 	*firstword, *secondword, *xstr, *ystr, *zstr, *nextword, 
 			*searchname;
 	char *delim = " \n";
-	int i, j, is2D = 0;
+	int i, j;
+	int is2D = 0;
+	int is3D = 0;
+	int antialias = 0;
+	int imageWidth = 0;
+	int imageHeight = 0;
 	int activeMod = -1;
 	int drawMod = -1;
 	int curLine = 0;
@@ -925,17 +977,28 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		strcpy(linein, strtok (buff, "#\n"));
 		if(verbose) printf("reading line: %s\n", linein); 
 
-		// get the first and second words
+		// get the first word
 		firstword = strtok (buff,delim);
 		if(!firstword){
 			if(verbose) printf("no first word on this line, skipping\n");
 			continue;
 		}
+		
+		// check for anti alis (only keyword without second word
+		if(strcmp(firstword, "antialias") == 0){
+			if(verbose) printf("anti aliasing on\n");
+			antialias = 1;
+			continue;
+		}
+		
+		// get the second word
 		secondword = strtok (NULL, delim);
 		if(!secondword){
 			if(verbose) printf("no second word on this line, skipping\n");
 			continue;
 		}
+		
+		// process first-second word keywords
 		
 		// define an animation variable that will create a bouncing gif
 		if(strcmp(firstword, "animate") == 0){
@@ -985,6 +1048,8 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 
 		// select a named module to draw
 		else if(strcmp(firstword, "draw") == 0){
+		
+			// define the module currently recording
 			if(undefmod){
 				mod[activeMod]->numlines = curLine;
 				activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
@@ -1046,9 +1111,11 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			// def module
 			if(strcmp(secondword, "module") == 0){
 			
-				// if a module has been previously defined, parse all lines
+				// first module
 				if(activeMod == -1)
 					activeMod++;
+					
+				// define the module currently recording
 				else if(undefmod){
 					mod[activeMod]->numlines = curLine;
 					activeMod += parseModule(activeMod, mod, c, pt, v, numbs, l, pl, pg, 
@@ -1255,7 +1322,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		// define a 3D view
 		else if(strcmp(firstword, "view3D") == 0){
 		
-			is2D = 0;
+			is3D = 1;
 			
 			// 3D vrp
 			if(strcmp(secondword, "vrp") == 0){
@@ -1389,16 +1456,31 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 		// define view and draw state and draw last module defined
 		matrix_identity( &gtm );
 		if(is2D){
+			if(antialias){
+				imageWidth = view2D.screenx;
+				imageHeight = view2D.screeny;
+				view2D.screenx = 3*imageWidth;
+				view2D.screeny = 3*imageHeight;
+			}
 			matrix_setView2D( &vtm, &view2D );
 			if(verbose) printf("\n2D view matrix:\n");
 			if(verbose) matrix_print(&vtm, stdout);
 			src = image_create( view2D.screeny, view2D.screenx );
 		}
-		else {
+		else if (is3D){
+			if(antialias){
+				imageWidth = view3D.screenx;
+				imageHeight = view3D.screeny;
+				view3D.screenx = 3*view3D.screenx;
+				view3D.screeny = 3*view3D.screeny;
+			}
 			matrix_setView3D( &vtm, &view3D );
 			if(verbose) printf("\n3D view matrix:\n");
 			if(verbose) matrix_print(&vtm, stdout);
 			src = image_create( view3D.screeny, view3D.screenx );
+		} else {
+			printf("no view defined, use view2D or view3D keyword\n");
+			exit(0);
 		}
 		image_fillColor(src, background);
 		if(firstCall && animate){
@@ -1411,7 +1493,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 					sprintf(outfilenamemod, "%03d%s", 
 							animateIndex, outfilename);
 					infile = fopen(infilename, "r");
-					genModule(infile, infilename, outfilenamemod, 
+					genModules(infile, infilename, outfilenamemod, 
 								0, animateIndex, 0);
 				}
 				if(loop){
@@ -1423,7 +1505,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 						sprintf(outfilenamemod, "%03d%s", 
 								animateStop+(animateStop-animateIndex), outfilename);
 						infile = fopen(infilename, "r");
-						genModule(infile, infilename, outfilenamemod, 
+						genModules(infile, infilename, outfilenamemod, 
 									0, animateIndex, 0);
 					}
 				}
@@ -1436,7 +1518,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 					sprintf(outfilenamemod, "%03d%s", 
 							animateStart-animateIndex, outfilename);
 					infile = fopen(infilename, "r");
-					genModule(infile, infilename, outfilenamemod, 
+					genModules(infile, infilename, outfilenamemod, 
 								0, animateIndex, 0);
 				}
 				if(loop){
@@ -1448,7 +1530,7 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 						sprintf(outfilenamemod, "%03d%s", 
 								animateStart+animateIndex, outfilename);
 						infile = fopen(infilename, "r");
-						genModule(infile, infilename, outfilenamemod, 
+						genModules(infile, infilename, outfilenamemod, 
 									0, animateIndex, 0);
 					}
 				}
@@ -1471,6 +1553,12 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 			module_draw(mod[drawMod]->module, &vtm, &gtm, ds, NULL, src);
 			image_write(src, outfilename);
 			if(verbose) printf("image %s written\n", outfilename);
+			if(antialias){
+				sprintf(command, "convert -scale %dx%d %s %s", 
+									imageWidth, imageHeight, 
+									outfilename, outfilename);
+				system(command);
+			}
 		}
 		// some clean up
 		image_free(src);
@@ -1514,7 +1602,6 @@ static void genModule(FILE *infile, char *infilename, char *outfilename,
 	if(verbose) printf("\n");
 }
 
-
 int main(int argc, char *argv[]) {
 	FILE *infile;
 	int verbose = 0;
@@ -1545,6 +1632,6 @@ int main(int argc, char *argv[]) {
 		printf("%s did not open for reading properly\n",infilename);
 		return(1);
 	}
-	genModule(infile, infilename, outfilename, 1, 0, verbose);
+	genModules(infile, infilename, outfilename, 1, 0, verbose);
 	return(0);
 }

@@ -55,6 +55,38 @@ void bezierSurface_init(BezierSurface *b){
 }
 
 /*
+ * prints the BezierCurve
+ */
+void bezierCurve_print(BezierCurve *b){
+	if(!b){
+		printf("Null passed to bezierCurve_print\n");
+		return;
+	}
+	int i;
+	printf("bezier curve:\n");
+	for(i=0;i<4;i++){
+		point_print(&(b->c[i]), stdout);
+	}
+}
+
+/*
+ * prints the BezierSurface
+ */
+void bezierSurface_print(BezierSurface *b){
+	if(!b){
+		printf("Null passed to bezierSurface_print\n");
+		return;
+	}
+	int i, j;
+	printf("bezier surface:\n");
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			point_print(&(b->c[i][j]), stdout);
+		}
+	}
+}
+
+/*
  * sets the control points of the BezierCurve to the four points in the vlist array.
  */
 void bezierCurve_set(BezierCurve *b, Point *vlist){
