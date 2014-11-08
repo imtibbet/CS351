@@ -13,6 +13,64 @@ draws a fire
 
 /* declare methods here for testing flexibility */
 
+/* Creates a pile of logs, limited to a maximum of five logs along
+ * the bottom. Returns a module of logs.
+ */
+static Module * genWood(float x, float y, float z);
+static Module * genWood(float x, float y, float z){
+	Module *wood, *outline, *woodpile;
+	Color brown0, brown1, dkBrown0, dkBrown1, final, outlineC;
+	int thickness, gen;
+	srand(time(NULL));
+	color_set(&brown0, (float)(123/255.0), (float)(63/255.0), 0.0);
+	color_set(&brown1, (float)(112/255.0), (float)(66/255.0), (float)(20/255.0));
+	color_set(&dkBrown0, (float)(101/255.0), (float)(67/255.0), (float)(33/255.0));
+	color_set(&dkBrown1, (float)(72/255.0), (float)(60/255.0), (float)(50/255.0));
+	color_set(&final, 0, 0, 0);
+
+	gen = (int)(rand() % 3 + 0.5);
+	if (gen == 0){
+		color_copy(&final, &brown0);
+		color_copy(&outlineC, &dkBrown0);
+	}
+	if (gen == 1){
+		color_copy(&final, &brown1);
+		color_copy(&outlineC, &dkBrown1);
+	}
+	if (gen == 2){
+		color_copy(&final, &dkBrown0);
+		color_copy(&outlineC, &brown0);
+	}
+	else{
+		color_copy(&final, &dkBrown1);
+		color_copy(&outlineC, &brown1);
+	}
+
+	wood = module_create();
+	woodpile = module_create();
+	outline = module_create();
+
+	thickness = 10;
+
+	module_scale(wood, 1, 4, 1);
+	module_rotateX(wood, 0, 1);
+	module_translate(wood, x, y, z);
+	module_color(wood, &final);
+	module_cylinder(wood, 20, 1, thickness, 0, 0, 0);
+	module_module(woodpile, wood);
+
+	module_scale(outline, 1, 4, 1);
+	module_rotateX(outline, 0, 1);
+	module_translate(outline, x, y, z);
+	module_color(outline, &outlineC);
+	module_cylinder(outline, 20, 0, thickness, 0, 0, 0);
+	module_module(woodpile, outline);
+
+	printf("added wood\n");
+
+	return((Module*)woodpile);
+}
+
 /* Creates a flame using a bezier surface*/
 static Module* genFire(float x, float y, float z, int divisions);
 static Module* genFire(float x, float y, float z, int divisions){
@@ -62,16 +120,15 @@ static Module* genFire(float x, float y, float z, int divisions){
 	for (i = 0; i < 20; i++){
 		gen = (int)(rand() % 6);
 		f[i] = module_create();
-		module_scale(f[i], (float)((rand()%10)+5), (float)(rand()%30), (float)(rand()%20));
-		module_translate(f[i], x+20, y, z);
-		module_color(f[i], &c[((int)gen)]);
+		module_scale(f[i], (float)(rand()%10), (float)(rand()%30), (float)(rand()%20));
+		module_translate(f[i], x+5, y, z);
+		module_color(f[i], &c[(int)gen]);
 		module_bezierSurface(f[i], &bc, divisions, 1);
 		module_module((Module*)fire, (Module*)f[i]);
 	}
 
 	printf("Creating flames with %d subdivisions\n", divisions);
 
-	// this method may work for matrix rotation of gtm
 	return((Module*)fire);
 }
 
@@ -80,7 +137,7 @@ int main(int argc, char *argv[]) {
 	const int rows = 600*2;
 	const int cols = 660*2;
 	Image *src;
-	Module *flame;
+	Module *woodpile, *fireside, *flame;
 	Polygon p;
 	View3D view;
 	Matrix vtm, gtm;
@@ -92,13 +149,15 @@ int main(int argc, char *argv[]) {
 	color_set(&blue, 0, 0, 1);
 	color_set(&green, 0, 1, 0);
 
+	fireside = module_create();
+
 	// grab command line argument to determine viewpoint
     // and set up the view structure
     if( argc > 1 ) {
         alpha = atof( argv[1] );
         if( alpha < 0.0 || alpha > 1.0 )
             alpha = 0.0;
-        point_set3D( &(view.vrp), 20*alpha, alpha, -50*alpha - (alpha*170-cos(alpha)*170) );
+        point_set3D( &(view.vrp), 20*alpha, 100*alpha, -50*alpha - (alpha*170-cos(alpha)*170) );
     } else {
 		point_set3D( &(view.vrp), 0, 0, -50);
     }
@@ -118,8 +177,37 @@ int main(int argc, char *argv[]) {
 	matrix_setView3D( &vtm, &view );
  	matrix_identity( &gtm );
 
+ 	// woodpile = module_create();
+ 	// woodpile = genWood(0, 0, 0);
+ 	// module_module(fireside, woodpile);
+ 	// woodpile = module_create();
+ 	// woodpile = genWood(2, 0, 0);
+ 	// module_module(fireside, woodpile);
+ 	// woodpile = module_create();
+ 	// woodpile = genWood(4, 0, 0);
+ 	// module_module(fireside, woodpile);
+ 	// woodpile = module_create();
+ 	// woodpile = genWood(-2, 0, 0);
+ 	// module_module(fireside, woodpile);
+ 	// woodpile = module_create();
+ 	// woodpile = genWood(-1, 1.5, 0);
+ 	// module_module(fireside, woodpile);
+ 	// woodpile = module_create();
+ 	// woodpile = genWood(1, 1.5, 0);
+ 	// module_module(fireside, woodpile);
+ 	// woodpile = module_create();
+ 	// woodpile = genWood(3, 1.5, 0);
+ 	// module_module(fireside, woodpile);
+ 	// woodpile = module_create();
+ 	// woodpile = genWood(2, 3, 0);
+ 	// module_module(fireside, woodpile);
+ 	// woodpile = module_create();
+ 	// woodpile = genWood(0, 3, 0);
+ 	// module_module(fireside, woodpile);
+
  	flame = module_create();
  	flame = genFire(0, 0, 0, 4);
+ 	module_module(fireside, flame);
 
 	color_set(&blue, 0, 0, 1);
 
@@ -131,7 +219,7 @@ int main(int argc, char *argv[]) {
 	printf("created the image and drawstate\n");
 
 	// draw scene
-	module_draw(flame, &vtm, &gtm, ds, NULL, src );
+	module_draw(fireside, &vtm, &gtm, ds, NULL, src );
 	printf("drew the scene\n");
 
 	// write out the scene
@@ -146,6 +234,7 @@ int main(int argc, char *argv[]) {
 
 	// free the modules
 	module_delete(flame);
+	module_delete(fireside);
 
 	printf("module freed\n");
 
