@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = pyramid-test pyramid-test-gif cylinder-test cylinder-test-gif cone-test cone-gif
+EXECUTABLES = pyramid-test pyramid-test-gif cylinder-test cylinder-test-gif cone-test cone-gif fire fire-gif
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = pyramid-test.o pyramid-test-gif.o cylinder-test.o cylinder-test-gif.o cone-test.o cone-gif.o
+_OBJ = pyramid-test.o pyramid-test-gif.o cylinder-test.o cylinder-test-gif.o cone-test.o cone-gif.o fire.o fire-gif.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -169,6 +169,10 @@ cylinder-test-gif: $(ODIR)/cylinder-test-gif.o
 cone-test: $(ODIR)/cone-test.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 cone-gif: $(ODIR)/cone-gif.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+fire: $(ODIR)/fire.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+fire-gif: $(ODIR)/fire-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
