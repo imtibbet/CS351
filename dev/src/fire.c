@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
 		printf("created the image and drawstate\n");
 		
 		matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
-		module_draw( flame, &vtm, &gtm, &ds, NULL, src );
+		module_draw( flame, &vtm, &gtm, ds, NULL, src );
 
 		// write out the scene
 		printf("Writing image\n");
@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
 		sprintf(command, "convert -scale %03dx%03d fire-frame%03d.ppm fire-frame%03d.ppm", cols/2, rows/2, frame, frame);
 		system(command);
 		image_write(src, buffer);
-		// image_reset(src);
+		image_reset(src);
 	}
 
 	printf("converting to gif...\n");
@@ -165,6 +165,8 @@ int main(int argc, char *argv[]) {
 	// free image
 	image_free( src );
 	printf("image freed\n");
+
+	system("animate fire.gif");
 
 	return(0);
 }
