@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 	char command[256];
 	float alpha;
 	Color blue, green;
-	int i, frame;
+	int i;
 	color_set(&blue, 0, 0, 1);
 	color_set(&green, 0, 1, 0);
 
@@ -118,36 +118,27 @@ int main(int argc, char *argv[]) {
 	matrix_setView3D( &vtm, &view );
  	matrix_identity( &gtm );
 
- 	// Create the animation by adjusting the GTM
-	for(frame=0;frame<60;frame++) {
-		char buffer[256];
+ 	flame = module_create();
+ 	flame = genFire(0, 0, 0, 4);
 
-		flame = module_create();
- 		flame = genFire(0, 0, 0, 4);
+	color_set(&blue, 0, 0, 1);
 
- 		// create the image and drawstate
-		src = image_create( rows, cols );
-		image_fillColor(src, blue);
-		ds = drawstate_create();
-		ds->shade = ShadeConstant;
-		printf("created the image and drawstate\n");
-		
-		matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
-		module_draw( flame, &vtm, &gtm, &ds, NULL, src );
+	// create the image and drawstate
+	src = image_create( rows, cols );
+	image_fillColor(src, blue);
+	ds = drawstate_create();
+	ds->shade = ShadeConstant;
+	printf("created the image and drawstate\n");
 
-		// write out the scene
-		printf("Writing image\n");
+	// draw scene
+	module_draw(flame, &vtm, &gtm, ds, NULL, src );
+	printf("drew the scene\n");
 
-		sprintf(buffer, "fire-frame%03d.ppm", frame);
-		sprintf(command, "convert -scale %03dx%03d fire-frame%03d.ppm fire-frame%03d.ppm", cols/2, rows/2, frame, frame);
-		system(command);
-		image_write(src, buffer);
-		// image_reset(src);
-	}
-
-	printf("converting to gif...\n");
-	system("convert -delay 1.5 -loop 0 fire-frame*.ppm fire.gif");
-	system("rm fire-frame*.ppm");
+	// write out the scene
+	printf("Writing image\n");
+	image_write( src, "fire.ppm" );
+	sprintf(command, "convert -scale %03dx%03d fire.ppm fire.ppm", cols/2, rows/2);
+	system(command);
 
 	// free the polygon data
 	polygon_clear( &p );
