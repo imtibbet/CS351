@@ -418,7 +418,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					if(j!=numparams){
 						if(verbose) printf("overwriting var %s\n", tempparamname);
 						sprintf(tempparamval, "%0.3f",
-							stringToFloat(tempparamval, numbs, numnumbers, NULL));
+							stringToFloat(tempparamval, numbs, numnumbers, mod[activeMod]));
 						strcat(varname, tempparamval);
 						strcat(newmodlinein, params[j]);
 					} else {
@@ -1449,8 +1449,8 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 	
 	// verify that at least one module defined
 	if(drawMod == -1){
-		printf(	"Must use draw firstword to specify a module to draw.\n"
-				" No module to draw, side effects\n");
+		printf(	"Must use draw firstword keyword to specify a module to draw.\n"
+				"No module to draw, no side effects\n");
 	} else {
 
 		// define view and draw state and draw last module defined
@@ -1534,7 +1534,7 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 									0, animateIndex, 0);
 					}
 				}
-			} 
+			}
 			if(animateStart == animateStop) {
 				printf("animate index start and end must differ\n");
 			} else {

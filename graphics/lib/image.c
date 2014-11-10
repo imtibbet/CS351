@@ -44,6 +44,8 @@ Image *image_create(int rows, int cols){
 	// assign image data fields to parameter and return pointer to image
 	src->rows = rows;
 	src->cols = cols;
+	image_reset(src);
+	
 	// printf("image created\n");
 	return(src);
 	
@@ -82,6 +84,7 @@ void image_init(Image *src){
 	}
 	src->data = NULL;
 	src->rows = src->cols = 0;
+	image_reset(src);
 	// printf("image initted\n");
 
 } // end image_init
@@ -122,22 +125,12 @@ int image_alloc(Image *src, int rows, int cols){
 	}
 
 	// assign all row pointers
-	for(i=0;i<rows;i++){
-		if(i){
-			src->data[i] = &(src->data[0][i * cols]);
-		}
-
-		// initialize data to appropriate values
-		for(j=0;j<cols;j++){
-			src->data[i][j].rgb[0] = 
-			src->data[i][j].rgb[1] = 
-			src->data[i][j].rgb[2] = 
-			src->data[i][j].a = 1.0;
-			src->data[i][j].z = 1.0;
-		}
+	for(i=1;i<rows;i++){
+		src->data[i] = &(src->data[0][i * cols]);
 	}
 	src->rows = rows;
 	src->cols = cols;
+	image_reset(src);
 	// printf("image allocated\n");
 	return(0);
 	
