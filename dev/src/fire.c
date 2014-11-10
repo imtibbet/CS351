@@ -1,10 +1,10 @@
 /*
-Astrid Moore (Bruce Maxwell)
+Astrid Moore 
 Fall 2014
 
 Example of a 3D scene model
 
-draws a fire
+Draws a roaring fire>
  */
 
 #include "graphics.h"
@@ -85,13 +85,9 @@ static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 
 		f[i] = module_create();
 
-		if (!f[i]){
-			printf("absent module\n");
-		}
-
 		module_scale((Module*)f[i], (float)((rand()%10)+5), (float)((rand()%30)+5), (float)((rand()%20)+1));
 		// printf("module scaled\n");
-		module_translate((Module*)f[i], (float)(x+40), y, z);
+		module_translate((Module*)f[i], x+3.0, y, z);
 		// printf("module translated\n");
 		module_color((Module*)f[i], &(ds->surface));
 		// printf("ds->surface->c[1] %f\n", ds->surface.c[1]);
@@ -99,6 +95,36 @@ static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 		// printf("surface set\n");
 		module_module((Module*)fire, (Module*)f[i]);
 		// printf("module added to fire\n");
+
+		f[i] = module_create();
+
+		module_scale((Module*)f[i], (float)((rand()%10)+5), (float)((rand()%30)+5), (float)((rand()%20)+1));
+		module_translate((Module*)f[i], x+2.0, y, z);
+		module_rotateY((Module*)f[i], 0, 1.3);
+		module_color((Module*)f[i], &(ds->surface));
+		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
+		module_module((Module*)fire, (Module*)f[i]);
+
+		f[i] = module_create();
+
+		module_scale((Module*)f[i], (float)((rand()%10)+5), (float)((rand()%30)+5), (float)((rand()%20)+1));
+		module_translate((Module*)f[i], x+2.0, y, z);
+		module_rotateY((Module*)f[i], 0, 1);
+		module_rotateY((Module*)f[i], 0, 1.3);
+		module_color((Module*)f[i], &(ds->surface));
+		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
+		module_module((Module*)fire, (Module*)f[i]);
+
+		f[i] = module_create();
+
+		module_scale((Module*)f[i], (float)((rand()%10)+5), (float)((rand()%30)+5), (float)((rand()%20)+1));
+		module_translate((Module*)f[i], x+2.0, y, z);
+		module_rotateY((Module*)f[i], 0, 1);
+		module_rotateY((Module*)f[i], 0, 1);
+		module_rotateY((Module*)f[i], 0, 1.3);
+		module_color((Module*)f[i], &(ds->surface));
+		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
+		module_module((Module*)fire, (Module*)f[i]);
 	}
 
 	// printf("Creating flames with %d subdivisions\n", divisions);
@@ -115,7 +141,6 @@ int main(int argc, char *argv[]) {
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
-	float alpha;
 	Color blue, green;
 	int frame;
 	color_set(&blue, 0, 0, 1);
@@ -125,12 +150,12 @@ int main(int argc, char *argv[]) {
 	ds = drawstate_create();
 	src = image_create( rows, cols );
 
-    point_set3D( &(view.vrp), 0, 0, -100);
+    point_set3D( &(view.vrp), 0, 0, -150);
 
 	// set up the view
 	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 	vector_set( &(view.vup), 0, 1, 0 );
-	view.d = 10;
+	view.d = 5;
 	view.du = 6;
 	view.f = 1;
 	view.b = 50;

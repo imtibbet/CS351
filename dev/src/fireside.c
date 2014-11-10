@@ -72,31 +72,26 @@ static Module * genWood(float x, float y, float z){
 }
 
 /* Creates a flame using a bezier surface*/
-static Module* genFire(float x, float y, float z, int divisions);
-static Module* genFire(float x, float y, float z, int divisions){
+static Module* genFire(float x, float y, float z, int divisions, DrawState *ds);
+static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 	Module *f[20];
 	Module *fire;
 	BezierSurface bc;
 	int gen, i;
-	Color ltOrange, orange, dkOrange, red, yellow, amber, final, c[6];
+	Color ltOrange, orange, dkOrange, red, yellow, amber, final;
 	Point p[16];
-	srand(time(NULL));
-	color_set(&ltOrange, 1, (float)(167/255), 0);
-	color_set(&orange, 1, (float)(127/255), 0);
-	color_set(&dkOrange, 1, (float)(103/255), 0);
+	color_set(&ltOrange, 1, (float)(167/255.0), 0.0);
+	color_set(&orange, 1, (float)(127/255.0), 0.0);
+	color_set(&dkOrange, 1, (float)(103/255.0), 0.0);
 	color_set(&red, 1, 0, 0);
-	color_set(&yellow, 1, (float)(233/255), 0);
-	color_set(&amber, 1, (float)(191/255), 0);
+	color_set(&yellow, 1, (float)(233/255.0), 0.0);
+	color_set(&amber, 1, (float)(191/255.0), 0.0);
 	color_set(&final, 0, 0, 0);
 
-	color_copy(&c[0], &ltOrange);
-	color_copy(&c[1], &orange);
-	color_copy(&c[2], &dkOrange);
-	color_copy(&c[3], &red);
-	color_copy(&c[4], &yellow);
-	color_copy(&c[5], &amber);
+	bezierSurface_init(&bc);
 
 	fire = module_create();
+	drawstate_setSurface(ds, final);
 
 	// create a curved surface sitting above the plane
 	point_set3D(&p[0], 0.0, 0.0, 0.0); // first row, constant x, even spacing in z
@@ -119,15 +114,69 @@ static Module* genFire(float x, float y, float z, int divisions){
 
 	for (i = 0; i < 20; i++){
 		gen = (int)(rand() % 6);
+		// printf("gen %d\n", gen);
+
+		if (gen == 0){
+			drawstate_setSurface(ds, ltOrange);
+			printf("ltOrange flame\n");
+		}
+		else if (gen == 1){
+			drawstate_setSurface(ds, orange);
+			printf("orange flame\n");
+		}
+		else if (gen == 2){
+			drawstate_setSurface(ds, dkOrange);
+			printf("dkOrange flame\n");
+		}
+		else if (gen == 3){
+			drawstate_setSurface(ds, red);
+			printf("red flame\n");
+		}
+		else if (gen == 4){
+			drawstate_setSurface(ds, yellow);	
+			printf("yellow flame\n");
+		}
+		else if (gen == 5){
+			drawstate_setSurface(ds, amber);
+			printf("amber flame\n");
+		}
+
 		f[i] = module_create();
-		module_scale(f[i], (float)(rand()%10), (float)(rand()%30), (float)(rand()%20));
-		module_translate(f[i], x+5, y, z);
-		module_color(f[i], &c[(int)gen]);
-		module_bezierSurface(f[i], &bc, divisions, 1);
+
+		if (!f[i]){
+			printf("absent module\n");
+		}
+
+		module_scale((Module*)f[i], (float)((rand()%10)+5), (float)((rand()%30)+5), (float)((rand()%20)+1));
+		// printf("module scaled\n");
+		module_translate((Module*)f[i], (x+40.0), y, z);
+		// printf("module translated\n");
+		module_color((Module*)f[i], &(ds->surface));
+		// printf("ds->surface->c[1] %f\n", ds->surface.c[1]);
+		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
+		// printf("surface set\n");
+		module_module((Module*)fire, (Module*)f[i]);
+		// printf("module added to fire\n");
+
+		f[i] = module_create();
+
+		if (!f[i]){
+			printf("absent module\n");
+		}
+
+		module_scale((Module*)f[i], (float)((rand()%10)+5), (float)((rand()%30)+5), (float)((rand()%20)+1));
+		// printf("module scaled\n");
+		module_translate((Module*)f[i], (x+40.0), y, z);
+		// printf("module translated\n");
+		module_rotateY((Module*)f[i], 1, 1);
+		module_color((Module*)f[i], &(ds->surface));
+		// printf("ds->surface->c[1] %f\n", ds->surface.c[1]);
+		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
+		// printf("surface set\n");
 		module_module((Module*)fire, (Module*)f[i]);
 	}
 
-	printf("Creating flames with %d subdivisions\n", divisions);
+	// printf("Creating flames with %d subdivisions\n", divisions);
 
 	return((Module*)fire);
 }
