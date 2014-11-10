@@ -126,7 +126,6 @@ void line_set2D(Line *l, double x0, double y0, double x1, double y1){
 	if(!l){
 		return;
 	}
-	
 	l->a.val[0] = x0;
 	l->a.val[1] = y0;
 	l->a.val[2] = 0.0;
@@ -145,7 +144,6 @@ void line_set(Line *l, Point ta, Point tb){
 	if(!l){
 		return;
 	}
-	
 	l->a = ta;
 	l->b = tb;
 }
@@ -157,7 +155,6 @@ void line_zBuffer(Line *l, int flag){
 	if(!l){
 		return;
 	}
-	
 	l->zBuffer = flag;
 }
 
@@ -178,11 +175,14 @@ void line_draw(Line *l, Image *src, Color c){
 	// Bresenham's line-drawing algorithm
 	int x0, y0, x1, y1;
 	int x, y, dx, dy, e, i;
+	float invz0, invz1, invzPer, invzCur;
 
 	x = x0 = l->a.val[0];
 	y = y0 = l->a.val[1];
+	invzCur = invz0 = 1/(l->a.val[2]);
 	x1 = l->b.val[0];
 	y1 = l->b.val[1];
+	invz1 = 1/(l->b.val[2]);
 
 	dx = x1 - x0;
 	dy = y1 - y0;
@@ -192,8 +192,10 @@ void line_draw(Line *l, Image *src, Color c){
 	if(dy<0){
 		x = x0 = l->b.val[0];
 		y = y0 = l->b.val[1];
+		invzCur = invz0 = 1/(l->b.val[2]);
 		x1 = l->a.val[0];
 		y1 = l->a.val[1];
+		invz1 = 1/(l->a.val[2]);
 
 		dx = x1 - x0;
 		dy = y1 - y0;
@@ -202,9 +204,15 @@ void line_draw(Line *l, Image *src, Color c){
 	// 1st and 2nd octants (right half)
 	if(dx>0) {
 	
+		// horizontal line
 		if(dy==0){
+			invzPer = (invz1-invz0)/dx;
 			while(x!=x1){
-				image_setColor(src,y,x,c);
+				if(invzCur > src->data[y][x].z){
+					src->data[y][x].z = invzCur;
+					image_setColor(src,y,x,c);
+				}
+				invzCur += invzPer;
 				x++;
 			}
 			return;
@@ -212,9 +220,14 @@ void line_draw(Line *l, Image *src, Color c){
 
 		// 1st octant
 		if(dx>=dy) {
+			invzPer = (invz1-invz0)/dx;
 			e = 3*dy-2*dx;
 			for(i=0; i<=dx; i++){
-				image_setColor(src,y,x,c);
+				if(invzCur > src->data[y][x].z){
+					src->data[y][x].z = invzCur;
+					image_setColor(src,y,x,c);
+				}
+				invzCur += invzPer;
 				if(e>0){
 					y++;
 					e-=(2*dx);
@@ -225,9 +238,14 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 2nd octant
 		else if(dy>dx){
+			invzPer = (invz1-invz0)/dy;
 			e = 3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				image_setColor(src,y,x,c);
+				if(invzCur > src->data[y][x].z){
+					src->data[y][x].z = invzCur;
+					image_setColor(src,y,x,c);
+				}
+				invzCur += invzPer;
 				if(e>0){
 					x++;
 					e-=(2*dy);
@@ -242,20 +260,31 @@ void line_draw(Line *l, Image *src, Color c){
 	else if(dx<0){
 		x--; // to avoid coloring x,y when the line doesn't go through that pixel
 		dx=-dx; // to make conditionals easier
+		
+		// horizontal line
 		if(dy==0){
+			invzPer = (invz1-invz0)/dx;
 			while(x!=x1){
-				image_setColor(src,y,x,c);
+				if(invzCur > src->data[y][x].z){
+					src->data[y][x].z = invzCur;
+					image_setColor(src,y,x,c);
+				}
+				invzCur -= invzPer; // -= because I negate dx for conditionals
 				x--;
 			}
-			//printf("horizontal line drawn\n");
 			return;
 		}
 
 		// 4th octant
 		if(dx>=dy) {
+			invzPer = (invz1-invz0)/dx;
 			e = 3*dy-2*dx;
 			for(i=0; i<=dx; i++){
-				image_setColor(src,y,x,c);
+				if(invzCur > src->data[y][x].z){
+					src->data[y][x].z = invzCur;
+					image_setColor(src,y,x,c);
+				}
+				invzCur -= invzPer; // -= because I negate dx for conditionals
 				if(e>0){
 					y++;
 					e-=(2*dx);
@@ -266,9 +295,14 @@ void line_draw(Line *l, Image *src, Color c){
 		}
 		// 3rd octant
 		else if(dy>dx){
+			invzPer = (invz1-invz0)/dy;
 			e = 3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				image_setColor(src,y,x,c);
+				if(invzCur > src->data[y][x].z){
+					src->data[y][x].z = invzCur;
+					image_setColor(src,y,x,c);
+				}
+				invzCur += invzPer;
 				if(e>0){
 					x--;
 					e-=(2*dy);
@@ -280,8 +314,13 @@ void line_draw(Line *l, Image *src, Color c){
 	}
 	// special case of vertical lines
 	else {//dx==0
+		invzPer = (invz1-invz0)/dy;
 		while(y!=y1){
-			image_setColor(src,y,x,c);
+			if(invzCur > src->data[y][x].z){
+				src->data[y][x].z = invzCur;
+				image_setColor(src,y,x,c);
+			}
+			invzCur += invzPer;
 			y++;
 		}
 	}
