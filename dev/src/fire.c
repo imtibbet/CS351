@@ -20,7 +20,7 @@ static Module* genFire(float x, float y, float z, int divisions){
 	Module *fire;
 	BezierSurface bc;
 	int gen, i;
-	Color ltOrange, orange, dkOrange, red, yellow, amber, final, c[6];
+	Color ltOrange, orange, dkOrange, red, yellow, amber, final;
 	Point p[16];
 	srand(time(NULL));
 	color_set(&ltOrange, 1, (float)(167/255), 0);
@@ -31,12 +31,7 @@ static Module* genFire(float x, float y, float z, int divisions){
 	color_set(&amber, 1, (float)(191/255), 0);
 	color_set(&final, 0, 0, 0);
 
-	color_copy(&c[0], &ltOrange);
-	color_copy(&c[1], &orange);
-	color_copy(&c[2], &dkOrange);
-	color_copy(&c[3], &red);
-	color_copy(&c[4], &yellow);
-	color_copy(&c[5], &amber);
+	bezierSurface_init(&bc);
 
 	fire = module_create();
 
@@ -61,17 +56,36 @@ static Module* genFire(float x, float y, float z, int divisions){
 
 	for (i = 0; i < 20; i++){
 		gen = (int)(rand() % 6);
+
+		if (gen == 0){
+			color_copy(&final, &ltOrange);
+		}
+		if (gen == 1){
+			color_copy(&final, &orange);
+		}
+		if (gen == 2){
+			color_copy(&final, &dkOrange);
+		}
+		if (gen == 3){
+			color_copy(&final, &red);
+		}
+		if (gen == 4){
+			color_copy(&final, &yellow);
+		}
+		else{
+			color_copy(&final, &amber);
+		}
+
 		f[i] = module_create();
-		module_scale(f[i], (float)((rand()%10)+5), (float)(rand()%30), (float)(rand()%20));
-		module_translate(f[i], x+20, y, z);
-		module_color(f[i], &c[((int)gen)]);
-		module_bezierSurface(f[i], &bc, divisions, 1);
+		module_scale((Module*)f[i], (float)((rand()%10)+5), (float)((rand()%30)+5), (float)((rand()%20)+1));
+		module_translate((Module*)f[i], (float)(x+20), y, z);
+		module_color((Module*)f[i], &(final));
+		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
 		module_module((Module*)fire, (Module*)f[i]);
 	}
 
-	printf("Creating flames with %d subdivisions\n", divisions);
+	// printf("Creating flames with %d subdivisions\n", divisions);
 
-	// this method may work for matrix rotation of gtm
 	return((Module*)fire);
 }
 
@@ -81,16 +95,18 @@ int main(int argc, char *argv[]) {
 	const int cols = 660*2;
 	Image *src;
 	Module *flame;
-	Polygon p;
 	View3D view;
 	Matrix vtm, gtm;
-	DrawState *ds;
-	char command[256];
+	DrawState ds;
 	float alpha;
 	Color blue, green;
-	int i, frame;
+	int frame;
 	color_set(&blue, 0, 0, 1);
 	color_set(&green, 0, 1, 0);
+
+	drawstate_setColor(&ds, blue);
+	ds.shade = ShadeConstant;
+	src = image_create( rows, cols );
 
 	// grab command line argument to determine viewpoint
     // and set up the view structure
@@ -100,7 +116,7 @@ int main(int argc, char *argv[]) {
             alpha = 0.0;
         point_set3D( &(view.vrp), 20*alpha, alpha, -50*alpha - (alpha*170-cos(alpha)*170) );
     } else {
-		point_set3D( &(view.vrp), 0, 0, -50);
+		point_set3D( &(view.vrp), 0, 0, -100);
     }
 
 	// set up the view
@@ -113,60 +129,33 @@ int main(int argc, char *argv[]) {
 	view.screenx = cols;
 	view.screeny = rows;
 
-	printf("set up view\n");
-
 	matrix_setView3D( &vtm, &view );
- 	matrix_identity( &gtm );
+	matrix_identity( &gtm );
+	flame = module_create();
 
- 	// Create the animation by adjusting the GTM
+ 	// create the animation by adjusting the gtm
 	for(frame=0;frame<60;frame++) {
+		// create the image and drawstate
 		char buffer[256];
+		flame = genFire(0, 0, 0, 4);
 
-		flame = module_create();
- 		flame = genFire(0, 0, 0, 4);
-
- 		// create the image and drawstate
-		src = image_create( rows, cols );
-		image_fillColor(src, blue);
-		ds = drawstate_create();
-		ds->shade = ShadeConstant;
-		printf("created the image and drawstate\n");
-		
 		matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
-		module_draw( flame, &vtm, &gtm, ds, NULL, src );
-
-		// write out the scene
-		printf("Writing image\n");
+		module_draw( flame, &vtm, &gtm, &ds, NULL, src );
 
 		sprintf(buffer, "fire-frame%03d.ppm", frame);
-		sprintf(command, "convert -scale %03dx%03d fire-frame%03d.ppm fire-frame%03d.ppm", cols/2, rows/2, frame, frame);
-		system(command);
 		image_write(src, buffer);
 		image_reset(src);
 	}
 
 	printf("converting to gif...\n");
 	system("convert -delay 1.5 -loop 0 fire-frame*.ppm fire.gif");
+	printf("converted gif\n");
 	system("rm fire-frame*.ppm");
-
-	// free the polygon data
-	polygon_clear( &p );
-	printf("polygon freed\n");
-
-	// free the modules
-	module_delete(flame);
-
-	printf("module freed\n");
-
-	// free drawstate
-	free(ds);
-	printf("drawstate freed\n");
-
-	// free image
-	image_free( src );
-	printf("image freed\n");
-
+	printf("animating gif...\n");
 	system("animate fire.gif");
+
+	image_free(src);
+	module_delete(flame);
 
 	return(0);
 }
