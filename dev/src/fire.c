@@ -14,26 +14,26 @@ draws a fire
 /* declare methods here for testing flexibility */
 
 /* Creates a flame using a bezier surface*/
-static Module* genFire(float x, float y, float z, int divisions);
-static Module* genFire(float x, float y, float z, int divisions){
+static Module* genFire(float x, float y, float z, int divisions, DrawState *ds);
+static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 	Module *f[20];
 	Module *fire;
 	BezierSurface bc;
 	int gen, i;
 	Color ltOrange, orange, dkOrange, red, yellow, amber, final;
 	Point p[16];
-	srand(time(NULL));
-	color_set(&ltOrange, 1, (float)(167/255), 0);
-	color_set(&orange, 1, (float)(127/255), 0);
-	color_set(&dkOrange, 1, (float)(103/255), 0);
+	color_set(&ltOrange, 1, (float)(167/255.0), 0.0);
+	color_set(&orange, 1, (float)(127/255.0), 0.0);
+	color_set(&dkOrange, 1, (float)(103/255.0), 0.0);
 	color_set(&red, 1, 0, 0);
-	color_set(&yellow, 1, (float)(233/255), 0);
-	color_set(&amber, 1, (float)(191/255), 0);
+	color_set(&yellow, 1, (float)(233/255.0), 0.0);
+	color_set(&amber, 1, (float)(191/255.0), 0.0);
 	color_set(&final, 0, 0, 0);
 
 	bezierSurface_init(&bc);
 
 	fire = module_create();
+	drawstate_setSurface(ds, final);
 
 	// create a curved surface sitting above the plane
 	point_set3D(&p[0], 0.0, 0.0, 0.0); // first row, constant x, even spacing in z
@@ -56,32 +56,49 @@ static Module* genFire(float x, float y, float z, int divisions){
 
 	for (i = 0; i < 20; i++){
 		gen = (int)(rand() % 6);
+		// printf("gen %d\n", gen);
 
 		if (gen == 0){
-			color_copy(&final, &ltOrange);
+			drawstate_setSurface(ds, ltOrange);
+			printf("ltOrange flame\n");
 		}
-		if (gen == 1){
-			color_copy(&final, &orange);
+		else if (gen == 1){
+			drawstate_setSurface(ds, orange);
+			printf("orange flame\n");
 		}
-		if (gen == 2){
-			color_copy(&final, &dkOrange);
+		else if (gen == 2){
+			drawstate_setSurface(ds, dkOrange);
+			printf("dkOrange flame\n");
 		}
-		if (gen == 3){
-			color_copy(&final, &red);
+		else if (gen == 3){
+			drawstate_setSurface(ds, red);
+			printf("red flame\n");
 		}
-		if (gen == 4){
-			color_copy(&final, &yellow);
+		else if (gen == 4){
+			drawstate_setSurface(ds, yellow);	
+			printf("yellow flame\n");
 		}
-		else{
-			color_copy(&final, &amber);
+		else if (gen == 5){
+			drawstate_setSurface(ds, amber);
+			printf("amber flame\n");
 		}
 
 		f[i] = module_create();
+
+		if (!f[i]){
+			printf("absent module\n");
+		}
+
 		module_scale((Module*)f[i], (float)((rand()%10)+5), (float)((rand()%30)+5), (float)((rand()%20)+1));
-		module_translate((Module*)f[i], (float)(x+20), y, z);
-		module_color((Module*)f[i], &(final));
+		// printf("module scaled\n");
+		module_translate((Module*)f[i], (float)(x+40), y, z);
+		// printf("module translated\n");
+		module_color((Module*)f[i], &(ds->surface));
+		// printf("ds->surface->c[1] %f\n", ds->surface.c[1]);
 		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
+		// printf("surface set\n");
 		module_module((Module*)fire, (Module*)f[i]);
+		// printf("module added to fire\n");
 	}
 
 	// printf("Creating flames with %d subdivisions\n", divisions);
@@ -94,35 +111,26 @@ int main(int argc, char *argv[]) {
 	const int rows = 600*2;
 	const int cols = 660*2;
 	Image *src;
-	Module *flame;
+	Module *flames[60];
 	View3D view;
 	Matrix vtm, gtm;
-	DrawState ds;
+	DrawState *ds;
 	float alpha;
 	Color blue, green;
 	int frame;
 	color_set(&blue, 0, 0, 1);
 	color_set(&green, 0, 1, 0);
+	srand(time(NULL));
 
-	drawstate_setColor(&ds, blue);
-	ds.shade = ShadeConstant;
+	ds = drawstate_create();
 	src = image_create( rows, cols );
 
-	// grab command line argument to determine viewpoint
-    // and set up the view structure
-    if( argc > 1 ) {
-        alpha = atof( argv[1] );
-        if( alpha < 0.0 || alpha > 1.0 )
-            alpha = 0.0;
-        point_set3D( &(view.vrp), 20*alpha, alpha, -50*alpha - (alpha*170-cos(alpha)*170) );
-    } else {
-		point_set3D( &(view.vrp), 0, 0, -100);
-    }
+    point_set3D( &(view.vrp), 0, 0, -100);
 
 	// set up the view
 	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 	vector_set( &(view.vup), 0, 1, 0 );
-	view.d = 8;
+	view.d = 10;
 	view.du = 6;
 	view.f = 1;
 	view.b = 50;
@@ -131,16 +139,16 @@ int main(int argc, char *argv[]) {
 
 	matrix_setView3D( &vtm, &view );
 	matrix_identity( &gtm );
-	flame = module_create();
 
  	// create the animation by adjusting the gtm
 	for(frame=0;frame<60;frame++) {
 		// create the image and drawstate
 		char buffer[256];
-		flame = genFire(0, 0, 0, 4);
+		flames[frame] = module_create();
+		flames[frame] = genFire(0, 0, 0, 4, ds);
 
 		matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
-		module_draw( flame, &vtm, &gtm, &ds, NULL, src );
+		module_draw( flames[frame], &vtm, &gtm, ds, NULL, src );
 
 		sprintf(buffer, "fire-frame%03d.ppm", frame);
 		image_write(src, buffer);
@@ -148,14 +156,17 @@ int main(int argc, char *argv[]) {
 	}
 
 	printf("converting to gif...\n");
-	system("convert -delay 1.5 -loop 0 fire-frame*.ppm fire.gif");
+	system("convert -delay 4 -loop 0 fire-frame*.ppm fire.gif");
 	printf("converted gif\n");
 	system("rm fire-frame*.ppm");
 	printf("animating gif...\n");
 	system("animate fire.gif");
 
 	image_free(src);
-	module_delete(flame);
+
+	for(frame=0;frame<60;frame++){
+		module_delete(flames[frame]);
+	}
 
 	return(0);
 }
