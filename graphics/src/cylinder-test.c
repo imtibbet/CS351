@@ -2,7 +2,7 @@
 Astrid Moore (Bruce Maxwell)
 Fall 2014
 
-Unit pyramid test.
+Unit cylinder test.
  */
 
 #include "graphics.h"
