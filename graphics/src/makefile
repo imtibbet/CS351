@@ -178,6 +178,7 @@ fireside: $(ODIR)/fireside.o
 test8a: $(ODIR)/test8a.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 cubism: $(ODIR)/cubism.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
 
