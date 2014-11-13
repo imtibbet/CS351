@@ -170,7 +170,11 @@ cone-test: $(ODIR)/cone-test.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 cone-gif: $(ODIR)/cone-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
-
+# proj 8
+test8a: $(ODIR)/test8a.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+cubism: $(ODIR)/cubism.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
 

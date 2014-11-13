@@ -30,3 +30,9 @@ int color_compare(Color a, Color b){
 			(a.c[2] == b.c[2]));
 }
 
+// print the color
+void color_print(Color c, FILE *fp){
+	fprintf(fp,"[ %.3f, %.3f, %.3f ]\n",c.c[0],c.c[1],c.c[2]);
+}
+
+

@@ -72,7 +72,9 @@ void point_draw(Point *p, Image *src, Color c){
 		printf("null passed to point_draw\n");
 		return;
 	}
-	image_setColor( src, p->val[1], p->val[0], c );
+	if(1/(p->val[2]) > image_getz(src, p->val[1], p->val[0])){
+		image_setColor( src, p->val[1], p->val[0], c );
+	}
 }
 
 /*
@@ -84,7 +86,9 @@ void point_drawf(Point *p, Image *src, FPixel c){
 		return;
 	}
 	
-	image_setf(src, p->val[1], p->val[0], c);
+	if(1/(p->val[2]) > image_getz(src, p->val[1], p->val[0])){
+		image_setf(src, p->val[1], p->val[0], c);
+	}
 }
 
 /*
@@ -177,11 +181,11 @@ void line_draw(Line *l, Image *src, Color c){
 	int x, y, dx, dy, e, i;
 	float invz0, invz1, invzPer, invzCur;
 
-	x = x0 = l->a.val[0];
-	y = y0 = l->a.val[1];
-	invzCur = invz0 = 1/(l->a.val[2]);
-	x1 = l->b.val[0];
-	y1 = l->b.val[1];
+	x = x0 = 			l->a.val[0];
+	y = y0 = 			l->a.val[1];
+	invzCur = invz0 = 	1/(l->a.val[2]);
+	x1 = 	l->b.val[0];
+	y1 = 	l->b.val[1];
 	invz1 = 1/(l->b.val[2]);
 
 	dx = x1 - x0;
@@ -190,11 +194,11 @@ void line_draw(Line *l, Image *src, Color c){
 	// swap endpoints so fifth through eighth octants
 	// can be handled as first through fourth octants
 	if(dy<0){
-		x = x0 = l->b.val[0];
-		y = y0 = l->b.val[1];
-		invzCur = invz0 = 1/(l->b.val[2]);
-		x1 = l->a.val[0];
-		y1 = l->a.val[1];
+		x = x0 = 			l->b.val[0];
+		y = y0 = 			l->b.val[1];
+		invzCur = invz0 = 	1/(l->b.val[2]);
+		x1 = 	l->a.val[0];
+		y1 = 	l->a.val[1];
 		invz1 = 1/(l->a.val[2]);
 
 		dx = x1 - x0;
@@ -208,8 +212,8 @@ void line_draw(Line *l, Image *src, Color c){
 		if(dy==0){
 			invzPer = (invz1-invz0)/dx;
 			while(x!=x1){
-				if(invzCur > src->data[y][x].z){
-					src->data[y][x].z = invzCur;
+				if(invzCur > image_getz(src, y, x)){
+					image_setz(src, y, x, invzCur);
 					image_setColor(src,y,x,c);
 				}
 				invzCur += invzPer;
@@ -223,8 +227,8 @@ void line_draw(Line *l, Image *src, Color c){
 			invzPer = (invz1-invz0)/dx;
 			e = 3*dy-2*dx;
 			for(i=0; i<=dx; i++){
-				if(invzCur > src->data[y][x].z){
-					src->data[y][x].z = invzCur;
+				if(invzCur > image_getz(src, y, x)){
+					image_setz(src, y, x, invzCur);
 					image_setColor(src,y,x,c);
 				}
 				invzCur += invzPer;
@@ -236,13 +240,14 @@ void line_draw(Line *l, Image *src, Color c){
 				e+=(2*dy);
 			}
 		}
+		
 		// 2nd octant
 		else if(dy>dx){
 			invzPer = (invz1-invz0)/dy;
 			e = 3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				if(invzCur > src->data[y][x].z){
-					src->data[y][x].z = invzCur;
+				if(invzCur > image_getz(src, y, x)){
+					image_setz(src, y, x, invzCur);
 					image_setColor(src,y,x,c);
 				}
 				invzCur += invzPer;
@@ -265,11 +270,11 @@ void line_draw(Line *l, Image *src, Color c){
 		if(dy==0){
 			invzPer = (invz1-invz0)/dx;
 			while(x!=x1){
-				if(invzCur > src->data[y][x].z){
-					src->data[y][x].z = invzCur;
+				if(invzCur > image_getz(src, y, x)){
+					image_setz(src, y, x, invzCur);
 					image_setColor(src,y,x,c);
 				}
-				invzCur -= invzPer; // -= because I negate dx for conditionals
+				invzCur += invzPer; // -= because I negate dx for conditionals
 				x--;
 			}
 			return;
@@ -280,11 +285,11 @@ void line_draw(Line *l, Image *src, Color c){
 			invzPer = (invz1-invz0)/dx;
 			e = 3*dy-2*dx;
 			for(i=0; i<=dx; i++){
-				if(invzCur > src->data[y][x].z){
-					src->data[y][x].z = invzCur;
+				if(invzCur > image_getz(src, y, x)){
+					image_setz(src, y, x, invzCur);
 					image_setColor(src,y,x,c);
 				}
-				invzCur -= invzPer; // -= because I negate dx for conditionals
+				invzCur += invzPer; // -= because I negate dx for conditionals
 				if(e>0){
 					y++;
 					e-=(2*dx);
@@ -293,13 +298,14 @@ void line_draw(Line *l, Image *src, Color c){
 				e+=(2*dy);
 			}
 		}
+		
 		// 3rd octant
 		else if(dy>dx){
 			invzPer = (invz1-invz0)/dy;
 			e = 3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				if(invzCur > src->data[y][x].z){
-					src->data[y][x].z = invzCur;
+				if(invzCur > image_getz(src, y, x)){
+					image_setz(src, y, x, invzCur);
 					image_setColor(src,y,x,c);
 				}
 				invzCur += invzPer;
@@ -312,12 +318,13 @@ void line_draw(Line *l, Image *src, Color c){
 			} 
 		}
 	}
+	
 	// special case of vertical lines
 	else {//dx==0
 		invzPer = (invz1-invz0)/dy;
 		while(y!=y1){
-			if(invzCur > src->data[y][x].z){
-				src->data[y][x].z = invzCur;
+			if(invzCur > image_getz(src, y, x)){
+				image_setz(src, y, x, invzCur);
 				image_setColor(src,y,x,c);
 			}
 			invzCur += invzPer;
@@ -1231,53 +1238,6 @@ void polygon_normalize( Polygon *p){
 }
 
 /*
- * dispatch the drawing of the polygon using DrawState d.
- */
-void polygon_draw(Polygon *p, Image *src, void *drawstate){
-	switch(((DrawState *)drawstate)->shade){
-		case ShadeFrame:
-			polygon_drawFrame(p, src, ((DrawState *)drawstate)->color);
-			break;
-		case ShadeConstant:
-		default:
-			polygon_drawFill(p, src, ((DrawState *)drawstate)->color);
-	}
-}
-
-/*
- * draw the outline of the polygon using color c.
- */
-void polygon_drawFrame(Polygon *p, Image *src, Color c){
-	int i;
-	Line l;
-
-	if(p){
-		if(!p->vertex){
-			return;
-		}
-	} else{
-		return;
-	}
-
-	if (p->nVertex < 3){
-		printf("can't draw a polygon with less than three points\n");
-	}
-
-	// iterate through polyline
-	for(i=0; i<(p->nVertex-1); i++){
-		// take coordinates for polyline point
-		// create a line
-		line_set(&l, p->vertex[i], p->vertex[i+1]);
-		// draw line on src using Color c
-		line_draw(&l, src, c);
-	}
-	//draw from last to first vertex at the end
-	line_set(&l, p->vertex[p->nVertex-1], p->vertex[0]);
-	line_draw(&l, src, c);
-	// printf("polygon drawn\n");
-}
-
-/*
 	Ian Tibbetts And Astrid Moorse (Bruce A. Maxwell)
 	Fall 2014
 
@@ -1294,6 +1254,7 @@ typedef struct tEdge {
 	int yStart, yEnd;               /* start row and end row */
 	/* where the edge intersects the current scanline and how it changes */
 	float xIntersect, dxPerScan;    
+	float zIntersect, dzPerScan; 
 	
 	/* we'll add more here later */
 	struct tEdge *next;
@@ -1341,8 +1302,9 @@ static int compXIntersect( const void *a, const void *b ) {
 static Edge *makeEdgeRec( Point start, Point end, Image *src)
 {
 	Edge *edge;
-	float dscan = end.val[1] - start.val[1];
-	float dwidth = end.val[0] - start.val[0];
+	float dx = end.val[0] - start.val[0];
+	float dy = end.val[1] - start.val[1];
+	float dz = 1/(end.val[2]) - 1/(start.val[2]);
 	float xAdjust, vyMinusFloor;
 
 	// Check if the starting row is below the image or the end row is
@@ -1379,7 +1341,8 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	}
 
 	// Calculate the slope, dxPerScan
-	edge->dxPerScan = dwidth/dscan;
+	edge->dxPerScan = dx/dy;
+	edge->dzPerScan = dz/dy;//Proj8
 	
 	// Calculate xIntersect, adjusting for the fraction of the point in the pixel.
 	// Scanlines go through the middle of pixels
@@ -1391,6 +1354,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 		xAdjust = 0.5 - vyMinusFloor;
 	}
 	edge->xIntersect = edge->x0 + xAdjust*edge->dxPerScan;
+	edge->zIntersect = 1/(start.val[2]);//Proj8
 	
 	// adjust if the edge starts above the image
 	// move the intersections down to scanline zero
@@ -1399,6 +1363,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 		//printf("row clipping top\n");
 		// update xIntersect
 		edge->xIntersect += (-edge->y0)*edge->dxPerScan;
+		edge->zIntersect += (-edge->y0)*edge->dzPerScan;//Proj8
 		// update y0
 		edge->y0 = 0.0;
 		// update x0
@@ -1470,9 +1435,11 @@ static LinkedList *setupEdgeList( Polygon *p, Image *src) {
 	Draw one scanline of a polygon given the scanline, the active edges,
 	a DrawState, the image, and some Lights (for Phong shading only).
  */
-static void fillScan( int scan, LinkedList *active, Image *src, Color c ) {
+static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate) {
 	Edge *p1, *p2;
 	int i, f;
+	float curZ, dzPerColumn;//Proj8
+	Color c = ((DrawState *)drawstate)->color;//Proj8
 
 	// loop over the list
 	p1 = ll_head( active );
@@ -1492,18 +1459,27 @@ static void fillScan( int scan, LinkedList *active, Image *src, Color c ) {
 		}
 
 		/**** Your code goes here ****/
+			
 		// identify the starting column
 		i=(int)(p1->xIntersect);
-		//printf("i=%d",i);
-		// clip to the left side of the image
-		if(i<0){
-			//printf(" clipping left ");
-			i=0;
-		}
 		
 		// identify the ending column
 		f=(int)(p2->xIntersect);
-		//printf("f=%d\n",f);
+		
+		// compute dzPerColumn and zIntersect using p2 and p1
+		curZ=p1->zIntersect;//Proj8
+		dzPerColumn = (p2->zIntersect-p1->zIntersect)/(f-i);//Proj8
+		
+		//printf("p2xint=%0.3f,p1xint=%0.3f\n",p2->xIntersect,p1->xIntersect);
+		printf("p2xint=%0.3f,p1xint=%0.3f,dzper=%0.3f\n",p2->xIntersect,p1->xIntersect, dzPerColumn);
+		
+		// clip to the left side of the image
+		if(i<0){
+			//printf(" clipping left ");
+			// update curZ if edge starts outside image
+			curZ += -i*dzPerColumn;//Proj8 
+			i=0;
+		}
 		
 		// clip to the right side of the image
 		if(f>(src->cols-1)){
@@ -1512,8 +1488,22 @@ static void fillScan( int scan, LinkedList *active, Image *src, Color c ) {
 		}
 		
 		// loop from start to end and color in the pixels
-		for(;i<f;i++){
-			image_setColor(src, scan, i, c);
+		for(;i<f;i++, curZ+=dzPerColumn){//Proj8 
+			if(curZ > image_getz(src, scan, i)){//Proj8 
+				image_setz(src, scan, i, curZ);//Proj8 
+				switch(((DrawState *)drawstate)->shade){//Proj8 
+					case ShadeConstant://Proj8 
+						break;//Proj8 
+					case ShadeDepth://Proj8 
+						c.c[0] = c.c[0]*(1-1/curZ);//Proj8 
+						c.c[1] = c.c[1]*(1-1/curZ);//Proj8 
+						c.c[2] = c.c[2]*(1-1/curZ);//Proj8 
+						break;//Proj8 
+					default://Proj8 
+						break;//Proj8 
+				}//Proj8 
+				image_setColor(src, scan, i, c);
+			}
 		}
 		
 		// move ahead to the next pair of edges
@@ -1526,7 +1516,7 @@ static void fillScan( int scan, LinkedList *active, Image *src, Color c ) {
 /* 
 	 Process the edge list, assumes the edges list has at least one entry
 */
-static int processEdgeList( LinkedList *edges, Image *src, Color c ) {
+static int processEdgeList( LinkedList *edges, Image *src, void *drawstate) {
 	LinkedList *active = NULL;
 	LinkedList *tmplist = NULL;
 	LinkedList *transfer = NULL;
@@ -1556,7 +1546,7 @@ static int processEdgeList( LinkedList *edges, Image *src, Color c ) {
 
 		// if there are active edges
 		// fill out the scanline
-		fillScan( scan, active, src, c);
+		fillScan( scan, active, src, drawstate);
 
 		// remove any ending edges and update the rest
 		for( tedge = ll_pop( active ); tedge != NULL; tedge = ll_pop( active ) ) {
@@ -1567,6 +1557,7 @@ static int processEdgeList( LinkedList *edges, Image *src, Color c ) {
 
 				// update the edge information with the dPerScan values
 				tedge->xIntersect += tedge->dxPerScan;
+				tedge->zIntersect += tedge->dzPerScan;//Proj8
 
 				// adjust in the case of partial overlap
 				if( tedge->dxPerScan < 0.0 && tedge->xIntersect < tedge->x1 ) {
@@ -1595,14 +1586,10 @@ static int processEdgeList( LinkedList *edges, Image *src, Color c ) {
 	return(0);
 }
 
-/****************************************
-End Scanline Fill
-*****************************************/
-
 /*
 	Draws a filled polygon of the specified color into the image src.
  */
-void polygon_drawFill(Polygon *p, Image *src, Color c ) {
+void polygon_drawFill(Polygon *p, Image *src, void *drawstate) {
 	LinkedList *edges = NULL;
 
 	// set up the edge list
@@ -1611,7 +1598,7 @@ void polygon_drawFill(Polygon *p, Image *src, Color c ) {
 		return;
 	
 	// process the edge list (should be able to take an arbitrary edge list)
-	processEdgeList( edges, src, c);
+	processEdgeList( edges, src, drawstate);
 
 	// clean up
 	ll_delete( edges, (void (*)(const void *))free );
@@ -1619,17 +1606,65 @@ void polygon_drawFill(Polygon *p, Image *src, Color c ) {
 	return;
 }
 
+/****************************************
+End Scanline Fill
+*****************************************/
+
+
+/*
+ * dispatch the drawing of the polygon using DrawState d.
+ */
+void polygon_draw(Polygon *p, Image *src, void *drawstate){
+	switch(((DrawState *)drawstate)->shade){
+		case ShadeFrame:
+			polygon_drawFrame(p, src, ((DrawState *)drawstate)->color);
+			break;
+		case ShadeConstant:
+		default:
+			polygon_drawFill(p, src, drawstate);
+	}
+}
+
+/*
+ * draw the outline of the polygon using color c.
+ */
+void polygon_drawFrame(Polygon *p, Image *src, Color c){
+	int i;
+	Line l;
+
+	if(p){
+		if(!p->vertex){
+			return;
+		}
+	} else{
+		return;
+	}
+
+	if (p->nVertex < 3){
+		printf("can't draw a polygon with less than three points\n");
+	}
+
+	// iterate through polyline
+	for(i=0; i<(p->nVertex-1); i++){
+		// take coordinates for polyline point
+		// create a line
+		line_set(&l, p->vertex[i], p->vertex[i+1]);
+		// draw line on src using Color c
+		line_draw(&l, src, c);
+	}
+	//draw from last to first vertex at the end
+	line_set(&l, p->vertex[p->nVertex-1], p->vertex[0]);
+	line_draw(&l, src, c);
+	// printf("polygon drawn\n");
+}
+
 /*
  * draw the filled polygon using color c with the Barycentric coordinates algorithm.
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
-    
-    // only works for triangles, use scanline for other polygons
-    if(p->nVertex != 3){
-    	printf("barycentric is only for triangles\n");
-        polygon_drawFill(p, src, c);
-        return;
-    }
+
+	printf("barycentric is only for triangles\n");
+	return;
     // printf("using barycentric\n");
     
     double ax, ay;
