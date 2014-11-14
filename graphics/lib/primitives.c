@@ -1304,7 +1304,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	Edge *edge;
 	float dx = end.val[0] - start.val[0];
 	float dy = end.val[1] - start.val[1];
-	float dz = 1/(end.val[2]) - 1/(start.val[2]);
+	float dz = 1/(end.val[2]) - 1/(start.val[2]);//Proj8
 	float xAdjust, vyMinusFloor;
 
 	// Check if the starting row is below the image or the end row is
@@ -1314,12 +1314,13 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 		return(NULL);
 	}
 
-	// allocate an edge structure and set the x0, y0, x1, y1 values
+	// allocate an edge structure and set x0, y0, x1, y1, and zIntersect
 	edge = malloc(sizeof(Edge));
 	edge->x0 = start.val[0];
 	edge->x1 = end.val[0];
 	edge->y0 = start.val[1];
 	edge->y1 = end.val[1];
+	edge->zIntersect = 1/(start.val[2]);//Proj8
 	
 	// define adjust, used to round
 	// turn on an edge only if the edge starts in the top half of it or
@@ -1354,7 +1355,6 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 		xAdjust = 0.5 - vyMinusFloor;
 	}
 	edge->xIntersect = edge->x0 + xAdjust*edge->dxPerScan;
-	edge->zIntersect = 1/(start.val[2]);//Proj8
 	
 	// adjust if the edge starts above the image
 	// move the intersections down to scanline zero
@@ -1440,6 +1440,7 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 	int i, f;
 	float curZ, dzPerColumn;//Proj8
 	Color c = ((DrawState *)drawstate)->color;//Proj8
+	Color tempc;
 
 	// loop over the list
 	p1 = ll_head( active );
@@ -1466,12 +1467,12 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 		// identify the ending column
 		f=(int)(p2->xIntersect);
 		
-		// compute dzPerColumn and zIntersect using p2 and p1
+		// compute dzPerColumn and zIntersect using p1 and p2
 		curZ=p1->zIntersect;//Proj8
-		dzPerColumn = (p2->zIntersect-p1->zIntersect)/(f-i);//Proj8
+		dzPerColumn = (p2->zIntersect - p1->zIntersect)/(f - i);//Proj8
 		
+		//printf("p2zint=%0.3f,p1zint=%0.3f,dzper=%0.3f\n",p2->zIntersect,p1->zIntersect, dzPerColumn);
 		//printf("p2xint=%0.3f,p1xint=%0.3f\n",p2->xIntersect,p1->xIntersect);
-		//printf("p2xint=%0.3f,p1xint=%0.3f,dzper=%0.3f\n",p2->xIntersect,p1->xIntersect, dzPerColumn);
 		
 		// clip to the left side of the image
 		if(i<0){
@@ -1489,20 +1490,19 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 		
 		// loop from start to end and color in the pixels
 		for(;i<f;i++, curZ+=dzPerColumn){//Proj8 
-			if(curZ > image_getz(src, scan, i)){//Proj8 
-				image_setz(src, scan, i, curZ);//Proj8 
-				switch(((DrawState *)drawstate)->shade){//Proj8 
-					case ShadeConstant://Proj8 
-						break;//Proj8 
-					case ShadeDepth://Proj8 
-						c.c[0] = c.c[0]*(1-1/curZ);//Proj8 
-						c.c[1] = c.c[1]*(1-1/curZ);//Proj8 
-						c.c[2] = c.c[2]*(1-1/curZ);//Proj8 
-						break;//Proj8 
-					default://Proj8 
-						break;//Proj8 
-				}//Proj8 
-				image_setColor(src, scan, i, c);
+			if(curZ > image_getz(src, scan, i)){// back clip plane
+				image_setz(src, scan, i, curZ);// update z buffer if drawing 
+				switch(((DrawState *)drawstate)->shade){
+					case ShadeDepth:// shade by depth using z=1/(1/z) 
+						tempc.c[0] = c.c[0]*(1-1/curZ);
+						tempc.c[1] = c.c[1]*(1-1/curZ);
+						tempc.c[2] = c.c[2]*(1-1/curZ);
+						break;
+					case ShadeConstant:// use single color by default
+					default:
+						break; 
+				}
+				image_setColor(src, scan, i, tempc);
 			}
 		}
 		
