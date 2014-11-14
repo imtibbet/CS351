@@ -1471,7 +1471,7 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 		dzPerColumn = (p2->zIntersect-p1->zIntersect)/(f-i);//Proj8
 		
 		//printf("p2xint=%0.3f,p1xint=%0.3f\n",p2->xIntersect,p1->xIntersect);
-		printf("p2xint=%0.3f,p1xint=%0.3f,dzper=%0.3f\n",p2->xIntersect,p1->xIntersect, dzPerColumn);
+		//printf("p2xint=%0.3f,p1xint=%0.3f,dzper=%0.3f\n",p2->xIntersect,p1->xIntersect, dzPerColumn);
 		
 		// clip to the left side of the image
 		if(i<0){
