@@ -6,6 +6,8 @@ typedef struct {
 	double val[4]; // four element vector of doubles
 } Point;
 
+typedef Point Vector;
+
 typedef struct {
 	int zBuffer; // whether to use the z-buffer, should default to true (1)
 	Point a; // starting point
@@ -34,6 +36,7 @@ typedef struct {
 	int zBuffer; // whether to use the z-buffer; should default to true (1)
 	int nVertex; // Number of vertices
 	Point *vertex; // vertex information
+	Vector *normal; // normals at the vertices
 } Polygon;
 
 // Point functions

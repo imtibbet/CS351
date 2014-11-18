@@ -17,5 +17,6 @@
 #include "drawstate.h"
 #include "bezier.h"
 #include "heirarchy.h"
+#include "plyRead.h"
 
 #endif

@@ -20,10 +20,16 @@ int main(int argc, char *argv[]) {
   int rows = 360;
   int cols = 640;
 
-  Color Grey = {{0.6, 0.62, 0.64}};
+  Color White;
+  Color Grey;
 
   DrawState *ds;
   View3D view;
+
+  Lighting *light;
+
+	color_set( &White, 1.0, 1.0, 1.0 );
+	color_set( &Grey, 0.6, 0.62, 0.64 );
 
   // initialize the image
   src = image_create(rows, cols);
@@ -52,25 +58,30 @@ int main(int argc, char *argv[]) {
   // make a simple cube module
   cube = module_create();
   module_scale( cube, 3, 1, 2 );
+
+  // this would color the cube in ShadeConstant mode
   module_color( cube, &Grey );
+
+  // the example cube is blue (Y/-Y), red (Z/-Z), yellow (X/-X)
+  // these colors should be the body colors
   module_cube( cube, 1);
 
+  // manually add a light source to the Lighting structure
+  // put it in the same place as the eye in world space
+  light = lighting_create();
+  lighting_add( light, LightPoint, &White, NULL, &(view.vrp), 0, 0 );
 
+  // set the shading to Gouraud
   ds = drawstate_create();
-  if(argc > 1 && !atoi(argv[1])){
-  	printf("shade frame\n");
-  	ds->shade = ShadeFrame;
-  } else{
-  	printf("shade depth\n");
-  	ds->shade = ShadeDepth;
-  }
-  color_print(ds->color, stdout);
+  point_copy(&(ds->viewer), &(view.vrp));
+	ds->shade = ShadeGouraud;
+	//	ds->shade = ShadeFlat;
 
   matrix_identity(&GTM);
-  module_draw(cube, &VTM, &GTM, ds, NULL, src);
+  module_draw(cube, &VTM, &GTM, ds, light, src);
 
   // write out the image
-  image_write(src, "test8a.ppm");
+  image_write(src, "test9a.ppm");
 
   // free stuff here
   module_delete( cube );

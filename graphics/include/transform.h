@@ -6,8 +6,6 @@ typedef struct {
 	float m[4][4];
 } Matrix;
 
-typedef Point Vector;
-
 typedef struct {
 
 	// 2-D point indicating the center of the view rectangle in world coordinates
