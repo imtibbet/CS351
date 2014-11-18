@@ -1014,12 +1014,16 @@ Polygon *polygon_create(){
 	// get space for the polyline
 	p = malloc(sizeof(Polygon));
 	if(!p){
+		printf("malloc failed in polygon_create\n");
 		return(NULL);
 	}
 	
 	// initialize structure
+	p->oneSided =
 	p->zBuffer = 1;
 	p->nVertex = 0;
+	p->color = 	NULL;
+	p->normal = NULL;
 	p->vertex = NULL;	
 	
 	// return pointer
@@ -1039,19 +1043,24 @@ Polygon *polygon_createp(int numV, Point *vlist){
 	// get space for the polyline
 	p = malloc(sizeof(Polygon));
 	if(!p){
+		printf("malloc failed in polygon_createp\n");
 		return(NULL);
 	}
 	
 	// get space for the vertex list
 	p->vertex = malloc(sizeof(Point) * numV);
 	if(!p->vertex){
+		printf("malloc failed in polygon_createp\n");
 		free(p);
 		return(NULL);
 	}
 	
 	// initialize structure
+	p->oneSided =
 	p->zBuffer = 1;
 	p->nVertex = numV;
+	p->color = 	NULL;
+	p->normal = NULL;
 	for(i=0;i<numV;i++){
 		p->vertex[i] = vlist[i];
 	}
@@ -1072,6 +1081,12 @@ void polygon_free(Polygon *p){
 		if(p->vertex){
 			free(p->vertex);
 		}
+		if(p->color){
+			free(p->color);
+		}
+		if(p->normal){
+			free(p->normal);
+		}
 		free(p);
 	} else {
 		printf("null p passed to polygon_free\n");
@@ -1090,9 +1105,12 @@ void polygon_init(Polygon *p){
 		return;
 	}
 	
-	// reset structure
+	// initialize structure
+	p->oneSided =
 	p->zBuffer = 1;
 	p->nVertex = 0;
+	p->color = 	NULL;
+	p->normal = NULL;
 	p->vertex = NULL;
 	
 	// printf("polygon initted\n");
@@ -1123,8 +1141,7 @@ void polygon_set(Polygon *p, int numV, Point *vlist){
 		return;
 	}
 	
-	// initialize structure
-	p->zBuffer = 1;
+	// populates veritces with vertices in vlist
 	p->nVertex = numV;
 	for(i=0;i<numV;i++){
 		p->vertex[i] = vlist[i];
@@ -1147,11 +1164,172 @@ void polygon_clear(Polygon *p){
 	if(p->vertex){
 		free(p->vertex);
 	}
+	if(p->color){
+		free(p->color);
+	}
+	if(p->normal){
+		free(p->normal);
+	}
 	
-	// reset structure
+	// initialize structure
+	p->oneSided =
+	p->zBuffer = 1;
 	p->nVertex = 0;
+	p->color = 	NULL;
+	p->normal = NULL;
 	p->vertex = NULL;
 	// printf("polygon cleared\n");
+}
+
+/*
+ * sets the oneSided field to the value
+ */
+void polygon_setSided(Polygon *p, int oneSided){
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polygon_setSided\n");
+		return;
+	}
+	p->oneSided = oneSided;
+}
+
+/*
+ * initializes the color array to the colors in clist
+ */
+void polygon_setColors(Polygon *p, int numV, Color *clist){
+	int i;
+	
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polygon_setColors\n");
+		return;
+	} else if(!clist) {
+		printf("null clist passed to polygon_setColors\n");
+		return;
+	}
+	
+	// free existing color list
+	if(p->color){
+		free(p->color);
+	}
+	
+	// get space for the color list
+	p->color = malloc(sizeof(Color) * numV);
+	if(!p->color){
+		printf("malloc failed in polygon_setColors\n");
+		return;
+	}
+	
+	// populates colors with colors in clist
+	for(i=0;i<numV;i++){
+		p->color[i] = clist[i];
+	}
+}
+
+/*
+ * initializes the normal array to the vectors in nlist.
+ */
+void polygon_setNormals(Polygon *p, int numV, Vector *nlist){
+	int i;
+	
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polygon_setNormals\n");
+		return;
+	} else if(!nlist) {
+		printf("null nlist passed to polygon_setNormals\n");
+		return;
+	}
+	
+	// free existing normal list
+	if(p->normal){
+		free(p->normal);
+	}
+	
+	// get space for the normal list
+	p->normal = malloc(sizeof(Vector) * numV);
+	if(!p->normal){
+		printf("malloc failed in polygon_setNormals\n");
+		return;
+	}
+	
+	// populates normals with normals in nlist
+	for(i=0;i<numV;i++){
+		p->normal[i] = nlist[i];
+	}
+}
+
+/*
+ * initializes the vertex list to the points in vlist, the colors to the colors
+ * in clist, the normals to the vectors in nlist, and the zBuffer and oneSided
+ * flags to their respectively values.
+ */
+void polygon_setAll(Polygon *p, int numV, Point *vlist, Color *clist, 
+	Vector *nlist, int zBuffer, int oneSided){
+	int i;
+	
+	// detect null pointer passed
+	if(!p){
+		printf("null p passed to polygon_setAll\n");
+		return;
+	} else if(!vlist) {
+		printf("null vlist passed to polygon_setAll\n");
+		return;
+	} else if(!clist) {
+		printf("null clist passed to polygon_setAll\n");
+		return;
+	} else if(!nlist) {
+		printf("null nlist passed to polygon_setAll\n");
+		return;
+	}
+	
+	// free existing vertex list
+	if(p->vertex){
+		free(p->vertex);
+	}
+	
+	// free existing color list
+	if(p->color){
+		free(p->color);
+	}
+	
+	// free existing normal list
+	if(p->normal){
+		free(p->normal);
+	}
+	
+	// get space for the vertex list
+	p->nVertex = 0;
+	p->vertex = malloc(sizeof(Point) * numV);
+	if(!p->vertex){
+		printf("malloc failed in polygon_set\n");
+		return;
+	}
+	
+	// get space for the color list
+	p->color = malloc(sizeof(Color) * numV);
+	if(!p->color){
+		printf("malloc failed in polygon_setColors\n");
+		free(p->vertex);
+		return;
+	}
+	
+	// get space for the normal list
+	p->normal = malloc(sizeof(Vector) * numV);
+	if(!p->normal){
+		printf("malloc failed in polygon_setNormals\n");
+		free(p->vertex);
+		free(p->color);
+		return;
+	}
+	
+	// populates with lists
+	p->nVertex = numV;
+	for(i=0;i<numV;i++){
+		p->vertex[i] = vlist[i]; // populates veritces with vertices in vlist
+		p->color[i] = clist[i]; // populates colors with colors in clist
+		p->normal[i] = nlist[i]; // populates normals with normals in nlist
+	}
 }
 
 /*
@@ -1187,12 +1365,31 @@ void polygon_copy(Polygon *to, Polygon *from){
 	if(to->vertex){
 		free(to->vertex);
 	}
+	if(to->color){
+		free(to->color);
+	}
+	if(to->normal){
+		free(to->normal);
+	}
 	
 	// allocate new destination space
+	to->nVertex = 0;
 	to->vertex = malloc( sizeof(Point) * (from->nVertex) );
 	if(!to->vertex){
-		printf("malloc failed in ppolygon_copy\n");
-		to->nVertex = 0;
+		printf("malloc failed in polygon_copy\n");
+		return;
+	}
+	to->color = malloc( sizeof(Color) * (from->nVertex) );
+	if(!to->color){
+		printf("malloc failed in polygon_copy\n");
+		free(to->vertex);
+		return;
+	}
+	to->normal = malloc( sizeof(Vector) * (from->nVertex) );
+	if(!to->normal){
+		printf("malloc failed in polygon_copy\n");
+		free(to->vertex);
+		free(to->color);
 		return;
 	}
 	
@@ -1200,6 +1397,8 @@ void polygon_copy(Polygon *to, Polygon *from){
 	to->nVertex = from->nVertex;
 	for(i=0;i<(to->nVertex);i++){
 		to->vertex[i] = from->vertex[i];
+		to->color[i] = from->color[i];
+		to->normal[i] = from->normal[i];
 	}
 	//printf("polygon copied\n");
 }
@@ -1229,7 +1428,7 @@ void polygon_print(Polygon *p, FILE *fp){
 /*
  * normalize the x and y values of each vertex by the homogeneous coord
  */
-void polygon_normalize( Polygon *p){
+void polygon_normalize( Polygon *p ){
 	int i;
 	for(i=0;i<p->nVertex;i++){
 		p->vertex[i].val[0] = p->vertex[i].val[0] / p->vertex[i].val[3];
@@ -1439,7 +1638,8 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 	Edge *p1, *p2;
 	int i, f;
 	float curZ, dzPerColumn;//Proj8
-	Color c = ((DrawState *)drawstate)->color;//Proj8
+	DrawState *ds = (DrawState *)drawstate;
+	Color c = ds->color;//Proj8
 	Color tempc;
 
 	// loop over the list
@@ -1492,7 +1692,7 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 		for(;i<f;i++, curZ+=dzPerColumn){//Proj8 
 			if(curZ > image_getz(src, scan, i)){// back clip plane
 				image_setz(src, scan, i, curZ);// update z buffer if drawing 
-				switch(((DrawState *)drawstate)->shade){
+				switch(ds->shade){
 					case ShadeDepth:// shade by depth using z=1/(1/z) 
 						tempc.c[0] = c.c[0]*(1-1/curZ);
 						tempc.c[1] = c.c[1]*(1-1/curZ);
@@ -1611,43 +1811,16 @@ void polygon_drawFill(Polygon *p, Image *src, void *drawstate) {
 End Scanline Fill
 *****************************************/
 
-
-/*
- * dispatch the drawing of the polygon using DrawState d.
- */
-void polygon_draw(Polygon *p, Image *src, void *drawstate){
-	switch(((DrawState *)drawstate)->shade){
-		case ShadeFrame:
-			polygon_drawFrame(p, src, ((DrawState *)drawstate)->color);
-			break;
-		case ShadeConstant:
-		default:
-			polygon_drawFill(p, src, drawstate);
-	}
-}
-
 /*
  * draw the outline of the polygon using color c.
  */
-void polygon_drawFrame(Polygon *p, Image *src, Color c){
+void polygon_draw(Polygon *p, Image *src, Color c){
 	int i;
 	Line l;
 
-	if(p){
-		if(!p->vertex){
-			return;
-		}
-	} else{
-		return;
-	}
-
-	if (p->nVertex < 3){
-		printf("can't draw a polygon with less than three points\n");
-	}
-
-	// iterate through polyline
+	// iterate through polygon
 	for(i=0; i<(p->nVertex-1); i++){
-		// take coordinates for polyline point
+		// take coordinates for polygon point
 		// create a line
 		line_set(&l, p->vertex[i], p->vertex[i+1]);
 		// draw line on src using Color c
@@ -1663,11 +1836,6 @@ void polygon_drawFrame(Polygon *p, Image *src, Color c){
  * draw the filled polygon using color c with the Barycentric coordinates algorithm.
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
-
-	printf("barycentric is only for triangles\n");
-	return;
-    // printf("using barycentric\n");
-    
     double ax, ay;
     double bx, by;
     double cx, cy;
@@ -1739,3 +1907,82 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
 		}
     }    
 }
+
+
+/*
+ * draw the filled polygon using the given DrawState. 
+ * The shade field of the DrawState determines how the polygon should be rendered. 
+ * The Lighting parameter should be NULL unless you are doing Phong shading
+ */
+void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting){
+	DrawState *ds = (DrawState *)drawstate;
+	Lighting *light = (Lighting *)lighting;
+
+	// check for badly formed p
+	if(p){
+		if(!p->vertex){
+			printf("Null vertices in p in polygon_drawShade\n");
+			return;
+		}
+	} else {
+		printf("Null p in polygon_drawShade\n");
+		return;
+	}
+	if (p->nVertex < 3){
+		printf("can't draw a polygon with less than three points in polygon_drawShade\n");
+		return;
+	}
+	
+	switch(ds->shade){
+		// Draw only the outline of the polygon using the DrawState color field
+		case ShadeFrame:
+			polygon_draw(p, src, ds->color);
+			break;
+		// fill the polygon with the DrawState color field (c
+		case ShadeConstant:
+		// fill the polygon based on the depth value, 
+		case ShadeDepth:
+		default:
+			polygon_drawFill(p, src, drawstate);
+			break;
+	}
+}
+
+/*
+ * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
+ * calculate colors at each vertex and create and fill out the color array of 
+ * the Polygon data structure. For ShadeFlat, use the average surface normal and
+ * average polygon location to calculate one color and set the color at each 
+ * vertex to the calculated value. 
+ * For ShadeGouraud use the surface normals and locations of each vertex
+ */
+void polygon_shade(Polygon *p, void *lighting, void *drawstate){
+	DrawState *ds = (DrawState *)drawstate;
+	Lighting *light = (Lighting *)lighting;
+
+	/*
+	 * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
+	 * calculate colors at each vertex and create and fill out the color array of 
+	 * the Polygon data structure.
+	 */
+	switch(ds->shade){
+	
+		/*
+		 * For ShadeFlat, use the average surface normal and average polygon
+		 * location to calculate one color and set the color at each 
+		 * vertex to the calculated value.
+		 */
+		case ShadeFlat:
+		
+			break;
+		// For ShadeGouraud use the surface normals and locations of each vertex
+		case ShadeGouraud:
+			break;
+		default:
+			break;
+	}
+}
+
+
+
+

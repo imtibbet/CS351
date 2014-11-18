@@ -14,6 +14,7 @@
 #include "floodfill.h"
 #include "list.h"
 #include "transform.h"
+#include "lighting.h"
 #include "drawstate.h"
 #include "bezier.h"
 #include "heirarchy.h"

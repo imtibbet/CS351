@@ -212,6 +212,21 @@ void module_cylinder( Module *mod, int sides, int fill, int size,
  */
 void module_color(Module *md, Color *c); 
 
+/*
+ * Adds the body color value to the tail of the module’s list.
+ */
+void module_bodyColor(Module *md, Color *c);
+
+/*
+ * Adds the surface color value to the tail of the module’s list.
+ */
+void module_surfaceColor(Module *md, Color *c);
+
+/*
+ * Adds the specular coefficient to the tail of the module’s list
+ */
+void module_surfaceCoeff(Module *md, float coeff);
+
 // Bezier Curve and Surface Module Functions
 
 /*

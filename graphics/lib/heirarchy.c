@@ -429,7 +429,7 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				matrix_xformPolygon(VTM, tempPolygon);
 				polygon_normalize(tempPolygon);
 				//polygon_print(tempPolygon, stdout);
-				polygon_draw(tempPolygon, src, ds);
+				polygon_drawShade(tempPolygon, src, ds, NULL);
 				break;
 			case ObjColor:
 				drawstate_setColor(ds, e->obj.color);
@@ -1031,6 +1031,53 @@ void module_color(Module *md, Color *c){
 	}
 	Element *e;
 	e = element_init(ObjColor, c);
+	module_insert(md, e);
+}
+
+/*
+ * Adds the body color value to the tail of the module’s list.
+ */
+void module_bodyColor(Module *md, Color *c){
+	if(!md){
+		printf("Null module passed to module_bodyColor\n");
+		return;
+	}
+	if(!c){
+		printf("Null color passed to module_bodyColor\n");
+		return;
+	}
+	Element *e;
+	e = element_init(ObjBodyColor, c);
+	module_insert(md, e);
+}
+
+/*
+ * Adds the surface color value to the tail of the module’s list.
+ */
+void module_surfaceColor(Module *md, Color *c){
+	if(!md){
+		printf("Null module passed to module_surfaceColor\n");
+		return;
+	}
+	if(!c){
+		printf("Null color passed to module_surfaceColor\n");
+		return;
+	}
+	Element *e;
+	e = element_init(ObjSurfaceColor, c);
+	module_insert(md, e);
+}
+
+/*
+ * Adds the specular coefficient to the tail of the module’s list
+ */
+void module_surfaceCoeff(Module *md, float coeff){
+	if(!md){
+		printf("Null module passed to module_surfaceCoeff\n");
+		return;
+	}
+	Element *e;
+	e = element_init(ObjSurfaceCoeff, &coeff);
 	module_insert(md, e);
 }
 

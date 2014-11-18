@@ -19,10 +19,6 @@ typedef enum {
 	ShadePhong // draw objects using Phong shading.
 } ShadeMethod;
 
-typedef struct {
-	int nLights;
-} Lighting;
-
 // how an object is to be drawn into the image.
 typedef struct {
 	Color color; // the foreground color, used in the default drawing mode.

@@ -33,10 +33,12 @@ typedef struct {
 } Polyline;
 
 typedef struct {
+	int oneSided; // whether to consider the polygon one-sided (1) or two-sided (0) for shading
 	int zBuffer; // whether to use the z-buffer; should default to true (1)
 	int nVertex; // Number of vertices
 	Point *vertex; // vertex information
-	Vector *normal; // normals at the vertices
+	Color *color; // color information for each vertex.
+	Vector *normal; // surface normal information for each vertex
 } Polygon;
 
 // Point functions
@@ -200,6 +202,29 @@ void polygon_set(Polygon *p, int numV, Point *vlist);
 void polygon_clear(Polygon *p);
 
 /*
+ * sets the oneSided field to the value
+ */
+void polygon_setSided(Polygon *p, int oneSided);
+
+/*
+ * initializes the color array to the colors in clist
+ */
+void polygon_setColors(Polygon *p, int numV, Color *clist);
+
+/*
+ * initializes the normal array to the vectors in nlist.
+ */
+void polygon_setNormals(Polygon *p, int numV, Vector *nlist);
+
+/*
+ * initializes the vertex list to the points in vlist, the colors to the colors
+ * in clist, the normals to the vectors in nlist, and the zBuffer and oneSided
+ * flags to their respectively values.
+ */
+void polygon_setAll(Polygon *p, int numV, Point *vlist, Color *clist, 
+	Vector *nlist, int zBuffer, int oneSided);
+	
+/*
  * sets the z-buffer flag to the given value.
  */
 void polygon_zBuffer(Polygon *p, int flag);
@@ -221,14 +246,9 @@ void polygon_print(Polygon *p, FILE *fp);
 void polygon_normalize( Polygon *p);
 
 /*
- * dispatch the drawing of the polygon using DrawState d.
- */
-void polygon_draw(Polygon *p, Image *src, void *drawstate);
-
-/*
  * draw the outline of the polygon using color c.
  */
-void polygon_drawFrame(Polygon *p, Image *src, Color c);
+void polygon_draw(Polygon *p, Image *src, Color c);
 
 /*
  * draw the filled polygon using color c with the scanline rendering algorithm.
@@ -240,7 +260,22 @@ void polygon_drawFill(Polygon *p, Image *src, void *drawstate);
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c);
 
+/*
+ * draw the filled polygon using the given DrawState. 
+ * The shade field of the DrawState determines how the polygon should be rendered. 
+ * The Lighting parameter should be NULL unless you are doing Phong shading
+ */
+void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting);
 
+/*
+ * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
+ * calculate colors at each vertex and create and fill out the color array of 
+ * the Polygon data structure. For ShadeFlat, use the average surface normal and
+ * average polygon location to calculate one color and set the color at each 
+ * vertex to the calculated value. 
+ * For ShadeGouraud use the surface normals and locations of each vertex
+ */
+void polygon_shade(Polygon *p, void *lighting, void *drawstate);
 
 
 #endif
