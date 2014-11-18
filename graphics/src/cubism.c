@@ -110,7 +110,13 @@ int main(int argc, char *argv[]) {
   }
 
   ds = drawstate_create();
-  ds->shade = ShadeDepth;
+  if(argc > 1 && !atoi(argv[1])){
+  	printf("shade frame\n");
+  	ds->shade = ShadeFrame;
+  } else{
+  	printf("shade depth\n");
+  	ds->shade = ShadeDepth;
+  }
 
   for(i=0;i<36;i++) {
     char buffer[256];
@@ -131,7 +137,10 @@ int main(int argc, char *argv[]) {
   module_delete( cubes );
   module_delete( scene );
   image_free( src );
-  
+
+	printf("converting to gif...\n");
+	system("convert -delay 10 -loop 0 frame-*.ppm cubism.gif");
+	system("rm frame-*.ppm");
 
   return(0);
 }

@@ -98,7 +98,7 @@ void image_init(Image *src){
  */
 int image_alloc(Image *src, int rows, int cols){
 
-	int i, j;
+	int i;
 
 	if(!src){
 		printf("null image given to alloc\n");
@@ -236,28 +236,45 @@ int image_write(Image *src, char *filename){
  * returns the FPixel at (r, c).
  */
 FPixel image_getf(Image *src, int r, int c){
-	return(src->data[r][c]);
+	FPixel f;
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) )
+		return(src->data[r][c]);
+	else
+		return(f);
 } // end image_getf
 
 /*
  * returns the value of band b at pixel (r, c).
  */
 float image_getc(Image *src, int r, int c, int b){
-	return(src->data[r][c].rgb[b]);
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) )
+		return(src->data[r][c].rgb[b]);
+	else
+		return(0.0);
 } // end image_getf
 
 /*
  * returns the alpha value at pixel (r, c).
  */
 float image_geta(Image *src, int r, int c){
-	return(src->data[r][c].a);
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) )
+		return(src->data[r][c].a);
+	else
+		return(0.0);
 } // end image_geta
 
 /*
  * returns the depth value at pixel (r, c).
  */
 float image_getz(Image *src, int r, int c){
-	return(src->data[r][c].z);
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) )
+		return(src->data[r][c].z);
+	else
+		return(0.0);
 } // end image_getz
 
 /*
@@ -504,9 +521,12 @@ void image_setColor( Image *src, int r, int c, Color val ){
 // returns a Color structure built from the pixel values
 Color image_getColor( Image *src, int r, int c ){
 	Color val;
-	val.c[0] = src->data[r][c].rgb[0];
-	val.c[1] = src->data[r][c].rgb[1];
-	val.c[2] = src->data[r][c].rgb[2];
+	if( (r>=0) && (r<(src->rows)) &&
+		(c>=0) && (c<(src->cols)) ){
+		val.c[0] = src->data[r][c].rgb[0];
+		val.c[1] = src->data[r][c].rgb[1];
+		val.c[2] = src->data[r][c].rgb[2];
+	}
 	return(val);
 }
 

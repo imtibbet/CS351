@@ -207,7 +207,8 @@ static int parseModule(int activeMod, ModuleItem **mod,
 		mod[activeMod]->params = malloc(numparams*sizeof(ParamListItem));
 		for(j=0;j<numparams;j++){
 			strcpy(mod[activeMod]->params[j].name, strtok(params[j], "="));
-			if(verbose) printf("processing parameter %s\n", mod[activeMod]->params[j].name);
+			if(verbose) printf("processing parameter %s\n", 
+								mod[activeMod]->params[j].name);
 			strcpy(tempparamval, strtok(NULL, "="));
 			mod[activeMod]->params[j].val = 
 					stringToFloat(tempparamval, numbs, numnumbers, NULL);
@@ -1606,7 +1607,7 @@ int main(int argc, char *argv[]) {
 	FILE *infile;
 	int verbose = 0;
 	char *infilename;
-	char *outfilename = "moduleGen_output.ppm";
+	char *outfilename = "moduleGen.ppm";
 	char *usage = "Usage: <input filename> [output filename] [verbose 0 or 1]\n";
 	srand(time(NULL));
 

@@ -57,7 +57,13 @@ int main(int argc, char *argv[]) {
 
 
   ds = drawstate_create();
-  ds->shade = ShadeDepth;
+  if(argc > 1 && !atoi(argv[1])){
+  	printf("shade frame\n");
+  	ds->shade = ShadeFrame;
+  } else{
+  	printf("shade depth\n");
+  	ds->shade = ShadeDepth;
+  }
   color_print(ds->color, stdout);
 
   matrix_identity(&GTM);

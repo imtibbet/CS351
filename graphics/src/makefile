@@ -143,7 +143,7 @@ city: $(ODIR)/city.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 city-gif: $(ODIR)/city-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
-giza: $(ODIR)/giza.o
+giza-test: $(ODIR)/giza-test.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 giza-gif: $(ODIR)/giza-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)

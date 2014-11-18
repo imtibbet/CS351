@@ -1500,6 +1500,7 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 						break;
 					case ShadeConstant:// use single color by default
 					default:
+						tempc = c;
 						break; 
 				}
 				image_setColor(src, scan, i, tempc);
