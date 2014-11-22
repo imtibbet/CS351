@@ -61,6 +61,7 @@ void vector_cross(Vector *a, Vector *b, Vector *c){
 	c->val[0] = a->val[1]*b->val[2] - a->val[2]*b->val[1];
 	c->val[1] = a->val[2]*b->val[0] - a->val[0]*b->val[2];
 	c->val[2] = a->val[0]*b->val[1] - a->val[1]*b->val[0];
+	c->val[3] = 0.0;
 }
 
 // 2D matrix
@@ -118,12 +119,7 @@ void matrix_set(Matrix *m, int r, int c, double v){
  * Copy the src matrix into the dest matrix.
  */
 void matrix_copy(Matrix *dest, Matrix *src){
-	int i, j;
-	for(i=0;i<4;i++){
-		for(j=0;j<4;j++){
-			dest->m[i][j] = src->m[i][j];
-		}
-	}
+	*dest = *src;
 }
 
 /*
@@ -161,11 +157,7 @@ void matrix_multiply(Matrix *left, Matrix *right, Matrix *m){
 	}
 
 	// copy the temp matrix into the desination matrix
-	for(i=0;i<4;i++){
-		for(j=0;j<4;j++){
-			m->m[i][j] = temp.m[i][j];
-		}
-	}
+	*m = temp;
 }
 
 /*
