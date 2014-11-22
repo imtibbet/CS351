@@ -211,13 +211,20 @@ void line_draw(Line *l, Image *src, Color c){
 		// horizontal line
 		if(dy==0){
 			invzPer = (invz1-invz0)/dx;
-			while(x!=x1){
-				if(invzCur > image_getz(src, y, x)){
-					image_setz(src, y, x, invzCur);
-					image_setColor(src,y,x,c);
+			if(l->zBuffer){
+				while(x!=x1){
+					if(invzCur > image_getz(src, y, x)){
+						image_setz(src, y, x, invzCur);
+						image_setColor(src,y,x,c);
+					}
+					invzCur += invzPer;
+					x++;
 				}
-				invzCur += invzPer;
-				x++;
+			} else {
+				while(x!=x1){
+					image_setColor(src,y,x,c);
+					x++;
+				}
 			}
 			return;
 		}
@@ -227,11 +234,15 @@ void line_draw(Line *l, Image *src, Color c){
 			invzPer = (invz1-invz0)/dx;
 			e = 3*dy-2*dx;
 			for(i=0; i<=dx; i++){
-				if(invzCur > image_getz(src, y, x)){
-					image_setz(src, y, x, invzCur);
+				if(l->zBuffer){
+					if(invzCur > image_getz(src, y, x)){
+						image_setz(src, y, x, invzCur);
+						image_setColor(src,y,x,c);
+					}
+					invzCur += invzPer;
+				} else {
 					image_setColor(src,y,x,c);
 				}
-				invzCur += invzPer;
 				if(e>0){
 					y++;
 					e-=(2*dx);
@@ -246,11 +257,15 @@ void line_draw(Line *l, Image *src, Color c){
 			invzPer = (invz1-invz0)/dy;
 			e = 3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				if(invzCur > image_getz(src, y, x)){
-					image_setz(src, y, x, invzCur);
+				if(l->zBuffer){
+					if(invzCur > image_getz(src, y, x)){
+						image_setz(src, y, x, invzCur);
+						image_setColor(src,y,x,c);
+					}
+					invzCur += invzPer;
+				} else {
 					image_setColor(src,y,x,c);
 				}
-				invzCur += invzPer;
 				if(e>0){
 					x++;
 					e-=(2*dy);
@@ -269,13 +284,20 @@ void line_draw(Line *l, Image *src, Color c){
 		// horizontal line
 		if(dy==0){
 			invzPer = (invz1-invz0)/dx;
-			while(x!=x1){
-				if(invzCur > image_getz(src, y, x)){
-					image_setz(src, y, x, invzCur);
-					image_setColor(src,y,x,c);
+			if(l->zBuffer){
+				while(x!=x1){
+					if(invzCur > image_getz(src, y, x)){
+						image_setz(src, y, x, invzCur);
+						image_setColor(src,y,x,c);
+					}
+					invzCur += invzPer;
+					x--;
 				}
-				invzCur += invzPer; // -= because I negate dx for conditionals
-				x--;
+			} else {
+				while(x!=x1){
+					image_setColor(src,y,x,c);
+					x--;
+				}
 			}
 			return;
 		}
@@ -285,11 +307,15 @@ void line_draw(Line *l, Image *src, Color c){
 			invzPer = (invz1-invz0)/dx;
 			e = 3*dy-2*dx;
 			for(i=0; i<=dx; i++){
-				if(invzCur > image_getz(src, y, x)){
-					image_setz(src, y, x, invzCur);
+				if(l->zBuffer){
+					if(invzCur > image_getz(src, y, x)){
+						image_setz(src, y, x, invzCur);
+						image_setColor(src,y,x,c);
+					}
+					invzCur += invzPer;
+				} else {
 					image_setColor(src,y,x,c);
 				}
-				invzCur += invzPer; // -= because I negate dx for conditionals
 				if(e>0){
 					y++;
 					e-=(2*dx);
@@ -304,11 +330,15 @@ void line_draw(Line *l, Image *src, Color c){
 			invzPer = (invz1-invz0)/dy;
 			e = 3*dx-2*dy;
 			for(i=0; i<=dy; i++){
-				if(invzCur > image_getz(src, y, x)){
-					image_setz(src, y, x, invzCur);
+				if(l->zBuffer){
+					if(invzCur > image_getz(src, y, x)){
+						image_setz(src, y, x, invzCur);
+						image_setColor(src,y,x,c);
+					}
+					invzCur += invzPer;
+				} else {
 					image_setColor(src,y,x,c);
 				}
-				invzCur += invzPer;
 				if(e>0){
 					x--;
 					e-=(2*dy);
@@ -322,13 +352,20 @@ void line_draw(Line *l, Image *src, Color c){
 	// special case of vertical lines
 	else {//dx==0
 		invzPer = (invz1-invz0)/dy;
-		while(y!=y1){
-			if(invzCur > image_getz(src, y, x)){
-				image_setz(src, y, x, invzCur);
-				image_setColor(src,y,x,c);
+		if(l->zBuffer){
+			while(y!=y1){
+				if(invzCur > image_getz(src, y, x)){
+					image_setz(src, y, x, invzCur);
+					image_setColor(src,y,x,c);
+				}
+				invzCur += invzPer;
+				y++;
 			}
-			invzCur += invzPer;
-			y++;
+		} else {
+			while(y!=y1){
+				image_setColor(src,y,x,c);
+				y++;
+			}
 		}
 	}
 }
@@ -985,6 +1022,8 @@ void polyline_draw(Polyline *p, Image *src, Color c){
 		// take coordinates for polyline point
 		// create a line
 		line_set(&l, p->vertex[i], p->vertex[i +1]);
+		// enforce polylines z buffer of the line created
+		line_zBuffer(&l, p->zBuffer);
 		// draw line on src using Color c
 		line_draw(&l, src, c);
 	}
@@ -1206,6 +1245,9 @@ void polygon_setColors(Polygon *p, int numV, Color *clist){
 	} else if(!clist) {
 		printf("null clist passed to polygon_setColors\n");
 		return;
+	} else if(numV != p->nVertex) {
+		printf("numV doesnt match in polygon_setColors\n");
+		return;
 	}
 	
 	// free existing color list
@@ -1238,6 +1280,9 @@ void polygon_setNormals(Polygon *p, int numV, Vector *nlist){
 		return;
 	} else if(!nlist) {
 		printf("null nlist passed to polygon_setNormals\n");
+		return;
+	} else if(numV != p->nVertex) {
+		printf("numV doesnt match in polygon_setColors\n");
 		return;
 	}
 	
