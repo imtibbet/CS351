@@ -102,7 +102,7 @@ void lighting_add( Lighting *l, Color *c, Vector *dir, Point *pos, float cutoff,
 	if(!lightSet){
 		printf("Null arguments passed to lighting_add, no light added\n");
 	} else {
-		light_copy(&(lighting->lights[lighting->nLights++]), light);
+		light_copy(&(lighting->light[lighting->nLights++]), light);
 	}
 }
 
@@ -123,32 +123,32 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 	}
 	for (i = 0; i < l->nLights; i++)
 	{
-		switch(l->lights[i].type){
+		switch(l->light[i].type){
 			case LightAmbient:
-				curc.c[0] += Cb->c[0]*l->lights[i].color.c[0];
-				curc.c[1] += Cb->c[1]*l->lights[i].color.c[1];
-				curc.c[2] += Cb->c[2]*l->lights[i].color.c[2];
+				curc.c[0] += Cb->c[0]*l->light[i].color.c[0];
+				curc.c[1] += Cb->c[1]*l->light[i].color.c[1];
+				curc.c[2] += Cb->c[2]*l->light[i].color.c[2];
 				break;
 			case LightDirect:
-				vector_copy(&L, &(l->lights[i].direction));
+				vector_copy(&L, &(l->light[i].direction));
 				vector_set(&H,	0.5*(L.val[0] + V->val[0]), 
 								0.5*(L.val[1] + V->val[1]), 
 								0.5*(L.val[2] + V->val[2]) );
 
 				break;
 			case LightPoint:
-				vector_set(&L, 	l->lights[i].position.val[0] - p->val[0], 
-								l->lights[i].position.val[1] - p->val[1], 
-								l->lights[i].position.val[2] - p->val[2] );
+				vector_set(&L, 	l->light[i].position.val[0] - p->val[0], 
+								l->light[i].position.val[1] - p->val[1], 
+								l->light[i].position.val[2] - p->val[2] );
 				vector_set(&H,	0.5*(L.val[0] + V->val[0]), 
 								0.5*(L.val[1] + V->val[1]), 
 								0.5*(L.val[2] + V->val[2]) );
 
 				break;
 			case LightSpot:
-				vector_set(&L, 	l->lights[i].position.val[0] - p->val[0], 
-								l->lights[i].position.val[1] - p->val[1], 
-								l->lights[i].position.val[2] - p->val[2] );
+				vector_set(&L, 	l->light[i].position.val[0] - p->val[0], 
+								l->light[i].position.val[1] - p->val[1], 
+								l->light[i].position.val[2] - p->val[2] );
 				vector_set(&H,	0.5*(L.val[0] + V->val[0]), 
 								0.5*(L.val[1] + V->val[1]), 
 								0.5*(L.val[2] + V->val[2]) );
