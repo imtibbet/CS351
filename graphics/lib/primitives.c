@@ -1868,14 +1868,14 @@ void polygon_draw(Polygon *p, Image *src, Color c){
 		// take coordinates for polygon point
 		// create a line
 		line_set(&l, p->vertex[i], p->vertex[i+1]);
-		// enforce polylines z buffer of the line created
+		// enforce polygon's z buffer of the line created
 		line_zBuffer(&l, p->zBuffer);
 		// draw line on src using Color c
 		line_draw(&l, src, c);
 	}
 	//draw from last to first vertex at the end
 	line_set(&l, p->vertex[p->nVertex-1], p->vertex[0]);
-	// enforce polylines z buffer of the line created
+	// enforce polygon's z buffer of the line created
 	line_zBuffer(&l, p->zBuffer);
 	line_draw(&l, src, c);
 	// printf("polygon drawn\n");
@@ -1883,6 +1883,7 @@ void polygon_draw(Polygon *p, Image *src, Color c){
 
 /*
  * draw the filled polygon using color c with the Barycentric coordinates algorithm.
+ * Note: does not enforce zbuffering
  */
 void polygon_drawFillB(Polygon *p, Image *src, Color c){
     double ax, ay;
