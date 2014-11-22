@@ -20,7 +20,9 @@ void light_init( Light *light ){
 		return;
 	}
 	light->type = LightAmbient;
-	light->color = {0.1, 0.1, 0.1};
+	light->color.c[0] = 
+	light->color.c[1] = 
+	light->color.c[2] = 0.1;
 }
 
 /*
@@ -80,29 +82,29 @@ void lighting_add( Lighting *l, Color *c, Vector *dir, Point *pos, float cutoff,
 	}
 	if (c){
 		lightSet = 1;
-		light->type = LightAmbient;
-		color_copy(&light->color, c);
+		light.type = LightAmbient;
+		color_copy(&light.color, c);
 	}
 	if (dir){
 		lightSet = 1;
-		light->type = LightDirect;
-		vector_copy(&light->direction, dir);
+		light.type = LightDirect;
+		vector_copy(&(light.direction), dir);
 	}
 	if (pos){
 		lightSet = 1;
-		light->type = LightPoint;
-		point_copy(&light->position, pos);
+		light.type = LightPoint;
+		point_copy(&light.position, pos);
 	}
 	if (cutoff && sharpness){
 		lightSet = 1;
-		light->type = LightSpot;
-		light->cutoff = cutoff;
-		light->sharpness = sharpness;
+		light.type = LightSpot;
+		light.cutoff = cutoff;
+		light.sharpness = sharpness;
 	}
 	if(!lightSet){
 		printf("Null arguments passed to lighting_add, no light added\n");
 	} else {
-		light_copy(&(lighting->light[lighting->nLights++]), light);
+		light_copy(&(l->light[l->nLights++]), &light);
 	}
 }
 
@@ -115,7 +117,7 @@ void lighting_add( Lighting *l, Color *c, Vector *dir, Point *pos, float cutoff,
 void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p, 
 	Color *Cb, Color *Cs, float s, int oneSided, Color *c){
 	int i;
-	Color curc = {0.0, 0.0, 0.0};
+	Color curc = {{0.0, 0.0, 0.0}};
 	Vector L, H;
 	if(!l || !N || !V || !p || !Cb || !Cs){
 		printf("Null passed to lighting_shading\n");

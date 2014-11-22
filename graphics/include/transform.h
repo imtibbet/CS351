@@ -61,6 +61,11 @@ typedef struct {
 void vector_set(Vector *v, double x, double y, double z);
 
 /*
+ * Copy the vector data structure. 
+ */
+void vector_copy(Vector *to, Vector *from);
+
+/*
  * Print out the Vector to stream fp in a pretty form
  */
 void vector_print(Vector *v, FILE *fp);
