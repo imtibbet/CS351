@@ -1145,7 +1145,7 @@ void polygon_init(Polygon *p){
 	}
 	
 	// initialize structure
-	p->oneSided =
+	p->oneSided = 
 	p->zBuffer = 1;
 	p->nVertex = 0;
 	p->color = 	NULL;
@@ -1424,26 +1424,34 @@ void polygon_copy(Polygon *to, Polygon *from){
 		printf("malloc failed in polygon_copy\n");
 		return;
 	}
-	to->color = malloc( sizeof(Color) * (from->nVertex) );
-	if(!to->color){
-		printf("malloc failed in polygon_copy\n");
-		free(to->vertex);
-		return;
+	if(from->color){
+		to->color = malloc( sizeof(Color) * (from->nVertex) );
+		if(!to->color){
+			printf("malloc failed in polygon_copy\n");
+			free(to->vertex);
+			return;
+		}
+	} else {
+		to->color = NULL;
 	}
-	to->normal = malloc( sizeof(Vector) * (from->nVertex) );
-	if(!to->normal){
-		printf("malloc failed in polygon_copy\n");
-		free(to->vertex);
-		free(to->color);
-		return;
+	if(from->normal){
+		to->normal = malloc( sizeof(Vector) * (from->nVertex) );
+		if(!to->normal){
+			printf("malloc failed in polygon_copy\n");
+			free(to->vertex);
+			free(to->color);
+			return;
+		}
+	} else {
+		to->normal = NULL;
 	}
 	
 	// copy the points to destination
 	to->nVertex = from->nVertex;
 	for(i=0;i<(to->nVertex);i++){
 		to->vertex[i] = from->vertex[i];
-		to->color[i] = from->color[i];
-		to->normal[i] = from->normal[i];
+		if(to->color) to->color[i] = from->color[i];
+		if(to->normal) to->normal[i] = from->normal[i];
 	}
 	//printf("polygon copied\n");
 }
