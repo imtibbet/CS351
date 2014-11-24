@@ -1998,8 +1998,20 @@ void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting){
 			break;
 		// fill the polygon with the DrawState color field (c
 		case ShadeConstant:
-		// fill the polygon based on the depth value, 
+			polygon_drawFillB(p, src, ds->color);
+			break;
+		// fill the polygon based on the depth value 
 		case ShadeDepth:
+		// fill the polygon with a single color resulting from a shading calculation
+		case ShadeFlat:
+			polygon_shade(p, lighting, drawstate);
+		// fill the polygon using a Gouraud shading method and the colors in the polygon
+		case ShadeGouraud:
+			polygon_shade(p, lighting, drawstate);
+			break;
+		// shading method based on the normals in the polygon data structure, the 
+		// parameters in the DrawState, and lighting in the Lighting data structure
+		case ShadePhong:
 		default:
 			polygon_drawFill(p, src, drawstate);
 			break;
