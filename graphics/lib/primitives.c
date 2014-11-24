@@ -1897,6 +1897,47 @@ End Scanline Fill
 *****************************************/
 
 /*
+ * draw the polygon using the given DrawState. 
+ * The shade field of the DrawState determines how the polygon should be rendered. 
+ * The Lighting parameter should be NULL unless you are doing Phong shading
+ */
+void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting){
+	DrawState *ds = (DrawState *)drawstate;
+	Lighting *light = (Lighting *)lighting;
+
+	// check for badly formed p
+	if(p){
+		if(!p->vertex){
+			printf("Null vertices in p in polygon_drawShade\n");
+			return;
+		}
+	} else {
+		printf("Null p in polygon_drawShade\n");
+		return;
+	}
+	if (p->nVertex < 3){
+		printf("can't draw a polygon with less than three points in polygon_drawShade\n");
+		return;
+	}
+	
+	switch(ds->shade){
+		// Draw only the outline of the polygon using the DrawState color field
+		case ShadeFrame:
+			polygon_draw(p, src, ds->color);
+			break;
+		// fill the polygon with the DrawState color field c
+		case ShadeConstant:
+		// fill the polygon based on the depth value, 
+		case ShadeDepth:
+		// interpolate color at each vertex to fill polygon
+		case ShadeGouraud:
+		default:
+			polygon_drawFill(p, src, drawstate);
+			break;
+	}
+}
+
+/*
  * draw the outline of the polygon using color c.
  */
 void polygon_draw(Polygon *p, Image *src, Color c){
@@ -1998,48 +2039,6 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
     }    
 }
 
-
-/*
- * draw the filled polygon using the given DrawState. 
- * The shade field of the DrawState determines how the polygon should be rendered. 
- * The Lighting parameter should be NULL unless you are doing Phong shading
- */
-void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting){
-	DrawState *ds = (DrawState *)drawstate;
-	Lighting *light = (Lighting *)lighting;
-
-	// check for badly formed p
-	if(p){
-		if(!p->vertex){
-			printf("Null vertices in p in polygon_drawShade\n");
-			return;
-		}
-	} else {
-		printf("Null p in polygon_drawShade\n");
-		return;
-	}
-	if (p->nVertex < 3){
-		printf("can't draw a polygon with less than three points in polygon_drawShade\n");
-		return;
-	}
-	
-	switch(ds->shade){
-		// Draw only the outline of the polygon using the DrawState color field
-		case ShadeFrame:
-			polygon_draw(p, src, ds->color);
-			break;
-		// fill the polygon with the DrawState color field c
-		case ShadeConstant:
-		// fill the polygon based on the depth value, 
-		case ShadeDepth:
-		// interpolate color at each vertex to fill polygon
-		case ShadeGouraud:
-		default:
-			polygon_drawFill(p, src, drawstate);
-			break;
-	}
-}
-
 /*
  * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
  * calculate colors at each vertex and create and fill out the color array of 
@@ -2065,8 +2064,9 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 		 * vertex to the calculated value.
 		 */
 		case ShadeFlat:
-		
+			
 			break;
+
 		// For ShadeGouraud use the surface normals and locations of each vertex
 		case ShadeGouraud:
 			break;
