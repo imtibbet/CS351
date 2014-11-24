@@ -20,8 +20,8 @@ void light_init( Light *light ){
 		return;
 	}
 	light->type = LightNone;
-	light->color = 
-	light->direction = 
+	light->color = NULL;
+	light->direction = NULL;
 	light->position = NULL;
 
 }
@@ -126,7 +126,7 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 
 			case LightDirect:
 				vector_set(&L, 	-1 * l->light[i].direction.val[0], 
-								-1 * l->light[i].direction.val[1]
+								-1 * l->light[i].direction.val[1],
 								-1 * l->light[i].direction.val[2]);
 				vector_set(&H,	0.5*(L.val[0] + V->val[0]), 
 								0.5*(L.val[1] + V->val[1]), 
@@ -207,13 +207,13 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 			default:
 				break;
 		}
-		printf("light %d: %.2f %.2f %.2f\n", i, curc.val[0], curc.val[1], curc.val[2]);
+		printf("light %d: %.2f %.2f %.2f\n", i, curc.c[0], curc.c[1], curc.c[2]);
 	}
 
 	// clip colors to that are over-saturated down to one
-	c->val[0] = curc.val[0] > 1.0 ? 1.0 : curc.val[0];
-	c->val[1] = curc.val[1] > 1.0 ? 1.0 : curc.val[1];
-	c->val[2] = curc.val[2] > 1.0 ? 1.0 : curc.val[2];
+	c->val[0] = curc.c[0] > 1.0 ? 1.0 : curc.c[0];
+	c->val[1] = curc.c[1] > 1.0 ? 1.0 : curc.c[1];
+	c->val[2] = curc.c[2] > 1.0 ? 1.0 : curc.c[2];
 }
 
 
