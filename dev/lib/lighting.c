@@ -19,11 +19,10 @@ void light_init( Light *light ){
 		printf("Null passed to light_init\n");
 		return;
 	}
-	light->type = LightNone;
-	light->color = 
-	light->direction = 
-	light->position = NULL;
-
+	light->type = LightAmbient;
+	light->color.c[0] = 
+	light->color.c[1] = 
+	light->color.c[2] = 0.1;
 }
 
 /*
@@ -49,7 +48,7 @@ Lighting *lighting_create( void ){
 		printf("malloc failed in lighting_create\n");
 		return(NULL);
 	}
-	l->nLights = 0;
+	l->nLights = 1;
 	light_init(&(l->light[0]));
 	return(l);
 }
@@ -71,9 +70,9 @@ void lighting_init( Lighting *l){
  * some of which may be NULL, depending upon the type. 
  * Make sure you don’t add more lights than MAX_LIGHTS.
  */
-void lighting_add( Lighting *l, LightType type, Color *c, Vector *dir, 
-	Point *pos, float cutoff, float sharpness ){
+void lighting_add( Lighting *l, Color *c, Vector *dir, Point *pos, float cutoff, float sharpness ){
 	Light light;
+	int lightSet = 0;
 	if(!l){
 		printf("Null lighting passed to lighting_add\n");
 		return;
@@ -81,21 +80,32 @@ void lighting_add( Lighting *l, LightType type, Color *c, Vector *dir,
 		printf("Full lighting passed to lighting_add\n");
 		return;
 	}
-	light.type = type;
 	if (c){
+		lightSet = 1;
+		light.type = LightAmbient;
 		color_copy(&light.color, c);
 	}
 	if (dir){
+		lightSet = 1;
+		light.type = LightDirect;
 		vector_copy(&(light.direction), dir);
 	}
 	if (pos){
+		lightSet = 1;
+		light.type = LightPoint;
 		point_copy(&light.position, pos);
 	}
-	if (type == LightSpot){
+	if (cutoff && sharpness){
+		lightSet = 1;
+		light.type = LightSpot;
 		light.cutoff = cutoff;
 		light.sharpness = sharpness;
 	}
-	light_copy(&(l->light[l->nLights++]), &light);
+	if(!lightSet){
+		printf("Null arguments passed to lighting_add, no light added\n");
+	} else {
+		light_copy(&(l->light[l->nLights++]), &light);
+	}
 }
 
 /*
@@ -126,7 +136,7 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 
 			case LightDirect:
 				vector_set(&L, 	-1 * l->light[i].direction.val[0], 
-								-1 * l->light[i].direction.val[1]
+								-1 * l->light[i].direction.val[1],
 								-1 * l->light[i].direction.val[2]);
 				vector_set(&H,	0.5*(L.val[0] + V->val[0]), 
 								0.5*(L.val[1] + V->val[1]), 
@@ -203,17 +213,16 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 									spotSharp;
 				}
 				break;
-
+				
 			default:
 				break;
 		}
-		printf("light %d: %.2f %.2f %.2f\n", i, curc.val[0], curc.val[1], curc.val[2]);
 	}
 
 	// clip colors to that are over-saturated down to one
-	c->val[0] = curc.val[0] > 1.0 ? 1.0 : curc.val[0];
-	c->val[1] = curc.val[1] > 1.0 ? 1.0 : curc.val[1];
-	c->val[2] = curc.val[2] > 1.0 ? 1.0 : curc.val[2];
+	c->c[0] = curc.c[0] > 1.0 ? 1.0 : curc.c[0];
+	c->c[1] = curc.c[1] > 1.0 ? 1.0 : curc.c[1];
+	c->c[2] = curc.c[2] > 1.0 ? 1.0 : curc.c[2];
 }
 
 
