@@ -2005,6 +2005,7 @@ void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting){
 		// fill the polygon with a single color resulting from a shading calculation
 		case ShadeFlat:
 			polygon_shade(p, lighting, drawstate);
+			break;
 		// fill the polygon using a Gouraud shading method and the colors in the polygon
 		case ShadeGouraud:
 			polygon_shade(p, lighting, drawstate);
@@ -2029,6 +2030,7 @@ void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting){
 void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 	DrawState *ds = (DrawState *)drawstate;
 	Lighting *light = (Lighting *)lighting;
+	float snormal;
 
 	/*
 	 * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
@@ -2043,7 +2045,7 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 		 * vertex to the calculated value.
 		 */
 		case ShadeFlat:
-		
+			
 			break;
 		// For ShadeGouraud use the surface normals and locations of each vertex
 		case ShadeGouraud:
