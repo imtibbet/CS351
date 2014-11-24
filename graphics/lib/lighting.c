@@ -20,9 +20,6 @@ void light_init( Light *light ){
 		return;
 	}
 	light->type = LightNone;
-	light->color = NULL;
-	light->direction = NULL;
-	light->position = NULL;
 
 }
 
@@ -62,7 +59,7 @@ void lighting_init( Lighting *l){
 		printf("Null passed to lighting_init\n");
 		return;
 	}
-	l->nLights = 1;
+	l->nLights = 0;
 	light_init(&(l->light[0]));
 }
 
@@ -119,15 +116,19 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 		switch(l->light[i].type){
 
 			case LightAmbient:
+				printf("Ambient Light\n");
 				curc.c[0] += Cb->c[0] * l->light[i].color.c[0];
 				curc.c[1] += Cb->c[1] * l->light[i].color.c[1];
 				curc.c[2] += Cb->c[2] * l->light[i].color.c[2];
 				break;
 
 			case LightDirect:
+				printf("Direct Light\n");
 				vector_set(&L, 	-1 * l->light[i].direction.val[0], 
 								-1 * l->light[i].direction.val[1],
 								-1 * l->light[i].direction.val[2]);
+				vector_normalize(&L);
+				vector_normalize(V);
 				vector_set(&H,	0.5*(L.val[0] + V->val[0]), 
 								0.5*(L.val[1] + V->val[1]), 
 								0.5*(L.val[2] + V->val[2]) );
@@ -149,9 +150,12 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 				break;
 
 			case LightPoint:
+				printf("Point Light\n");
 				vector_set(&L, 	l->light[i].position.val[0] - p->val[0], 
 								l->light[i].position.val[1] - p->val[1], 
 								l->light[i].position.val[2] - p->val[2] );
+				vector_normalize(&L);
+				vector_normalize(V);
 				vector_set(&H,	0.5*(L.val[0] + V->val[0]), 
 								0.5*(L.val[1] + V->val[1]), 
 								0.5*(L.val[2] + V->val[2]) );
@@ -173,9 +177,12 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 				break;
 
 			case LightSpot:
+				printf("Spot Light\n");
 				vector_set(&L, 	-1 * (l->light[i].position.val[0] - p->val[0]), 
 								-1 * (l->light[i].position.val[1] - p->val[1]), 
 								-1 * (l->light[i].position.val[2] - p->val[2]) );
+				vector_normalize(&L);
+				vector_normalize(V);
 				vector_set(&H,	0.5*(L.val[0] + V->val[0]), 
 								0.5*(L.val[1] + V->val[1]), 
 								0.5*(L.val[2] + V->val[2]) );
@@ -211,9 +218,9 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 	}
 
 	// clip colors to that are over-saturated down to one
-	c->val[0] = curc.c[0] > 1.0 ? 1.0 : curc.c[0];
-	c->val[1] = curc.c[1] > 1.0 ? 1.0 : curc.c[1];
-	c->val[2] = curc.c[2] > 1.0 ? 1.0 : curc.c[2];
+	c->c[0] = curc.c[0] > 1.0 ? 1.0 : curc.c[0];
+	c->c[1] = curc.c[1] > 1.0 ? 1.0 : curc.c[1];
+	c->c[2] = curc.c[2] > 1.0 ? 1.0 : curc.c[2];
 }
 
 

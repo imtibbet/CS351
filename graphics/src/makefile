@@ -180,6 +180,8 @@ test8a: $(ODIR)/test8a.o
 cubism: $(ODIR)/cubism.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 # proj 9
+testLighting_shading: $(ODIR)/testLighting_shading.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 test9a: $(ODIR)/test9a.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 test9b: $(ODIR)/test9b.o

@@ -204,20 +204,28 @@ void matrix_xformVector(Matrix *m, Vector *p, Vector *q){
  */
 void matrix_xformPolygon(Matrix *m, Polygon *p){
 	int i, j;
-	Point temp;
+	Point tempp;
+	Vector tempn;
 	for(i=0;i<p->nVertex;i++){
 		
-		// matrix_xformPoint(m, &(p->vertex[i]), &temp);
+		// matrix_xformPoint(m, &(p->vertex[i]), &tempp);
 		for(j=0;j<4;j++){
-			temp.val[j] =	m->m[j][0] * p->vertex[i].val[0] +
+			// vertex
+			tempp.val[j] =	m->m[j][0] * p->vertex[i].val[0] +
 							m->m[j][1] * p->vertex[i].val[1] + 
 							m->m[j][2] * p->vertex[i].val[2] + 
 							m->m[j][3] * p->vertex[i].val[3];
+			// normal
+			tempn.val[j] =	m->m[j][0] * p->normal[i].val[0] +
+							m->m[j][1] * p->normal[i].val[1] + 
+							m->m[j][2] * p->normal[i].val[2] + 
+							m->m[j][3] * p->normal[i].val[3];
 		}
 	
 		// point_copy(&(p->vertex[i]), &temp);
 		for(j=0;j<4;j++){
-			p->vertex[i].val[j] = temp.val[j];
+			p->vertex[i].val[j] = tempp.val[j];
+			p->normal[i].val[j] = tempn.val[j];
 		}
 	}
 }
