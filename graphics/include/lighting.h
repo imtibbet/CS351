@@ -63,7 +63,7 @@ void lighting_init( Lighting *l);
  * some of which may be NULL, depending upon the type. 
  * Make sure you don’t add more lights than MAX_LIGHTS.
  */
-void lighting_add( Lighting *l, Color *c, Vector *dir, Point *pos, float cutoff, float sharpness );
+void lighting_add( Lighting *l, LightType type, Color *c, Vector *dir, Point *pos, float cutoff, float sharpness );
 
 /*
  * calculate the proper color given the normal N, view vector V, 3D point P, 
