@@ -2076,9 +2076,10 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 			}
 			vector_set(&V, 	ds->viewer.val[0] - tempVert.val[0],
 							ds->viewer.val[1] - tempVert.val[1],
-							ds->viewer.val[2] - tempVert.val[2] )
-			lighting_shading(light, &tempNorm, &V, &tempVert, ds->body, ds->surface, 
-								ds->surfaceCoeff, p->oneSided, &destc);
+							ds->viewer.val[2] - tempVert.val[2] );
+			lighting_shading(light, &tempNorm, &V, &tempVert, 
+							&(ds->body), &(ds->surface), ds->surfaceCoeff, 
+							p->oneSided, &destc);
 			for (i = 0; i < p->nVertex; i++) {
 				setColors[i] = destc;
 			}
@@ -2090,9 +2091,9 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 			for (i = 0; i < p->nVertex; i++) {
 				vector_set(&V, 	ds->viewer.val[0] - p->vertex[i].val[0],
 								ds->viewer.val[1] - p->vertex[i].val[1],
-								ds->viewer.val[2] - p->vertex[i].val[2] )
+								ds->viewer.val[2] - p->vertex[i].val[2] );
 				lighting_shading(light, &(p->normal[i]), &V, &(p->vertex[i]), 
-								ds->body, ds->surface, ds->surfaceCoeff, 
+								&(ds->body), &(ds->surface), ds->surfaceCoeff, 
 								p->oneSided, &destc);
 				setColors[i] = destc;
 			}
