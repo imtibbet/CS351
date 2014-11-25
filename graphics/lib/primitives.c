@@ -2050,6 +2050,10 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
 void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 	DrawState *ds = (DrawState *)drawstate;
 	Lighting *light = (Lighting *)lighting;
+	Point tempVert;
+	Vector V, tempNorm;
+	int i;
+	Color destc, setColors[p->nVertex];
 
 	/*
 	 * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
@@ -2064,11 +2068,35 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 		 * vertex to the calculated value.
 		 */
 		case ShadeFlat:
-			
+			point_copy(&tempVert, &(p->vertex[0]));
+			vector_copy(&tempNorm, &(p->normal[0]));
+			for (i = 1; i < p->nVertex; i++) {
+				point_avg(&tempVert, &tempVert, &(p->vertex[i]));
+				vector_avg(&tempNorm, &tempNorm, &(p->normal[i]));
+			}
+			vector_set(&V, 	ds->viewer.val[0] - tempVert.val[0],
+							ds->viewer.val[1] - tempVert.val[1],
+							ds->viewer.val[2] - tempVert.val[2] )
+			lighting_shading(light, &tempNorm, &V, &tempVert, ds->body, ds->surface, 
+								ds->surfaceCoeff, p->oneSided, &destc);
+			for (i = 0; i < p->nVertex; i++) {
+				setColors[i] = destc;
+			}
+			polygon_setColors(p, p->nVertex, &(setColors[0]));
 			break;
 
 		// For ShadeGouraud use the surface normals and locations of each vertex
 		case ShadeGouraud:
+			for (i = 0; i < p->nVertex; i++) {
+				vector_set(&V, 	ds->viewer.val[0] - p->vertex[i].val[0],
+								ds->viewer.val[1] - p->vertex[i].val[1],
+								ds->viewer.val[2] - p->vertex[i].val[2] )
+				lighting_shading(light, &(p->normal[i]), &V, &(p->vertex[i]), 
+								ds->body, ds->surface, ds->surfaceCoeff, 
+								p->oneSided, &destc);
+				setColors[i] = destc;
+			}
+			polygon_setColors(p, p->nVertex, &(setColors[0]));
 			break;
 		default:
 			break;

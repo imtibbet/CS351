@@ -56,6 +56,14 @@ void vector_normalize(Vector *v){
 	v->val[2] = z / vLength;
 }
 
+/** average p1 and p2 x, y, z values and put results in dest, set homogeneous to 0 **/
+void vector_avg(Vector *dest, Vector *p1, Vector *p2){	
+	dest->val[0] = (p1->val[0] + p2->val[0])/2.0;
+	dest->val[1] = (p1->val[1] + p2->val[1])/2.0;
+	dest->val[2] = (p1->val[2] + p2->val[2])/2.0;
+	dest->val[3] = 0.0;
+}
+
 /*
  * Returns the scalar product of a and b
  */

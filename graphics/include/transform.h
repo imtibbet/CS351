@@ -80,6 +80,9 @@ double vector_length(Vector *v);
  */
 void vector_normalize(Vector *v);
 
+/** average p1 and p2 x, y, z values and put results in dest, set homogeneous to 0 **/
+void vector_avg(Vector *dest, Vector *p1, Vector *p2);
+
 /*
  * Returns the scalar product of a and b
  */
