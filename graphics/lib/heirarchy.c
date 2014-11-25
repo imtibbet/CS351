@@ -98,7 +98,6 @@ void element_delete(Element *e){
 			break;
 	}
 	free(e);
-
 }
 
 /*
@@ -426,6 +425,9 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				polygon_copy(tempPolygon, &(e->obj.polygon));
 				matrix_xformPolygon(&LTM, tempPolygon);
 				matrix_xformPolygon(GTM, tempPolygon);
+				if(ds->shade == ShadeGouraud){
+					polygon_shade(tempPolygon, lighting, ds);
+				}
 				matrix_xformPolygon(VTM, tempPolygon);
 				polygon_normalize(tempPolygon);
 				//polygon_print(tempPolygon, stdout);
@@ -580,6 +582,7 @@ void module_cube(Module *md, int solid){
 	Point v[8];
 	Point tv[4];
 	Line l;
+	Vector tn[4], front, back, left, right, top, bottom;
 	int i;
 	
 	// initialize polygon
@@ -634,13 +637,30 @@ void module_cube(Module *md, int solid){
 	}
 	else{
 	 	// use polygons ( 6 of them )
+		vector_set(&front, 0, 0, -1);
+		vector_set(&back, 0, 0, 1);
+		vector_set(&left, -1, 0, 0);
+		vector_set(&right, 1, 0, 0);
+		vector_set(&top, 0, 1, 0);
+		vector_set(&bottom, 0, -1, 0);
+
 		// front side
 		polygon_set( &p, 4, &(v[0]) );
+		vector_copy( &tn[0], &front );
+		vector_copy( &tn[1], &front );
+		vector_copy( &tn[2], &front );
+		vector_copy( &tn[3], &front );
+		polygon_setNormals( &p, 4, &(tn[0]) );
 		e = element_init(ObjPolygon, &p);
 		module_insert(md, e);
 
 		// back side
 		polygon_set( &p, 4, &(v[4]) );
+		vector_copy( &tn[0], &back );
+		vector_copy( &tn[1], &back );
+		vector_copy( &tn[2], &back );
+		vector_copy( &tn[3], &back );
+		polygon_setNormals( &p, 4, &(tn[0]) );
 		e = element_init(ObjPolygon, &p);
 		module_insert(md, e);
 
@@ -649,8 +669,12 @@ void module_cube(Module *md, int solid){
 		point_copy( &tv[1], &v[3] );
 		point_copy( &tv[2], &v[7] );
 		point_copy( &tv[3], &v[6] );
-
 		polygon_set( &p, 4, tv );
+		vector_copy( &tn[0], &top );
+		vector_copy( &tn[1], &top );
+		vector_copy( &tn[2], &top );
+		vector_copy( &tn[3], &top );
+		polygon_setNormals( &p, 4, &(tn[0]) );
 		e = element_init(ObjPolygon, &p);
 		module_insert(md, e);
 
@@ -659,8 +683,12 @@ void module_cube(Module *md, int solid){
 		point_copy( &tv[1], &v[1] );
 		point_copy( &tv[2], &v[5] );
 		point_copy( &tv[3], &v[4] );
-
 		polygon_set( &p, 4, tv );
+		vector_copy( &tn[0], &bottom );
+		vector_copy( &tn[1], &bottom );
+		vector_copy( &tn[2], &bottom );
+		vector_copy( &tn[3], &bottom );
+		polygon_setNormals( &p, 4, &(tn[0]) );
 		e = element_init(ObjPolygon, &p);
 		module_insert(md, e);
 
@@ -669,8 +697,12 @@ void module_cube(Module *md, int solid){
 		point_copy( &tv[1], &v[3] );
 		point_copy( &tv[2], &v[7] );
 		point_copy( &tv[3], &v[4] );
-
 		polygon_set( &p, 4, tv );
+		vector_copy( &tn[0], &left );
+		vector_copy( &tn[1], &left );
+		vector_copy( &tn[2], &left );
+		vector_copy( &tn[3], &left );
+		polygon_setNormals( &p, 4, &(tn[0]) );
 		e = element_init(ObjPolygon, &p);
 		module_insert(md, e);
 
@@ -679,8 +711,12 @@ void module_cube(Module *md, int solid){
 		point_copy( &tv[1], &v[2] );
 		point_copy( &tv[2], &v[6] );
 		point_copy( &tv[3], &v[5] );
-
 		polygon_set( &p, 4, tv );
+		vector_copy( &tn[0], &right );
+		vector_copy( &tn[1], &right );
+		vector_copy( &tn[2], &right );
+		vector_copy( &tn[3], &right );
+		polygon_setNormals( &p, 4, &(tn[0]) );
 		e = element_init(ObjPolygon, &p);
 		module_insert(md, e);
 	}
