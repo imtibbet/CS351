@@ -934,7 +934,7 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 	// set cone parameters
     module_scale(mod, (int)size, (int)size, (int)size);
 	module_translate(mod, (float)x, (float)y, (float)z);
-	printf("parameters set\n");
+	// printf("parameters set\n");
 
 	polygon_init( &p );
 	point_set3D( &xtop, 0, 1.0, 0.0 );

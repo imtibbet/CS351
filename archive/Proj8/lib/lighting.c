@@ -136,7 +136,7 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 
 			case LightDirect:
 				vector_set(&L, 	-1 * l->light[i].direction.val[0], 
-								-1 * l->light[i].direction.val[1]
+								-1 * l->light[i].direction.val[1],
 								-1 * l->light[i].direction.val[2]);
 				vector_set(&H,	0.5*(L.val[0] + V->val[0]), 
 								0.5*(L.val[1] + V->val[1]), 
@@ -220,9 +220,9 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 	}
 
 	// clip colors to that are over-saturated down to one
-	c->val[0] = curc.val[0] > 1.0 ? 1.0 : curc.val[0];
-	c->val[1] = curc.val[1] > 1.0 ? 1.0 : curc.val[1];
-	c->val[2] = curc.val[2] > 1.0 ? 1.0 : curc.val[2];
+	c->c[0] = curc.c[0] > 1.0 ? 1.0 : curc.c[0];
+	c->c[1] = curc.c[1] > 1.0 ? 1.0 : curc.c[1];
+	c->c[2] = curc.c[2] > 1.0 ? 1.0 : curc.c[2];
 }
 
 

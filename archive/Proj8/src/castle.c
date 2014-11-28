@@ -16,121 +16,133 @@ draws a castle
 /* Creates bricks using cube modules, color for the is chosen randomly from 
  * one of 4 colors of grey and brown. 
  */
-static Module * genWall(float x, float y, float z);
-static Module * genWall(float x, float y, float z){
+static Module * genTower(float x, float y, float z);
+static Module * genTower(float x, float y, float z){
 	// set up fields
-	Module *brick, *wall;
-	Color ltGrey, grey, dkGrey, final, dkBrown1;
-	int thickness, gen;
-	// set up different grey colors for castle blocks
-	color_set(&ltGrey, (float)(192/255.0), (float)(197/255.0), 
-		(float)(186/255.0));
-	color_set(&grey, (float)(164/255.0), (float)(168/255.0), 
-		(float)(163/255.0));
-	color_set(&dkGrey, (float)(118/255.0), (float)(126/255.0), 
-		(float)(121/255.0));
-	color_set(&dkBrown1, (float)(72/255.0), (float)(60/255.0), 
-		(float)(50/255.0));
-	color_set(&final, 0, 0, 0);
-
-	// randomly generate a number between 0 and 3 inclusive
-	gen = (int)(rand() % 3);
-	// select fill color depending on gen
-	if (gen == 0){
-		color_copy(&final, &ltGrey);
-	}
-	if (gen == 1){
-		color_copy(&final, &grey);
-	}
-	if (gen == 2){
-		color_copy(&final, &dkGrey);
-	}
-	else{
-		color_copy(&final, &dkBrown1);
-	}
+	Module *tower, *t, *sup, *stone, *roof;
+	Color grey, dkGrey, brown, dkBrown;
+	color_set(&grey, (float)(108/255.0), (float)(116/255.0), 
+		(float)(111/255.0));
+	color_set(&dkGrey, (float)(98/255.0), (float)(106/255.0), 
+		(float)(101/255.0));
+	color_set(&brown, (float)(113/255.0), (float)(83/255.0), 
+		(float)(46/255.0));
+	color_set(&dkBrown, (float)(58/255.0), (float)(18/255.0), 
+		(float)(11/255.0));
 
 	// create modules
-	brick = module_create();
-	wall = module_create();
-
-	module_scale(brick, 1, 3, 1);
-	module_rotateX(brick, 0, 1);
-	module_translate(brick, x, y, z);
-	module_color(brick, &final);
-	module_cube(brick, 1);
-	module_module(wall, brick);
-
-	// printf("added brick\n");
-
-	return((Module*)wall);
-}
-
-/* Generates a tower at x, y, z.
- */
-static Module* genTower(float x, float y, float z);
-static Module* genTower(float x, float y, float z){
-
-	// define fields + create output module, woodpile
-	Module *tower;
 	tower = module_create();
+	t = module_create();
+	sup = module_create();
+	stone = module_create();
+	roof = module_create();
 
-	// bottom layer of wood
-	wood = module_create();
- 	wood = genWood(x-3, y, z-2, fill);
- 	module_module(woodpile, wood);
-	wood = module_create();
- 	wood = genWood(x-1, y, z-2, fill);
- 	module_module(woodpile, wood);
- 	wood = module_create();
- 	wood = genWood(x+1, y, z-2, fill);
- 	module_module(woodpile, wood);
- 	wood = module_create();
- 	wood = genWood(x+3, y, z-2, fill);
- 	module_module(woodpile, wood);
+	// basic tower cylinder
+	module_scale(t, 1, 3, 1);
+	module_color(t, &grey);
+	module_cylinder(t, 20, 1, 8, x, y, z);
+	module_module(tower, t);
 
- 	// middle layer of wood
- 	wood = module_create();
- 	wood = genWood(x-2, y+1.5, z-2, fill);
- 	module_module(woodpile, wood);
- 	wood = module_create();
- 	wood = genWood(x, y+1.5, z-2, fill);
- 	module_module(woodpile, wood);
- 	wood = module_create();
- 	wood = genWood(x+2, y+1.5, z-2, fill);
- 	module_module(woodpile, wood);
+	// smaller cylinder placed inside for staircase (flickering) effect
+	t = module_create();
+	module_scale(t, .8, 3, .8);
+	module_color(t, &dkGrey);
+	module_cylinder(t, 20, 1, 8, x, y, z);
+	module_module(tower, t);
 
- 	// top layer of wood
- 	wood = module_create();
- 	wood = genWood(x-1, y+3, z-2, fill);
- 	module_module(woodpile, wood);
- 	wood = module_create();
- 	wood = genWood(x+1, y+3, z-2, fill);
- 	module_module(woodpile, wood);
+	// wooden posts to support the roof of the tower
+	module_scale(sup, 1, 5.5, 1);
+	module_translate(sup, x-4, y+25, z-4);
+	module_color(sup, &brown);
+	module_cube(sup, 1);
+	module_module(tower, sup);
+	sup = module_create();
+	module_scale(sup, 1, 5.5, 1);
+	module_translate(sup, x+4, y+25, z-4);
+	module_color(sup, &brown);
+	module_cube(sup, 1);
+	module_module(tower, sup);
+	sup = module_create();
+	module_scale(sup, 1, 5.5, 1);
+	module_translate(sup, x-4, y+25, z+4);
+	module_color(sup, &brown);
+	module_cube(sup, 1);
+	module_module(tower, sup);
+	sup = module_create();
+	module_scale(sup, 1, 5.5, 1);
+	module_translate(sup, x+4, y+25, z+4);
+	module_color(sup, &brown);
+	module_cube(sup, 1);
+	module_module(tower, sup);
 
- 	return((Module*)woodpile);
+	// decorative stonework 1
+	module_scale(stone, 2, 3, 2);
+	module_translate(stone, x-7, y+24, z);
+	module_color(stone, &dkGrey);
+	module_cube(stone, 1);
+	module_module(tower, stone);
+	stone = module_create();
+	module_scale(stone, 2, 3, 2);
+	module_translate(stone, x+7, y+24, z);
+	module_color(stone, &dkGrey);
+	module_cube(stone, 1);
+	module_module(tower, stone);
+	stone = module_create();
+	module_scale(stone, 2, 3, 2);
+	module_translate(stone, x, y+24, z-7);
+	module_color(stone, &dkGrey);
+	module_cube(stone, 1);
+	module_module(tower, stone);
+	stone = module_create();
+	module_scale(stone, 2, 3, 2);
+	module_translate(stone, x, y+24, z+7);
+	module_color(stone, &dkGrey);
+	module_cube(stone, 1);
+	module_module(tower, stone);
+	// offset decorative stonework 2
+	stone = module_create();
+	module_scale(stone, 2, 3, 2);
+	module_translate(stone, x-5, y+23, z-5);
+	module_color(stone, &dkGrey);
+	module_cube(stone, 1);
+	module_module(tower, stone);
+	stone = module_create();
+	module_scale(stone, 2, 3, 2);
+	module_translate(stone, x+5, y+23, z-5);
+	module_color(stone, &dkGrey);
+	module_cube(stone, 1);
+	module_module(tower, stone);
+	stone = module_create();
+	module_scale(stone, 2, 3, 2);
+	module_translate(stone, x-5, y+23, z+5);
+	module_color(stone, &dkGrey);
+	module_cube(stone, 1);
+	module_module(tower, stone);
+	stone = module_create();
+	module_scale(stone, 2, 3, 2);
+	module_translate(stone, x+5, y+23, z+5);
+	module_color(stone, &dkGrey);
+	module_cube(stone, 1);
+	module_module(tower, stone);
+	
+	// roof of the tower
+	module_color(roof, &dkBrown);
+	module_cone(roof, 8, 1, 8, x, y+28, z);
+	module_module(tower, roof);
+
+	// printf("added tower\n");
+	return((Module*)tower);
 }
 
-
-/* Creates a flame using a bezier surface (source: Bruce Maxwell). 
- * A set of 20 individual flames are generated and then added to
- * a module, fire. Fire module is then copied 4 different directions
- * to give further 3D complexity to the flames. The degree of 
- * subdivisions is moderated by the parameter, divisions. Drawstate
- * is passed through so that each flame can have a varied color 
- * (by half). Scale increases the upper bound for the random range of 
- * of the fire to generate larger, broader flames. */
-static Module* genCastle(float x, float y, float z, int divisions, 
-	DrawState *ds, int scale);
-static Module* genCastle(float x, float y, float z, int divisions, 
-	DrawState *ds, int scale){
-	// define fields
+/* Creates a flame using a bezier surface*/
+static Module* genFire(float x, float y, float z, int divisions, DrawState *ds);
+static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 	Module *f[20];
-	Module *tower, *wall;
+	Module *fire;
 	BezierSurface bc;
-	int gen, i;
+	int gen, i, scale;
 	Color ltOrange, orange, dkOrange, red, yellow, amber, final;
 	Point p[16];
-	// set fire colors
 	color_set(&ltOrange, 1, (float)(167/255.0), 0.0);
 	color_set(&orange, 1, (float)(127/255.0), 0.0);
 	color_set(&dkOrange, 1, (float)(103/255.0), 0.0);
@@ -139,14 +151,14 @@ static Module* genCastle(float x, float y, float z, int divisions,
 	color_set(&amber, 1, (float)(191/255.0), 0.0);
 	color_set(&final, 0, 0, 0);
 
-	// init bezier surface
+	scale = 10;
+
 	bezierSurface_init(&bc);
 
-	// create fire module + set default drawstate
 	fire = module_create();
 	drawstate_setSurface(ds, final);
 
-	// points to form a curved surface (Bruce Maxwell)
+	// create a curved surface sitting above the plane
 	point_set3D(&p[0], 0.0, 0.0, 0.0); // first row, constant x, even spacing in z
 	point_set3D(&p[1], 0.0, 0.2, 0.33);
 	point_set3D(&p[2], 0.0, 0.5, 0.66);
@@ -163,17 +175,12 @@ static Module* genCastle(float x, float y, float z, int divisions,
 	point_set3D(&p[13], 1.0, 0.2, 0.33);
 	point_set3D(&p[14], 1.0, 0.5, 0.66);
 	point_set3D(&p[15], 1.0, 1.0, 1.0);
-	// set bezier surface
 	bezierSurface_set(&bc, p);
 
-	// iterate through all 20 flames, copying + rotating around to fill 
-	// all the quandrants with fire
 	for (i = 0; i < 20; i++){
-		// generate a random number between 0 and 6
 		gen = (int)(rand() % 6);
 		// printf("gen %d\n", gen);
 
-		// set color based on gen
 		if (gen == 0){
 			drawstate_setSurface(ds, ltOrange);
 			printf("ltOrange flame\n");
@@ -199,12 +206,11 @@ static Module* genCastle(float x, float y, float z, int divisions,
 			printf("amber flame\n");
 		}
 
-		// flame set 1
 		f[i] = module_create();
-		module_scale((Module*)f[i], (float)((rand()%(10*scale))+5), 
-			(float)((rand()%(30*scale))+5), (float)((rand()%(20*scale))+1));
+
+		module_scale((Module*)f[i], (float)((rand()%10)+5)/scale, (float)((rand()%30)+5)/scale, (float)((rand()%20)+1)/scale);
 		// printf("module scaled\n");
-		module_translate((Module*)f[i], x-2.0, y, z-2);
+		module_translate((Module*)f[i], x+3.0, y, z);
 		// printf("module translated\n");
 		module_color((Module*)f[i], &(ds->surface));
 		// printf("ds->surface->c[1] %f\n", ds->surface.c[1]);
@@ -213,62 +219,29 @@ static Module* genCastle(float x, float y, float z, int divisions,
 		module_module((Module*)fire, (Module*)f[i]);
 		// printf("module added to fire\n");
 
-		// flame set 2
 		f[i] = module_create();
-		module_scale((Module*)f[i], (float)((rand()%(10*scale))+5), 
-			(float)((rand()%(30*scale))+5), (float)((rand()%(20*scale))+1));
-		module_translate((Module*)f[i], x-2.0, y, z-2);
+
+		module_scale((Module*)f[i], (float)((rand()%10)+5)/scale, (float)((rand()%30)+5)/scale, (float)((rand()%20)+1)/scale);
+		module_translate((Module*)f[i], x+2.0, y, z);
 		module_rotateY((Module*)f[i], 0, 1.3);
 		module_color((Module*)f[i], &(ds->surface));
 		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
 		module_module((Module*)fire, (Module*)f[i]);
 
-		// generate a fresh random number between 0 and 6 inclusive
-		gen = (int)(rand() % 6);
-		// printf("gen %d\n", gen);
-
-		// set color based on gen
-		if (gen == 0){
-			drawstate_setSurface(ds, ltOrange);
-			// printf("ltOrange flame\n");
-		}
-		else if (gen == 1){
-			drawstate_setSurface(ds, orange);
-			// printf("orange flame\n");
-		}
-		else if (gen == 2){
-			drawstate_setSurface(ds, dkOrange);
-			// printf("dkOrange flame\n");
-		}
-		else if (gen == 3){
-			drawstate_setSurface(ds, red);
-			// printf("red flame\n");
-		}
-		else if (gen == 4){
-			drawstate_setSurface(ds, yellow);	
-			// printf("yellow flame\n");
-		}
-		else if (gen == 5){
-			drawstate_setSurface(ds, amber);
-			// printf("amber flame\n");
-		}
-
-		// flame set 3
 		f[i] = module_create();
-		module_scale((Module*)f[i], (float)((rand()%(10*scale))+5), 
-			(float)((rand()%(30*scale))+5), (float)((rand()%(20*scale))+1));
-		module_translate((Module*)f[i], x-2.0, y, z-2);
+
+		module_scale((Module*)f[i], (float)((rand()%10)+5)/scale, (float)((rand()%30)+5)/scale, (float)((rand()%20)+1)/scale);
+		module_translate((Module*)f[i], x+2.0, y, z);
 		module_rotateY((Module*)f[i], 0, 1);
 		module_rotateY((Module*)f[i], 0, 1.3);
 		module_color((Module*)f[i], &(ds->surface));
 		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
 		module_module((Module*)fire, (Module*)f[i]);
 
-		// flame set 4
 		f[i] = module_create();
-		module_scale((Module*)f[i], (float)((rand()%(10*scale))+5), 
-			(float)((rand()%(30*scale))+5), (float)((rand()%(20*scale))+1));
-		module_translate((Module*)f[i], x-2.0, y, z-2);
+
+		module_scale((Module*)f[i], (float)((rand()%10)+5)/scale, (float)((rand()%30)+5)/scale, (float)((rand()%20)+1)/scale);
+		module_translate((Module*)f[i], x+2.0, y, z);
 		module_rotateY((Module*)f[i], 0, 1);
 		module_rotateY((Module*)f[i], 0, 1);
 		module_rotateY((Module*)f[i], 0, 1.3);
@@ -287,7 +260,7 @@ int main(int argc, char *argv[]) {
 	const int rows = 500*2;
 	const int cols = 560*2;
 	Image *src;
-	Module *flames[60], *woodpile;
+	Module *tower, *flames[60];
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
@@ -303,46 +276,35 @@ int main(int argc, char *argv[]) {
 	src = image_create( rows, cols );
 
 	// set up the view
-	point_set3D( &(view.vrp), 0, 50, -80);
+	point_set3D( &(view.vrp), 0, 45, -60);
 	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 	vector_set( &(view.vup), 0, 1, 0 );
 	view.d = 5;
 	view.du = 6;
 	view.f = 1;
-	view.b = 50;
+	view.b = 100;
 	view.screenx = cols;
 	view.screeny = rows;
 
 	matrix_setView3D( &vtm, &view );
 	matrix_identity( &gtm );
 
- 	// create the animation by adjusting the gtm
-	for(frame=0;frame<60;frame++) {
-		char buffer[256];
-		// create each fire as an item in an array of fire modules
+	for (frame=0; frame<60; frame++){
+		tower = module_create();
+		tower = genTower(0, 0, 0);
 		flames[frame] = module_create();
-		// generate fire, inputing drawstate
-		flames[frame] = genFire(0, -6, 0, 6, ds, 1);
+		flames[frame] = genFire(0, 25, 0, 4, ds);
 
-		// create filled woodpile module 
-		woodpile = module_create();
-		woodpile = genWoodPile(0, 0, 0, 1);
+		char buffer[256];
 		matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
-		// draw woodpile
-		module_draw( woodpile, &vtm, &gtm, ds, NULL, src );
-		// draw flames
-		module_draw( flames[frame], &vtm, &gtm, ds, NULL, src );
-
-		// create outlined woodpile module to overlay + boost 3D visual effect
-		woodpile = module_create();
-		woodpile = genWoodPile(0, 0, 0, 0);
-		// draw woodpile
-		module_draw( woodpile, &vtm, &gtm, ds, NULL, src );
+		// draw tower and flames
+		module_draw( tower, &vtm, &gtm, ds, NULL, src );
+		module_draw( flames[frame], &vtm, &gtm, ds, NULL, src);
 
 		// write out image
-		sprintf(buffer, "fireside-frame%03d.ppm", frame);
+		sprintf(buffer, "tower-frame%03d.ppm", frame);
 		image_write(src, buffer);
-		sprintf(command, "convert -scale %03dx%03d fireside-frame%03d.ppm fireside-frame%03d.ppm", 
+		sprintf(command, "convert -scale %03dx%03d tower-frame%03d.ppm tower-frame%03d.ppm", 
 		cols/2, rows/2, frame, frame);
 		system(command);
 		// reset image
@@ -351,21 +313,22 @@ int main(int argc, char *argv[]) {
 
 	// convert to gif
 	printf("converting to gif...\n");
-	system("convert -delay 2 -loop 0 fireside-frame*.ppm fireside.gif");
+	system("convert -delay 3 -loop 0 tower-frame*.ppm tower.gif");
 	printf("converted gif\n");
 	// remove ppm files
-	system("rm fireside-frame*.ppm");
+	system("rm tower-frame*.ppm");
 	printf("animating gif...\n");
 	// animate gif
-	system("animate fireside.gif");
+	system("animate tower.gif");
 
 	// free drawstate, image, modules
 	free(ds);
 	image_free(src);
-	for(frame=0;frame<60;frame++){
-		module_delete(flames[frame]);
+	module_delete(tower);
+
+	for (frame = 0; frame < 60; frame++){
+		module_delete(&(flames[frame]));
 	}
-	module_delete(woodpile);
 
 	return(0);
 }

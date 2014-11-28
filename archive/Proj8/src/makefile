@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = pyramid-test pyramid-test-gif cylinder-test cylinder-test-gif cone-test cone-gif fire fireside
+EXECUTABLES = castle
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = pyramid-test.o pyramid-test-gif.o cylinder-test.o cylinder-test-gif.o cone-test.o cone-gif.o fire.o fireside.o
+_OBJ = castle.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -178,6 +178,8 @@ fireside: $(ODIR)/fireside.o
 test8a: $(ODIR)/test8a.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 cubism: $(ODIR)/cubism.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+castle: $(ODIR)/castle.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 # proj 9
 test9a: $(ODIR)/test9a.o
