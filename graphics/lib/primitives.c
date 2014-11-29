@@ -2087,9 +2087,9 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 							&(ds->body), &(ds->surface), ds->surfaceCoeff, 
 							p->oneSided, &destc);
 			for (i = 0; i < p->nVertex; i++) {
-				setColors[i] = destc;
+				color_copy(&(setColors[i]), &destc);
 			}
-			polygon_setColors(p, p->nVertex, &(setColors[0]));
+			polygon_setColors(p, p->nVertex, setColors);
 			break;
 
 		// For ShadeGouraud use the surface normals and locations of each vertex
@@ -2102,9 +2102,9 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 				lighting_shading(light, &(p->normal[i]), &V, &(p->vertex[i]), 
 								&(ds->body), &(ds->surface), ds->surfaceCoeff, 
 								p->oneSided, &destc);
-				setColors[i] = destc;
+				color_copy(&(setColors[i]), &destc);
 			}
-			polygon_setColors(p, p->nVertex, &(setColors[0]));
+			polygon_setColors(p, p->nVertex, setColors);
 			break;
 		default:
 			break;
