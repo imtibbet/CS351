@@ -1664,14 +1664,20 @@ static LinkedList *setupEdgeList( Polygon *p, Image *src) {
 
 	// walk around the polygon, starting with the last point
 	v1 = p->vertex[p->nVertex-1];
-	c1 = p->color[p->nVertex-1];
+	if(p->color)
+		c1 = p->color[p->nVertex-1];
+	else
+		color_set( &c1, 1.0, 1.0, 1.0 );
 
 	for(i=0;i<p->nVertex;i++) {
 		
 		// the current point (i) is the end of the segment
 		v2 = p->vertex[i];
-		c2 = p->color[i];
-
+		if(p->color)
+			c2 = p->color[i];
+		else
+			color_set( &c2, 1.0, 1.0, 1.0 );
+				
 		// if it is not a horizontal line
 		if( (int)(v1.val[1]+0.5) != (int)(v2.val[1]+0.5) ) {
 			Edge *edge;
@@ -1772,16 +1778,16 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 			if(curZ > image_getz(src, scan, i)){// back clip plane
 				image_setz(src, scan, i, curZ);// update z buffer if drawing 
 				switch(ds->shade){
-					case ShadeDepth:// shade by depth using z=1/(1/z) 
+					case ShadeDepth:// shade by depth using 1-z=1-1/(1/z) 
 						tempc.c[0] = c.c[0]*(1-1/curZ);
 						tempc.c[1] = c.c[1]*(1-1/curZ);
 						tempc.c[2] = c.c[2]*(1-1/curZ);
 						break;
 					case ShadeFlat:
-					case ShadeGouraud:// interpolate vertex color
-						tempc.c[0] = curc.c[0]*curZ;
-						tempc.c[1] = curc.c[1]*curZ;
-						tempc.c[2] = curc.c[2]*curZ;
+					case ShadeGouraud:// interpolate vertex color c=(c/z)/(1/z)
+						tempc.c[0] = curc.c[0]/curZ;
+						tempc.c[1] = curc.c[1]/curZ;
+						tempc.c[2] = curc.c[2]/curZ;
 						break;
 					case ShadeConstant:// use single color by default
 					default:
@@ -2060,6 +2066,9 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 	int i;
 	Color destc, setColors[p->nVertex];
 
+	printf("body (%.3f, %.3f, %.3f) surface (%.3f, %.3f, %.3f)\n",
+			ds->body.c[0], ds->body.c[1], ds->body.c[2], 
+			ds->surface.c[0], ds->surface.c[1], ds->surface.c[2]);
 	/*
 	 * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
 	 * calculate colors at each vertex and create and fill out the color array of 
@@ -2073,7 +2082,7 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 		 * vertex to the calculated value.
 		 */
 		case ShadeFlat:
-			//printf("ShadeFlat\n");
+			printf("ShadeFlat\n");
 			point_copy(&tempVert, &(p->vertex[0]));
 			vector_copy(&tempNorm, &(p->normal[0]));
 			for (i = 1; i < p->nVertex; i++) {
@@ -2094,7 +2103,7 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 
 		// For ShadeGouraud use the surface normals and locations of each vertex
 		case ShadeGouraud:
-			//printf("ShadeGouraud\n");
+			printf("ShadeGouraud\n");
 			for (i = 0; i < p->nVertex; i++) {
 				vector_set(&V, 	ds->viewer.val[0] - p->vertex[i].val[0],
 								ds->viewer.val[1] - p->vertex[i].val[1],

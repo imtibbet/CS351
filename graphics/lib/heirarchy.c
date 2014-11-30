@@ -355,36 +355,36 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 	Polyline *tempPolyline = polyline_create();
 	Polygon *tempPolygon = polygon_create();
 	Element *e = md->head;
-	
+	int verbose = 0;
 	matrix_identity(&LTM);
 	
 	// loop until the end of the linked list is reached
 	while(e){
-		//printf("Handling type %d\n", e->type);
+		if(verbose) printf("Handling type %d\n", e->type);
 		// draw based on type
 		switch(e->type){
 			case ObjNone:
 				break;
 			case ObjPoint:
-				//printf("drawing point ");
+				if(verbose) printf("drawing ObjPoint\n");
 				// copy, xform, normalize, draw
 				matrix_xformPoint(&LTM, &(e->obj.point), &tempPointLTM);
 				matrix_xformPoint(GTM, &tempPointLTM, &tempPointGTM);
 				matrix_xformPoint(VTM, &tempPointGTM, &tempPointVTM);
 				point_normalize(&(tempPointVTM));
-				//point_print(&tempPointVTM, stdout);
+				if(verbose) point_print(&tempPointVTM, stdout);
 				point_draw(&tempPointVTM, src, ds->color);
 				break;
 			case ObjLine:
+				if(verbose) printf("drawing ObjLine\n");
 				line_copy(&tempLine, &(e->obj.line));
-				//printf("drawing line ");
 				// copy, xform, normalize, draw
 				matrix_xformLine(&LTM, &tempLine);
 				matrix_xformLine(GTM, &tempLine);
 				matrix_xformLine(VTM, &tempLine);
 				line_normalize(&tempLine);
 				line_draw(&tempLine, src, ds->color);
-				//line_print(&tempLine, stdout);
+				if(verbose) line_print(&tempLine, stdout);
 				/*if(antialias){
 					dx = tempLine.b.val[0]-tempLine.a.val[0];
 					dy = tempLine.b.val[1]-tempLine.a.val[1];
@@ -409,20 +409,20 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				}*/
 				break;
 			case ObjPolyline:
-				//printf("drawing polyline ");
+				if(verbose) printf("drawing ObjPolyline\n");
 				// copy, xform, normalize, draw
 				polyline_copy(tempPolyline, &(e->obj.polyline));
 				matrix_xformPolyline(&LTM, tempPolyline);
 				matrix_xformPolyline(GTM, tempPolyline);
 				matrix_xformPolyline(VTM, tempPolyline);
 				polyline_normalize(tempPolyline);
-				//polyline_print(tempPolyline, stdout);
+				if(verbose) polyline_print(tempPolyline, stdout);
 				polyline_draw(tempPolyline, src, ds->color);
 				break;
 			case ObjPolygon:
-				//printf("drawing polygon ");
 				// copy, xform, normalize, draw
 				polygon_copy(tempPolygon, &(e->obj.polygon));
+				if(verbose) printf("drawing ObjPolygon\n");
 				matrix_xformPolygon(&LTM, tempPolygon);
 				matrix_xformPolygon(GTM, tempPolygon);
 				if(ds->shade == ShadeGouraud || ds->shade == ShadeFlat){
@@ -430,30 +430,38 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				}
 				matrix_xformPolygon(VTM, tempPolygon);
 				polygon_normalize(tempPolygon);
-				//polygon_print(tempPolygon, stdout);
+				if(verbose) polygon_print(tempPolygon, stdout);
 				polygon_drawShade(tempPolygon, src, ds, NULL);
 				break;
 			case ObjColor:
+				if(verbose) printf("drawing ObjColor\n");
 				drawstate_setColor(ds, e->obj.color);
 				break;
 			case ObjBodyColor:
+				if(verbose) printf("drawing ObjBodyColor\n");
 				drawstate_setBody(ds, e->obj.color);
 				break;
 			case ObjSurfaceColor:
+				if(verbose) printf("drawing ObjSurfaceColor\n");
 				drawstate_setSurface(ds, e->obj.color);
 				break;
 			case ObjSurfaceCoeff:
+				if(verbose) printf("drawing ObjSurfaceCoeff\n");
 				drawstate_setSurfaceCoeff(ds, e->obj.coeff);
 				break;
 			case ObjLight:
+				if(verbose) printf("drawing ObjLight\n");
 				break;
 			case ObjIdentity:
+				if(verbose) printf("drawing ObjIdentity\n");
 				matrix_identity(&LTM);
 				break;
 			case ObjMatrix:
+				if(verbose) printf("drawing ObjMatrix\n");
 				matrix_multiply(&(e->obj.matrix), &LTM, &LTM);
 				break;
 			case ObjModule:
+				if(verbose) printf("drawing ObjModule\n");
 				matrix_multiply(GTM, &LTM, &tempGTM);
 				drawstate_copy(tempds, ds);
 				module_draw(e->obj.module, VTM, &tempGTM, tempds, lighting, src);
@@ -587,6 +595,17 @@ void module_cube(Module *md, int solid){
 	Line l;
 	Vector tn[4], front, back, left, right, top, bottom;
 	int i;
+	
+  // test9a:	
+  // the example cube is blue (Y/-Y), red (Z/-Z), yellow (X/-X)
+  // these colors should be the body colors
+	Color Grey;
+	Color Dark;
+	color_set(&Grey, 0.6, 0.65, 0.67 );
+	color_set(&Dark, 0.2, 0.2, 0.2 );
+	module_surfaceColor( md, &Dark );
+	module_bodyColor( md, &Dark );
+  // test9a:	
 	
 	// initialize polygon
 	polygon_init( &p );

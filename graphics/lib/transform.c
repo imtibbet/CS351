@@ -224,16 +224,18 @@ void matrix_xformPolygon(Matrix *m, Polygon *p){
 							m->m[j][2] * p->vertex[i].val[2] + 
 							m->m[j][3] * p->vertex[i].val[3];
 			// normal
-			tempn.val[j] =	m->m[j][0] * p->normal[i].val[0] +
-							m->m[j][1] * p->normal[i].val[1] + 
-							m->m[j][2] * p->normal[i].val[2] + 
-							m->m[j][3] * p->normal[i].val[3];
+			if(p->normal)
+				tempn.val[j] =	m->m[j][0] * p->normal[i].val[0] +
+								m->m[j][1] * p->normal[i].val[1] + 
+								m->m[j][2] * p->normal[i].val[2] + 
+								m->m[j][3] * p->normal[i].val[3];
 		}
 	
 		// point_copy(&(p->vertex[i]), &temp);
 		for(j=0;j<4;j++){
 			p->vertex[i].val[j] = tempp.val[j];
-			p->normal[i].val[j] = tempn.val[j];
+			if(p->normal)
+				p->normal[i].val[j] = tempn.val[j];
 		}
 	}
 }

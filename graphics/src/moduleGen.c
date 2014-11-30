@@ -960,6 +960,7 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 	polyline_init(&temppolyline);
 	polygon_init(&temppolygon);
 	ds = drawstate_create();
+	ds->shade = ShadeConstant;
 	color_set(&background, 0.0, 0.0, 0.0);
 
 	// loop until EOF is reached, generating modules
