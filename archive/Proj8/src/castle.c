@@ -183,27 +183,27 @@ static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 
 		if (gen == 0){
 			drawstate_setSurface(ds, ltOrange);
-			printf("ltOrange flame\n");
+			// printf("ltOrange flame\n");
 		}
 		else if (gen == 1){
 			drawstate_setSurface(ds, orange);
-			printf("orange flame\n");
+			// printf("orange flame\n");
 		}
 		else if (gen == 2){
 			drawstate_setSurface(ds, dkOrange);
-			printf("dkOrange flame\n");
+			// printf("dkOrange flame\n");
 		}
 		else if (gen == 3){
 			drawstate_setSurface(ds, red);
-			printf("red flame\n");
+			// printf("red flame\n");
 		}
 		else if (gen == 4){
 			drawstate_setSurface(ds, yellow);	
-			printf("yellow flame\n");
+			// printf("yellow flame\n");
 		}
 		else if (gen == 5){
 			drawstate_setSurface(ds, amber);
-			printf("amber flame\n");
+			// printf("amber flame\n");
 		}
 
 		f[i] = module_create();
@@ -260,29 +260,33 @@ int main(int argc, char *argv[]) {
 	const int rows = 500*2;
 	const int cols = 560*2;
 	Image *src;
-	Module *tower, *flames[60];
+	Module *tower0, *tower1, *tower2, *tower3;
+	Module *flames[60], *wall;
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
-	Color blue, green;
+	Color blue, green, dkGrey;
 	int frame;
 	char command[256];
 	color_set(&blue, 0, 0, 1);
 	color_set(&green, 0, 1, 0);
+	color_set(&dkGrey, (float)(98/255.0), (float)(106/255.0), 
+		(float)(101/255.0));
 	srand(time(NULL));
 
 	// create drawstate + image
 	ds = drawstate_create();
+	ds->shade=ShadeDepth;
 	src = image_create( rows, cols );
 
 	// set up the view
-	point_set3D( &(view.vrp), 0, 45, -60);
+	point_set3D( &(view.vrp), 0, 45, -70);
 	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 	vector_set( &(view.vup), 0, 1, 0 );
 	view.d = 5;
 	view.du = 6;
 	view.f = 1;
-	view.b = 100;
+	view.b = 150;
 	view.screenx = cols;
 	view.screeny = rows;
 
@@ -290,16 +294,51 @@ int main(int argc, char *argv[]) {
 	matrix_identity( &gtm );
 
 	for (frame=0; frame<60; frame++){
-		tower = module_create();
-		tower = genTower(0, 0, 0);
+		tower0 = module_create();
+		tower0 = genTower(-50, 0, 0);
+		tower1 = module_create();
+		tower1 = genTower(0, 0, 0);
+		tower2 = module_create();
+		tower2 = genTower(0, 0, -50);
+		tower3 = module_create();
+		tower3 = genTower(-50, 0, -50);
 		flames[frame] = module_create();
 		flames[frame] = genFire(0, 25, 0, 4, ds);
+		wall = module_create();
+		module_scale(wall, 50, 23, 1);
+		module_translate(wall, 25, 10, 0);
+		module_rotateY((Module*)wall, 0, 1);
+		module_color((Module*)wall, &dkGrey);
+		module_cube(wall, 1);
+		module_draw(wall, &vtm, &gtm, ds, NULL, src);
+		wall = module_create();
+		module_scale(wall, 50, 23, 1);
+		module_translate(wall, -25, 10, 0);
+		module_color((Module*)wall, &dkGrey);
+		module_cube(wall, 1);
+		module_draw(wall, &vtm, &gtm, ds, NULL, src);
+		wall = module_create();
+		module_scale(wall, 50, 23, 1);
+		module_translate(wall, 25, 10, -50);
+		module_rotateY((Module*)wall, 0, 1);
+		module_color((Module*)wall, &dkGrey);
+		module_cube(wall, 1);
+		module_draw(wall, &vtm, &gtm, ds, NULL, src);
+		wall = module_create();
+		module_scale(wall, 50, 23, 1);
+		module_translate(wall, -25, 10, -50);
+		module_color((Module*)wall, &dkGrey);
+		module_cube(wall, 1);
+		module_draw(wall, &vtm, &gtm, ds, NULL, src);
 
 		char buffer[256];
 		matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
 		// draw tower and flames
-		module_draw( tower, &vtm, &gtm, ds, NULL, src );
 		module_draw( flames[frame], &vtm, &gtm, ds, NULL, src);
+		module_draw( tower0, &vtm, &gtm, ds, NULL, src );
+		module_draw( tower1, &vtm, &gtm, ds, NULL, src );
+		module_draw( tower2, &vtm, &gtm, ds, NULL, src );
+		module_draw( tower3, &vtm, &gtm, ds, NULL, src );
 
 		// write out image
 		sprintf(buffer, "tower-frame%03d.ppm", frame);
@@ -324,10 +363,14 @@ int main(int argc, char *argv[]) {
 	// free drawstate, image, modules
 	free(ds);
 	image_free(src);
-	module_delete(tower);
+	module_delete(tower0);
+	module_delete(tower1);
+	module_delete(tower2);
+	module_delete(tower3);
+	module_delete(wall);
 
 	for (frame = 0; frame < 60; frame++){
-		module_delete(&(flames[frame]));
+		module_delete(flames[frame]);
 	}
 
 	return(0);
