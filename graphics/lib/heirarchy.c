@@ -596,17 +596,6 @@ void module_cube(Module *md, int solid){
 	Vector tn[4], front, back, left, right, top, bottom;
 	int i;
 	
-  // test9a:	
-  // the example cube is blue (Y/-Y), red (Z/-Z), yellow (X/-X)
-  // these colors should be the body colors
-	Color Grey;
-	Color Dark;
-	color_set(&Grey, 0.6, 0.65, 0.67 );
-	color_set(&Dark, 0.2, 0.2, 0.2 );
-	module_surfaceColor( md, &Dark );
-	module_bodyColor( md, &Dark );
-  // test9a:	
-	
 	// initialize polygon
 	polygon_init( &p );
 	polygon_setSided( &p, 0 );
