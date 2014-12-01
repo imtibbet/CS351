@@ -136,7 +136,7 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
 								invlenLplusV*(L.val[1] + V->val[1]), 
 								invlenLplusV*(L.val[2] + V->val[2]) );
-				if(oneSided && vector_dot(&L, N) < 0){
+				if(!oneSided && vector_dot(&L, N) < 0){
 					N->val[0] *= -1;
 					N->val[1] *= -1;
 					N->val[2] *= -1;
@@ -167,7 +167,7 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
 								invlenLplusV*(L.val[1] + V->val[1]), 
 								invlenLplusV*(L.val[2] + V->val[2]) );
-				if(oneSided && vector_dot(&L, N) < 0){
+				if(!oneSided && vector_dot(&L, N) < 0){
 					N->val[0] *= -1;
 					N->val[1] *= -1;
 					N->val[2] *= -1;
@@ -198,7 +198,7 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
 								invlenLplusV*(L.val[1] + V->val[1]), 
 								invlenLplusV*(L.val[2] + V->val[2]) );
-				if(oneSided && vector_dot(&L, N) < 0){
+				if(!oneSided && vector_dot(&L, N) < 0){
 					N->val[0] *= -1;
 					N->val[1] *= -1;
 					N->val[2] *= -1;

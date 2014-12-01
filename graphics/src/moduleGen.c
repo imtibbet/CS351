@@ -183,6 +183,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 	// init
 	polygon_init(&temppolygon);
 	polyline_init(&temppolyline);
+	line_zBuffer(&templine, 1);
 	bezierCurve_init(&tempcurve);
 	bezierSurface_init(&tempsurface);
 
@@ -951,14 +952,10 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 				*pl[maxdef], *pg[maxdef];
 	ModuleItem 	*mod[maxdef];
 	Point temppts[maxpts];
-	Polyline temppolyline;
-	Polygon temppolygon;
 	float x, y, z;
 	Color background;
 
 	// init
-	polyline_init(&temppolyline);
-	polygon_init(&temppolygon);
 	ds = drawstate_create();
 	ds->shade = ShadeConstant;
 	color_set(&background, 0.0, 0.0, 0.0);
@@ -1178,6 +1175,7 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 						}
 					}
 				}
+				line_zBuffer(&(l[numlines++]->item.line), 1);
 				line_set(&(l[numlines++]->item.line), temppts[0], temppts[1]);
 			}
 			
@@ -1573,8 +1571,6 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 
 	// rest of the clean up
 	free(ds);
-	polygon_clear(&temppolygon);
-	polyline_clear(&temppolyline);
 	for(j=0;j<numcolors;j++){
 		if(verbose) printf("freeing color named %s\n", c[j]->name);
 		free(c[j]);

@@ -1058,7 +1058,7 @@ Polygon *polygon_create(){
 	}
 	
 	// initialize structure
-	p->oneSided =
+	p->oneSided = 0;
 	p->zBuffer = 1;
 	p->nVertex = 0;
 	p->color = 	NULL;
@@ -1095,7 +1095,7 @@ Polygon *polygon_createp(int numV, Point *vlist){
 	}
 	
 	// initialize structure
-	p->oneSided =
+	p->oneSided = 0;
 	p->zBuffer = 1;
 	p->nVertex = numV;
 	p->color = 	NULL;
@@ -1145,7 +1145,7 @@ void polygon_init(Polygon *p){
 	}
 	
 	// initialize structure
-	p->oneSided = 
+	p->oneSided = 0;
 	p->zBuffer = 1;
 	p->nVertex = 0;
 	p->color = 	NULL;
@@ -1211,7 +1211,7 @@ void polygon_clear(Polygon *p){
 	}
 	
 	// initialize structure
-	p->oneSided =
+	p->oneSided = 0;
 	p->zBuffer = 1;
 	p->nVertex = 0;
 	p->color = 	NULL;

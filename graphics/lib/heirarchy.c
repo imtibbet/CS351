@@ -598,7 +598,10 @@ void module_cube(Module *md, int solid){
 	
 	// initialize polygon
 	polygon_init( &p );
-	polygon_setSided( &p, 0 );
+	polygon_setSided( &p, 1 );
+	
+	// initialize line
+	line_zBuffer(&l, 1);
 	
 	// corners of a cube, centered at (0, 0, 0)
 	point_set3D( &v[0], -0.5, -0.5, -0.5 );
@@ -751,8 +754,13 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
     Line l;
     Element *e;
     int i;
-
-    polygon_init(&side);
+    
+	// initialize polygon
+	polygon_init( &side );
+	polygon_setSided( &side, 1 );
+	
+	// initialize line
+	line_zBuffer(&l, 1);
 
     // corners of the pyramid
     point_set3D(&v[0], -1, -1, -1 );
@@ -860,7 +868,13 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 	module_translate(mod, (float)x, (float)y, (float)z);
 	//printf("parameters set\n");
 
+	// initialize polygon
 	polygon_init( &p );
+	polygon_setSided( &p, 1 );
+	
+	// initialize line
+	line_zBuffer(&l, 1);
+	
 	point_set3D( &xtop, 0, 1.0, 0.0 );
 	point_set3D( &xbot, 0, 0.0, 0.0 );
 
@@ -983,7 +997,13 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 	module_translate(mod, (float)x, (float)y, (float)z);
 	printf("parameters set\n");
 
+	// initialize polygon
 	polygon_init( &p );
+	polygon_setSided( &p, 1 );
+	
+	// initialize line
+	line_zBuffer(&l, 1);
+	
 	point_set3D( &xtop, 0, 1.0, 0.0 );
 	point_set3D( &xbot, 0, 0.0, 0.0 );
 
@@ -1165,6 +1185,12 @@ void module_bezierCurve(Module *m, BezierCurve *b, int divisions){
 		return;
 	}
 	
+	// initialize line
+	line_zBuffer(&tempLine, b->zBuffer);
+	
+	// initialize temporary curve
+	tempbez.zBuffer = b->zBuffer;
+	
 	// base case, add six lines to module
 	if(divisions == 0){
 		line_set(&tempLine, b->c[0], b->c[1]);
@@ -1204,6 +1230,16 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 		printf("Null passed to module_bezierSurface\n");
 		return;
 	}
+	
+	// initialize polygon
+	polygon_setSided( temptri, 0 );
+	polygon_zBuffer(temptri, b->zBuffer);
+	
+	// initialize line
+	line_zBuffer(&tempLine, b->zBuffer);
+	
+	// initialize temporary surface
+	tempBezSurf.zBuffer = b->zBuffer;
 	
 	// base case
 	if(divisions == 0){

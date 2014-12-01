@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
   // this would color the cube in ShadeConstant mode
   module_color( cube, &Grey );
   //module_surfaceColor( cube, &lGrey ); //Ian added
-  module_bodyColor( cube, &Grey ); //Ian added
+  //module_bodyColor( cube, &Grey ); //Ian added
 
   // the example cube is blue (Y/-Y), red (Z/-Z), yellow (X/-X)
   // these colors should be the body colors
