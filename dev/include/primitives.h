@@ -3,10 +3,10 @@
 #define PRIMITIVES_H
 
 #include "point.h"
-#include "drawstate.h"
 #include "color.h"
 #include "image.h"
 #include "list.h"
+#include "drawstate.h"
 #include "lighting.h"
 
 typedef struct {

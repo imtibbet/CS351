@@ -11,6 +11,7 @@
 
 #include <math.h>
 #include "point.h"
+#include "transform.h"
 #include "color.h"
 #include "image.h"
 
@@ -40,6 +41,11 @@ typedef struct {
 } Lighting;
 
 // Light functions
+
+/*
+ * allocate and return a new light structure set to default values.
+ */
+Light *light_create( void );
 
 /*
  * initialize the light to default values.

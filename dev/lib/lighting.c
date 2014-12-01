@@ -168,7 +168,9 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 					N->val[1] *= -1;
 					N->val[2] *= -1;
 				}
+
 				LdotN = vector_dot(&L, N);
+				
 				if(LdotN > 0){
 					HdotNpowS = pow(vector_dot(&H, N), s);
 					curc.c[0] += 	(Cb->c[0] * l->light[i].color.c[0] * LdotN + 
