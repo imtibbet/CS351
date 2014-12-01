@@ -4,8 +4,10 @@
  *
  * The bezier curve and surfaces
  */
-
-#include "graphics.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "bezier.h"
 
 /*
  * sets the zbuffer flag to 1 and the curve points to the X-axis between 0 and 1.

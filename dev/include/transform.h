@@ -2,6 +2,8 @@
 
 #define TRANSFORM_H
 
+#include "primitives.h"
+
 typedef struct {
 	float m[4][4];
 } Matrix;
@@ -79,6 +81,9 @@ double vector_length(Vector *v);
  * Normalize the Vector to unit length. Do not modify the homogeneous coordinate.
  */
 void vector_normalize(Vector *v);
+
+/** average p1 and p2 x, y, z values and put results in dest, set homogeneous to 0 **/
+void vector_avg(Vector *dest, Vector *p1, Vector *p2);
 
 /*
  * Returns the scalar product of a and b

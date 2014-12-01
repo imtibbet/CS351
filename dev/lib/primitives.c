@@ -5,7 +5,10 @@
  * The color function implementations
  */
 
-#include "graphics.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "primitives.h"
 const float epsilon = 0.000001;
 
 // POINT
@@ -1447,6 +1450,8 @@ void polygon_copy(Polygon *to, Polygon *from){
 	}
 	
 	// copy the points to destination
+	to->oneSided = from->oneSided;
+	to->zBuffer = from->zBuffer;
 	to->nVertex = from->nVertex;
 	for(i=0;i<(to->nVertex);i++){
 		to->vertex[i] = from->vertex[i];
@@ -1506,7 +1511,8 @@ typedef struct tEdge {
 	int yStart, yEnd;               /* start row and end row */
 	/* where the edge intersects the current scanline and how it changes */
 	float xIntersect, dxPerScan;    
-	float zIntersect, dzPerScan; 
+	float zIntersect, dzPerScan;  
+	Color cIntersect, dcPerScan; 
 	
 	/* we'll add more here later */
 	struct tEdge *next;
@@ -1551,12 +1557,12 @@ static int compXIntersect( const void *a, const void *b ) {
 	Eventually, the points will be 3D and we'll add color and texture
 	coordinates.
  */
-static Edge *makeEdgeRec( Point start, Point end, Image *src)
+static Edge *makeEdgeRec( Point start, Point end, Color c1, Color c2, Image *src)
 {
 	Edge *edge;
 	float dx = end.val[0] - start.val[0];
 	float dy = end.val[1] - start.val[1];
-	float dz = 1/(end.val[2]) - 1/(start.val[2]);//Proj8
+	float dz = 1/(end.val[2]) - 1/(start.val[2]);
 	float xAdjust, vyMinusFloor;
 
 	// Check if the starting row is below the image or the end row is
@@ -1572,7 +1578,6 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 	edge->x1 = end.val[0];
 	edge->y0 = start.val[1];
 	edge->y1 = end.val[1];
-	edge->zIntersect = 1/(start.val[2]);//Proj8
 	
 	// define adjust, used to round
 	// turn on an edge only if the edge starts in the top half of it or
@@ -1595,7 +1600,10 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 
 	// Calculate the slope, dxPerScan
 	edge->dxPerScan = dx/dy;
-	edge->dzPerScan = dz/dy;//Proj8
+	edge->dzPerScan = dz/dy;
+	edge->dcPerScan.c[0] = ( c2.c[0]/end.val[2] - c1.c[0]/start.val[2] ) / dy;
+	edge->dcPerScan.c[1] = ( c2.c[1]/end.val[2] - c1.c[1]/start.val[2] ) / dy;
+	edge->dcPerScan.c[2] = ( c2.c[2]/end.val[2] - c1.c[2]/start.val[2] ) / dy;
 	
 	// Calculate xIntersect, adjusting for the fraction of the point in the pixel.
 	// Scanlines go through the middle of pixels
@@ -1607,6 +1615,10 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 		xAdjust = 0.5 - vyMinusFloor;
 	}
 	edge->xIntersect = edge->x0 + xAdjust*edge->dxPerScan;
+	edge->zIntersect = 1/start.val[2];
+	edge->cIntersect.c[0] = c1.c[0]*edge->zIntersect;
+	edge->cIntersect.c[1] = c1.c[1]*edge->zIntersect;
+	edge->cIntersect.c[2] = c1.c[2]*edge->zIntersect;
 	
 	// adjust if the edge starts above the image
 	// move the intersections down to scanline zero
@@ -1615,7 +1627,10 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 		//printf("row clipping top\n");
 		// update xIntersect
 		edge->xIntersect += (-edge->y0)*edge->dxPerScan;
-		edge->zIntersect += (-edge->y0)*edge->dzPerScan;//Proj8
+		edge->zIntersect += (-edge->y0)*edge->dzPerScan;
+		edge->cIntersect.c[0] += (-edge->y0)*edge->dcPerScan.c[0];
+		edge->cIntersect.c[1] += (-edge->y0)*edge->dcPerScan.c[1];
+		edge->cIntersect.c[2] += (-edge->y0)*edge->dcPerScan.c[2];
 		// update y0
 		edge->y0 = 0.0;
 		// update x0
@@ -1644,6 +1659,7 @@ static Edge *makeEdgeRec( Point start, Point end, Image *src)
 static LinkedList *setupEdgeList( Polygon *p, Image *src) {
 	LinkedList *edges = NULL;
 	Point v1, v2;
+	Color c1, c2;
 	int i;
 
 	// create a linked list
@@ -1651,27 +1667,36 @@ static LinkedList *setupEdgeList( Polygon *p, Image *src) {
 
 	// walk around the polygon, starting with the last point
 	v1 = p->vertex[p->nVertex-1];
+	if(p->color)
+		c1 = p->color[p->nVertex-1];
+	else
+		color_set( &c1, 1.0, 1.0, 1.0 );
 
 	for(i=0;i<p->nVertex;i++) {
 		
 		// the current point (i) is the end of the segment
 		v2 = p->vertex[i];
-
+		if(p->color)
+			c2 = p->color[i];
+		else
+			color_set( &c2, 1.0, 1.0, 1.0 );
+				
 		// if it is not a horizontal line
 		if( (int)(v1.val[1]+0.5) != (int)(v2.val[1]+0.5) ) {
 			Edge *edge;
 
 			// if the first coordinate is smaller (top edge)
 			if( v1.val[1] < v2.val[1] )
-				edge = makeEdgeRec( v1, v2, src );
+				edge = makeEdgeRec( v1, v2, c1, c2, src );
 			else
-				edge = makeEdgeRec( v2, v1, src );
+				edge = makeEdgeRec( v2, v1, c1, c2, src );
 
 			// insert the edge into the list of edges if it's not null
 			if( edge )
 				ll_insert( edges, edge, compYStart );
 		}
 		v1 = v2;
+		c1 = c2;
 	}
 
 	// check for empty edges (like nothing in the viewport)
@@ -1690,10 +1715,10 @@ static LinkedList *setupEdgeList( Polygon *p, Image *src) {
 static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate) {
 	Edge *p1, *p2;
 	int i, f;
-	float curZ, dzPerColumn;//Proj8
+	float curZ, dzPerColumn;
 	DrawState *ds = (DrawState *)drawstate;
-	Color c = ds->color;//Proj8
-	Color tempc;
+	Color c = ds->color;
+	Color tempc, curc, dcPerColumn;
 
 	// loop over the list
 	p1 = ll_head( active );
@@ -1720,9 +1745,13 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 		// identify the ending column
 		f=(int)(p2->xIntersect);
 		
-		// compute dzPerColumn and zIntersect using p1 and p2
-		curZ=p1->zIntersect;//Proj8
-		dzPerColumn = (p2->zIntersect - p1->zIntersect)/(f - i);//Proj8
+		// compute dc\dzPerColumn and c\zIntersect using p1 and p2
+		curZ = p1->zIntersect;
+		curc = p1->cIntersect;
+		dzPerColumn = (p2->zIntersect - p1->zIntersect)/(f - i);
+		dcPerColumn.c[0] = (p2->cIntersect.c[0] - p1->cIntersect.c[0])/(f - i);
+		dcPerColumn.c[1] = (p2->cIntersect.c[1] - p1->cIntersect.c[1])/(f - i);
+		dcPerColumn.c[2] = (p2->cIntersect.c[2] - p1->cIntersect.c[2])/(f - i);
 		
 		//printf("p2zint=%0.3f,p1zint=%0.3f,dzper=%0.3f\n",p2->zIntersect,p1->zIntersect, dzPerColumn);
 		//printf("p2xint=%0.3f,p1xint=%0.3f\n",p2->xIntersect,p1->xIntersect);
@@ -1731,7 +1760,10 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 		if(i<0){
 			//printf(" clipping left ");
 			// update curZ if edge starts outside image
-			curZ += -i*dzPerColumn;//Proj8 
+			curZ += -i*dzPerColumn; 
+			curc.c[0] += -i*dcPerColumn.c[0]; 
+			curc.c[1] += -i*dcPerColumn.c[1]; 
+			curc.c[2] += -i*dcPerColumn.c[2]; 
 			i=0;
 		}
 		
@@ -1742,14 +1774,23 @@ static void fillScan( int scan, LinkedList *active, Image *src, void *drawstate)
 		}
 		
 		// loop from start to end and color in the pixels
-		for(;i<f;i++, curZ+=dzPerColumn){//Proj8 
+		for(;i<f;i++, 	curZ += dzPerColumn,
+						curc.c[0] += dcPerColumn.c[0], 
+						curc.c[1] += dcPerColumn.c[1], 
+						curc.c[2] += dcPerColumn.c[2] ){
 			if(curZ > image_getz(src, scan, i)){// back clip plane
 				image_setz(src, scan, i, curZ);// update z buffer if drawing 
 				switch(ds->shade){
-					case ShadeDepth:// shade by depth using z=1/(1/z) 
+					case ShadeDepth:// shade by depth using 1-z=1-1/(1/z) 
 						tempc.c[0] = c.c[0]*(1-1/curZ);
 						tempc.c[1] = c.c[1]*(1-1/curZ);
 						tempc.c[2] = c.c[2]*(1-1/curZ);
+						break;
+					case ShadeFlat:
+					case ShadeGouraud:// interpolate vertex color c=(c/z)/(1/z)
+						tempc.c[0] = curc.c[0]/curZ;
+						tempc.c[1] = curc.c[1]/curZ;
+						tempc.c[2] = curc.c[2]/curZ;
 						break;
 					case ShadeConstant:// use single color by default
 					default:
@@ -1811,7 +1852,10 @@ static int processEdgeList( LinkedList *edges, Image *src, void *drawstate) {
 
 				// update the edge information with the dPerScan values
 				tedge->xIntersect += tedge->dxPerScan;
-				tedge->zIntersect += tedge->dzPerScan;//Proj8
+				tedge->zIntersect += tedge->dzPerScan;
+				tedge->cIntersect.c[0] += tedge->dcPerScan.c[0];
+				tedge->cIntersect.c[1] += tedge->dcPerScan.c[1];
+				tedge->cIntersect.c[2] += tedge->dcPerScan.c[2];
 
 				// adjust in the case of partial overlap
 				if( tedge->dxPerScan < 0.0 && tedge->xIntersect < tedge->x1 ) {
@@ -1843,7 +1887,7 @@ static int processEdgeList( LinkedList *edges, Image *src, void *drawstate) {
 /*
 	Draws a filled polygon of the specified color into the image src.
  */
-void polygon_drawFill(Polygon *p, Image *src, void *drawstate) {
+void polygon_drawFill(Polygon *p, Image *src, DrawState *drawstate) {
 	LinkedList *edges = NULL;
 
 	// set up the edge list
@@ -1863,6 +1907,56 @@ void polygon_drawFill(Polygon *p, Image *src, void *drawstate) {
 /****************************************
 End Scanline Fill
 *****************************************/
+
+/*
+ * draw the polygon using the given DrawState. 
+ * The shade field of the DrawState determines how the polygon should be rendered. 
+ * The Lighting parameter should be NULL unless you are doing Phong shading
+ */
+void polygon_drawShade(Polygon *p, Image *src, DrawState *drawstate, Lighting *lighting){
+	DrawState *ds = (DrawState *)drawstate;
+	Lighting *light = (Lighting *)lighting;
+
+	// check for badly formed p
+	if(p){
+		if(!p->vertex){
+			printf("Null vertices in p in polygon_drawShade\n");
+			return;
+		}
+	} else {
+		printf("Null p in polygon_drawShade\n");
+		return;
+	}
+	if (p->nVertex < 3){
+		printf("can't draw a polygon with less than three points in polygon_drawShade\n");
+		return;
+	}
+	
+	switch(ds->shade){
+		// Draw only the outline of the polygon using the DrawState color field
+		case ShadeFrame:
+			polygon_draw(p, src, ds->color);
+			break;
+		// fill the polygon with the DrawState color field c
+		case ShadeConstant:
+			polygon_drawFillB(p, src, ds->color);
+			break;
+		// fill the polygon based on the depth value, 
+		case ShadeDepth:
+			polygon_drawFill(p, src, ds);
+		// use color at a vertex to fill polygon
+		case ShadeFlat:
+			polygon_shade(p, light, ds);
+			break;
+		// interpolate color at each vertex to fill polygon
+		case ShadeGouraud:
+			polygon_shade(p, light, ds);
+			break;
+		default:
+			polygon_drawFill(p, src, drawstate);
+			break;
+	}
+}
 
 /*
  * draw the outline of the polygon using color c.
@@ -1966,59 +2060,6 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
     }    
 }
 
-
-/*
- * draw the filled polygon using the given DrawState. 
- * The shade field of the DrawState determines how the polygon should be rendered. 
- * The Lighting parameter should be NULL unless you are doing Phong shading
- */
-void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting){
-	DrawState *ds = (DrawState *)drawstate;
-	Lighting *light = (Lighting *)lighting;
-
-	// check for badly formed p
-	if(p){
-		if(!p->vertex){
-			printf("Null vertices in p in polygon_drawShade\n");
-			return;
-		}
-	} else {
-		printf("Null p in polygon_drawShade\n");
-		return;
-	}
-	if (p->nVertex < 3){
-		printf("can't draw a polygon with less than three points in polygon_drawShade\n");
-		return;
-	}
-	
-	switch(ds->shade){
-		// Draw only the outline of the polygon using the DrawState color field
-		case ShadeFrame:
-			polygon_draw(p, src, ds->color);
-			break;
-		// fill the polygon with the DrawState color field (c
-		case ShadeConstant:
-			polygon_drawFillB(p, src, ds->color);
-			break;
-		// fill the polygon based on the depth value 
-		case ShadeDepth:
-		// fill the polygon with a single color resulting from a shading calculation
-		case ShadeFlat:
-			polygon_shade(p, lighting, drawstate);
-			break;
-		// fill the polygon using a Gouraud shading method and the colors in the polygon
-		case ShadeGouraud:
-			polygon_shade(p, lighting, drawstate);
-			break;
-		// shading method based on the normals in the polygon data structure, the 
-		// parameters in the DrawState, and lighting in the Lighting data structure
-		case ShadePhong:
-		default:
-			polygon_drawFill(p, src, drawstate);
-			break;
-	}
-}
-
 /*
  * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
  * calculate colors at each vertex and create and fill out the color array of 
@@ -2027,28 +2068,61 @@ void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting){
  * vertex to the calculated value. 
  * For ShadeGouraud use the surface normals and locations of each vertex
  */
-void polygon_shade(Polygon *p, void *lighting, void *drawstate){
+void polygon_shade(Polygon *p, Lighting *lighting, DrawState *drawstate){
 	DrawState *ds = (DrawState *)drawstate;
 	Lighting *light = (Lighting *)lighting;
-	float snormal;
+	Point tempVert;
+	Vector V, tempNorm;
+	int i;
+	Color destc, setColors[p->nVertex];
 
+	printf("body (%.3f, %.3f, %.3f) surface (%.3f, %.3f, %.3f)\n",
+			ds->body.c[0], ds->body.c[1], ds->body.c[2], 
+			ds->surface.c[0], ds->surface.c[1], ds->surface.c[2]);
 	/*
 	 * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
 	 * calculate colors at each vertex and create and fill out the color array of 
 	 * the Polygon data structure.
 	 */
 	switch(ds->shade){
-	
 		/*
 		 * For ShadeFlat, use the average surface normal and average polygon
 		 * location to calculate one color and set the color at each 
 		 * vertex to the calculated value.
 		 */
 		case ShadeFlat:
-			
+			printf("ShadeFlat\n");
+			point_copy(&tempVert, &(p->vertex[0]));
+			vector_copy(&tempNorm, &(p->normal[0]));
+			for (i = 1; i < p->nVertex; i++) {
+				point_avg(&tempVert, &tempVert, &(p->vertex[i]));
+				vector_avg(&tempNorm, &tempNorm, &(p->normal[i]));
+			}
+			vector_set(&V, 	ds->viewer.val[0] - tempVert.val[0],
+							ds->viewer.val[1] - tempVert.val[1],
+							ds->viewer.val[2] - tempVert.val[2] );
+			lighting_shading(light, &tempNorm, &V, &tempVert, 
+							&(ds->body), &(ds->surface), ds->surfaceCoeff, 
+							p->oneSided, &destc);
+			for (i = 0; i < p->nVertex; i++) {
+				color_copy(&(setColors[i]), &destc);
+			}
+			polygon_setColors(p, p->nVertex, setColors);
 			break;
+
 		// For ShadeGouraud use the surface normals and locations of each vertex
 		case ShadeGouraud:
+			printf("ShadeGouraud\n");
+			for (i = 0; i < p->nVertex; i++) {
+				vector_set(&V, 	ds->viewer.val[0] - p->vertex[i].val[0],
+								ds->viewer.val[1] - p->vertex[i].val[1],
+								ds->viewer.val[2] - p->vertex[i].val[2] );
+				lighting_shading(light, &(p->normal[i]), &V, &(p->vertex[i]), 
+								&(ds->body), &(ds->surface), ds->surfaceCoeff, 
+								p->oneSided, &destc);
+				color_copy(&(setColors[i]), &destc);
+			}
+			polygon_setColors(p, p->nVertex, setColors);
 			break;
 		default:
 			break;
