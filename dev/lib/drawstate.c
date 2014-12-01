@@ -4,8 +4,10 @@
  *
  * The heirarchical model
  */
-
-#include "graphics.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "drawstate.h"
 
 // Draw State
 

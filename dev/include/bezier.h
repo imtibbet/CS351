@@ -2,6 +2,8 @@
 
 #define BEZIER_H
 
+#include "primitives.h"
+
 typedef struct {
 	Point c[4];
 	int zBuffer;

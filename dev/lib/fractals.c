@@ -4,8 +4,12 @@ Date: 9/17/2014
 
 The fractal functions for project 2
 */
-
-#include "graphics.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+#include "fractals.h"
 
 /*
  * draws the complex plane at x0, y0 with width dx onto the destination image

@@ -2,11 +2,12 @@
 
 #define PRIMITIVES_H
 
-typedef struct {
-	double val[4]; // four element vector of doubles
-} Point;
-
-typedef Point Vector;
+#include "point.h"
+#include "color.h"
+#include "image.h"
+#include "list.h"
+#include "drawstate.h"
+#include "lighting.h"
 
 typedef struct {
 	int zBuffer; // whether to use the z-buffer, should default to true (1)
@@ -253,7 +254,7 @@ void polygon_draw(Polygon *p, Image *src, Color c);
 /*
  * draw the filled polygon using color c with the scanline rendering algorithm.
  */
-void polygon_drawFill(Polygon *p, Image *src, void *drawstate);
+void polygon_drawFill(Polygon *p, Image *src, DrawState *drawstate);
 
 /*
  * draw the filled polygon using color c with the Barycentric coordinates algorithm.
@@ -265,7 +266,7 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c);
  * The shade field of the DrawState determines how the polygon should be rendered. 
  * The Lighting parameter should be NULL unless you are doing Phong shading
  */
-void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting);
+void polygon_drawShade(Polygon *p, Image *src, DrawState *drawstate, Lighting *lighting);
 
 /*
  * For the Shade-Flat and ShadeGouraud cases of the shade field of DrawState, 
@@ -275,7 +276,7 @@ void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting);
  * vertex to the calculated value. 
  * For ShadeGouraud use the surface normals and locations of each vertex
  */
-void polygon_shade(Polygon *p, void *lighting, void *drawstate);
+void polygon_shade(Polygon *p, Lighting *lighting, DrawState *drawstate);
 
 
 #endif

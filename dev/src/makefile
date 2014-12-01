@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = req9_0
+EXECUTABLES = testLighting_shading test9a test9b test9c test9d
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = req9_0.o
+_OBJ = testLighting_shading.o test9a.o test9b.o test9c.o test9d.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -180,6 +180,8 @@ test8a: $(ODIR)/test8a.o
 cubism: $(ODIR)/cubism.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 # proj 9
+testLighting_shading: $(ODIR)/testLighting_shading.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 test9a: $(ODIR)/test9a.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 test9b: $(ODIR)/test9b.o
@@ -187,8 +189,6 @@ test9b: $(ODIR)/test9b.o
 test9c: $(ODIR)/test9c.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 test9d: $(ODIR)/test9d.o
-	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
-req9_0: $(ODIR)/req9_0.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
