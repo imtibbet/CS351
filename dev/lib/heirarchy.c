@@ -1050,12 +1050,7 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 	line_zBuffer(&l, 1);
 	
 	point_set3D( &xtop, 0, 1.0, 0.0 );
-	vector_copy( &pt[0], &top );
-	polygon_setNormals( &p, 1, pt );
-
 	point_set3D( &xbot, 0, 0.0, 0.0 );
-	vector_copy( &pt[1], &bottom );
-	polygon_setNormals( &p, 1, pt );
 
 	if (fill == 1){
 		// make a fan for the top and bottom sides
