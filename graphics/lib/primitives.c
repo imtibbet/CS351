@@ -2082,17 +2082,17 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 			point_copy(&avgLocation, &(p->vertex[0]));
 			vector_copy(&avgNormal, &(p->normal[0]));
 			for (i = 1; i < p->nVertex; i++) {
-				point_set(&avgLocation, avgLocation.val[0] + p->vertex[i].val[0],
+				point_set3D(&avgLocation, avgLocation.val[0] + p->vertex[i].val[0],
 										avgLocation.val[1] + p->vertex[i].val[1],
 										avgLocation.val[2] + p->vertex[i].val[2] );
-				point_set(&avgNormal, 	avgNormal.val[0] + p->vertex[i].val[0],
+				point_set3D(&avgNormal, avgNormal.val[0] + p->vertex[i].val[0],
 										avgNormal.val[1] + p->vertex[i].val[1],
 										avgNormal.val[2] + p->vertex[i].val[2] );
 			}
-			point_set(&avgLocation, avgLocation.val[0] / p->nVertex,
+			point_set3D(&avgLocation, avgLocation.val[0] / p->nVertex,
 									avgLocation.val[1] / p->nVertex,
 									avgLocation.val[2] / p->nVertex );
-			point_set(&avgNormal, 	avgNormal.val[0] / p->nVertex,
+			point_set3D(&avgNormal, avgNormal.val[0] / p->nVertex,
 									avgNormal.val[1] / p->nVertex,
 									avgNormal.val[2] / p->nVertex );
 			vector_set(&V, 	ds->viewer.val[0] - avgLocation.val[0],
