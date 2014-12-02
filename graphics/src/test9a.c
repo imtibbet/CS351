@@ -22,7 +22,6 @@ int main(int argc, char *argv[]) {
 
   Color White;
   Color Grey;
-  Color lGrey;
 
   DrawState *ds;
   View3D view;
@@ -31,7 +30,6 @@ int main(int argc, char *argv[]) {
 
 	color_set( &White, 1.0, 1.0, 1.0 );
 	color_set( &Grey, 0.6, 0.62, 0.64 );
-	color_set( &lGrey, 0.2, 0.2, 0.2 ); // Ian added
 
   // initialize the image
   src = image_create(rows, cols);
@@ -63,8 +61,6 @@ int main(int argc, char *argv[]) {
 
   // this would color the cube in ShadeConstant mode
   module_color( cube, &Grey );
-  //module_surfaceColor( cube, &lGrey ); //Ian added
-  //module_bodyColor( cube, &Grey ); //Ian added
 
   // the example cube is blue (Y/-Y), red (Z/-Z), yellow (X/-X)
   // these colors should be the body colors

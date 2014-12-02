@@ -345,7 +345,32 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 	Module *thickLineMod = module_create();			
 	Element *thickLineE;
 	float dx, dy, dz, lineLength;
-	Vector u, v, w;*/
+	Vector u, v, w;
+	
+				// in ObjLine case statement
+				if(antialias){
+					dx = tempLine.b.val[0]-tempLine.a.val[0];
+					dy = tempLine.b.val[1]-tempLine.a.val[1];
+					dz = tempLine.b.val[2]-tempLine.a.val[2];
+					lineLength = sqrt(dx*dx+dy*dy+dz*dz);
+					module_scale( thickLineMod, 1, lineLength, 1 );
+					vector_set(&v, dx, dy, dz);
+					vector_normalize(&v);
+					vector_set(&u, -dz, dx, dy);
+					vector_cross(&u, &v, &w);
+					vector_cross(&v, &w, &u);
+					vector_normalize(&u);
+					vector_normalize(&w);
+					module_rotateXYZ( thickLineMod, &u, &v, &w );
+					module_translate( thickLineMod,	tempLine.a.val[0], 
+													tempLine.a.val[1], 
+													tempLine.a.val[2] );
+					module_cylinder( thickLineMod, 4, 1, 1, 0, 0, 0 );
+					thickLineE = element_init(ObjModule, thickLineMod);
+					thickLineE->next = e->next;
+					e->next = thickLineE;
+				}
+	*/
 	
 	// all locally needed variables
 	Matrix LTM, tempGTM;
@@ -385,28 +410,6 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				line_normalize(&tempLine);
 				line_draw(&tempLine, src, ds->color);
 				if(verbose) line_print(&tempLine, stdout);
-				/*if(antialias){
-					dx = tempLine.b.val[0]-tempLine.a.val[0];
-					dy = tempLine.b.val[1]-tempLine.a.val[1];
-					dz = tempLine.b.val[2]-tempLine.a.val[2];
-					lineLength = sqrt(dx*dx+dy*dy+dz*dz);
-					module_scale( thickLineMod, 1, lineLength, 1 );
-					vector_set(&v, dx, dy, dz);
-					vector_normalize(&v);
-					vector_set(&u, -dz, dx, dy);
-					vector_cross(&u, &v, &w);
-					vector_cross(&v, &w, &u);
-					vector_normalize(&u);
-					vector_normalize(&w);
-					module_rotateXYZ( thickLineMod, &u, &v, &w );
-					module_translate( thickLineMod,	tempLine.a.val[0], 
-													tempLine.a.val[1], 
-													tempLine.a.val[2] );
-					module_cylinder( thickLineMod, 4, 1, 1, 0, 0, 0 );
-					thickLineE = element_init(ObjModule, thickLineMod);
-					thickLineE->next = e->next;
-					e->next = thickLineE;
-				}*/
 				break;
 			case ObjPolyline:
 				if(verbose) printf("drawing ObjPolyline\n");

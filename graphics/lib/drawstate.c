@@ -23,8 +23,8 @@ DrawState *drawstate_create(){
 	color_set(&(ds->color), 1.0, 1.0, 1.0);
 	color_set(&(ds->flatColor), 1.0, 1.0, 1.0);
 	color_set(&(ds->body), 1.0, 1.0, 1.0);
-	color_set(&(ds->surface), 0.2, 0.2, 0.2);
-	ds->surfaceCoeff = 0;
+	color_set(&(ds->surface), 0.1, 0.1, 0.1);
+	ds->surfaceCoeff = 10;
 	ds->shade = ShadeConstant;
 	ds->zBufferFlag = 1;
 	point_set3D(&(ds->viewer), 0.0, 0.0, 0.0);
