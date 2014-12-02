@@ -822,7 +822,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 		vector_copy( &tn[0], &front );
 		vector_copy( &tn[1], &front );
 		vector_copy( &tn[2], &front );
-		polygon_setNormals( &p, 3, tn );
+		polygon_setNormals( &side, 3, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -834,7 +834,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 		vector_copy( &tn[0], &back );
 		vector_copy( &tn[1], &back );
 		vector_copy( &tn[2], &back );
-		polygon_setNormals( &p, 3, tn );
+		polygon_setNormals( &side, 3, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -844,7 +844,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 		vector_copy( &tn[1], &bottom );
 		vector_copy( &tn[2], &bottom );
 		vector_copy( &tn[3], &bottom );
-		polygon_setNormals( &p, 4, tn );
+		polygon_setNormals( &side, 4, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -856,7 +856,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 		vector_copy( &tn[0], &left );
 		vector_copy( &tn[1], &left );
 		vector_copy( &tn[2], &left );
-		polygon_setNormals( &p, 3, tn );
+		polygon_setNormals( &side, 3, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -868,7 +868,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 		vector_copy( &tn[0], &right );
 		vector_copy( &tn[1], &right );
 		vector_copy( &tn[2], &right );
-		polygon_setNormals( &p, 3, tn );
+		polygon_setNormals( &side, 3, tn );
 		e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
