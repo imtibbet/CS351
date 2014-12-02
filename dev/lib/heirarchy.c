@@ -1026,7 +1026,7 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 void module_cone( Module *mod, int sides, int fill, int size, float x, float y, float z) {
 	Polygon p;
 	Point xtop, xbot;
-	Vector pt[6], top, side, bottom;
+	Vector pt[6], tn[6], top, side, bottom;
 	Element *e;
 	Line l;
 	double x1, x2, z1, z2;
@@ -1066,10 +1066,10 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 			point_set3D( &pt[1], x1, 0.0, z1 );
 			point_set3D( &pt[2], x2, 0.0, z2 );
 			polygon_set( &p, 3, pt );
-			vector_copy( &pt[0], &bottom );
-			vector_copy( &pt[1], &bottom );
-			vector_copy( &pt[2], &bottom );
-			polygon_setNormals( &p, 3, pt );
+			vector_copy( &tn[0], &bottom );
+			vector_copy( &tn[1], &bottom );
+			vector_copy( &tn[2], &bottom );
+			polygon_setNormals( &p, 3, tn );
 
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
@@ -1078,10 +1078,10 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 			point_set3D( &pt[4], x2, 0.0, z2 );
 			point_copy( &pt[5], &xtop);
 			polygon_set( &p, 3, &pt[3] );
-			vector_copy( &pt[0], &top );
-			vector_copy( &pt[1], &top );
-			vector_copy( &pt[2], &top );
-			polygon_setNormals( &p, 3, pt );
+			vector_copy( &tn[0], &top );
+			vector_copy( &tn[1], &top );
+			vector_copy( &tn[2], &top );
+			polygon_setNormals( &p, 3, tn );
 
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
