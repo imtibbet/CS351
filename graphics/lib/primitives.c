@@ -2067,8 +2067,8 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
 void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 	DrawState *ds = (DrawState *)drawstate;
 	Lighting *light = (Lighting *)lighting;
-	Point tempVert;
-	Vector V, tempNorm;
+	Point avgLocation;
+	Vector V, avgNormal;
 	int i;
 	Color destc, setColors[p->nVertex];
 
@@ -2089,16 +2089,26 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 		 */
 		case ShadeFlat:
 			//printf("ShadeFlat\n");
-			point_copy(&tempVert, &(p->vertex[0]));
-			vector_copy(&tempNorm, &(p->normal[0]));
+			point_copy(&avgLocation, &(p->vertex[0]));
+			vector_copy(&avgNormal, &(p->normal[0]));
 			for (i = 1; i < p->nVertex; i++) {
-				point_avg(&tempVert, &tempVert, &(p->vertex[i]));
-				vector_avg(&tempNorm, &tempNorm, &(p->normal[i]));
+				point_set(&avgLocation, avgLocation.val[0] + p->vertex[i].val[0],
+										avgLocation.val[1] + p->vertex[i].val[1],
+										avgLocation.val[2] + p->vertex[i].val[2] );
+				point_set(&avgNormal, 	avgNormal.val[0] + p->vertex[i].val[0],
+										avgNormal.val[1] + p->vertex[i].val[1],
+										avgNormal.val[2] + p->vertex[i].val[2] );
 			}
-			vector_set(&V, 	ds->viewer.val[0] - tempVert.val[0],
-							ds->viewer.val[1] - tempVert.val[1],
-							ds->viewer.val[2] - tempVert.val[2] );
-			lighting_shading(light, &tempNorm, &V, &tempVert, 
+			point_set(&avgLocation, avgLocation.val[0] / p->nVertex,
+									avgLocation.val[1] / p->nVertex,
+									avgLocation.val[2] / p->nVertex );
+			point_set(&avgNormal, 	avgNormal.val[0] / p->nVertex,
+									avgNormal.val[1] / p->nVertex,
+									avgNormal.val[2] / p->nVertex );
+			vector_set(&V, 	ds->viewer.val[0] - avgLocation.val[0],
+							ds->viewer.val[1] - avgLocation.val[1],
+							ds->viewer.val[2] - avgLocation.val[2] );
+			lighting_shading(light, &avgNormal, &V, &avgLocation, 
 							&(ds->body), &(ds->surface), ds->surfaceCoeff, 
 							p->oneSided, &destc);
 			for (i = 0; i < p->nVertex; i++) {
