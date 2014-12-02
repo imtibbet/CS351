@@ -80,7 +80,8 @@ int main(int argc, char *argv[]) {
   starfury = module_create();
   module_surfaceColor(starfury, &SurfaceColor);
   for(i=0;i < nPolygons;i++) {
-	  printf("%.2f %.2f %.2f\n", clist[i].c[0], clist[i].c[1], clist[i].c[2] );
+	  printf("color %.2f %.2f %.2f normal %.2f %.2f %.2f\n", clist[i].c[0], clist[i].c[1], clist[i].c[2]
+      , plist[i].normal.val[0], plist[i].normal.val[1], plist[i].normal.val[2] );
     module_bodyColor(starfury, &clist[i]);
     module_polygon(starfury, &(plist[i]));
   }

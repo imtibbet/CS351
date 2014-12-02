@@ -1616,16 +1616,6 @@ static Edge *makeEdgeRec( Point start, Point end, Color c1, Color c2, Image *src
 	edge->cIntersect.c[0] = c1.c[0]*edge->zIntersect + xAdjust*edge->dcPerScan.c[0];
 	edge->cIntersect.c[1] = c1.c[1]*edge->zIntersect + xAdjust*edge->dcPerScan.c[1];
 	edge->cIntersect.c[2] = c1.c[2]*edge->zIntersect + xAdjust*edge->dcPerScan.c[2];
-	  
-	if( edge->xIntersect > 350.0 && edge->yStart < 105 ) {
-    	printf("c1: %.2f %.2f %.2f\n", c1.c[0], c1.c[1], c1.c[2]);
-    	printf("c2: %.2f %.2f %.2f\n", c2.c[0], c2.c[1], c2.c[2]);
-  
-		printf("xIntersect, ystart: %.2f, %d\n", edge->xIntersect, edge->yStart);
-
-		printf("dcPerScan: %.5f, %.5f, %.5f\n", edge->dcPerScan.c[0], edge->dcPerScan.c[1], edge->dcPerScan.c[2]);
-		printf("cIntersect: %.2f, %.2f, %.2f\n", edge->cIntersect.c[0], edge->cIntersect.c[1], edge->cIntersect.c[2]);
-	}
 	
 	// adjust if the edge starts above the image
 	// move the intersections down to scanline zero
