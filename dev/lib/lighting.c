@@ -4,31 +4,12 @@
  *
  * The lighting function implementations
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "lighting.h"
+
+#include "graphics.h"
 
 //const int MAX_LIGHTS = 64;
 
 // Light functions
-
-/*
- * allocate and return a new light structure set to default values.
- */
-Light *light_create( void ){
-	Light *l = NULL;
-	l = malloc(sizeof(Light));
-	if(!l){
-		printf("malloc failed in lighting_create\n");
-		return(NULL);
-	}
-	l->type = LightNone;
-	l->cutoff = 0;
-	l->sharpness = 0;
-
-	return(l);
-}
 
 /*
  * initialize the light to default values.
@@ -89,8 +70,7 @@ void lighting_init( Lighting *l){
  */
 void lighting_add( Lighting *l, LightType type, Color *c, Vector *dir, 
 	Point *pos, float cutoff, float sharpness ){
-	Light *light = light_create();
-
+	Light light;
 	if(!l){
 		printf("Null lighting passed to lighting_add\n");
 		return;
@@ -98,21 +78,21 @@ void lighting_add( Lighting *l, LightType type, Color *c, Vector *dir,
 		printf("Full lighting passed to lighting_add\n");
 		return;
 	}
-	light->type = type;
+	light.type = type;
 	if (c){
-		color_copy(&(light->color), c);
+		color_copy(&light.color, c);
 	}
 	if (dir){
-		vector_copy((light->direction), dir);
+		vector_copy(&(light.direction), dir);
 	}
 	if (pos){
-		point_copy(light->position, pos);
+		point_copy(&light.position, pos);
 	}
 	if (type == LightSpot){
-		light->cutoff = cutoff;
-		light->sharpness = sharpness;
+		light.cutoff = cutoff;
+		light.sharpness = sharpness;
 	}
-	light_copy(&(l->light[l->nLights++]), light);
+	light_copy(&(l->light[l->nLights++]), &light);
 }
 
 /*
@@ -123,34 +103,28 @@ void lighting_add( Lighting *l, LightType type, Color *c, Vector *dir,
  */
 void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p, 
 	Color *Cb, Color *Cs, float s, int oneSided, Color *c){
-	int i;
+	int i, verbose = 0;
 	float LdotN, HdotNpowS, nLdotD, spotSharp, invlenLplusV;
 	Color curc = {{0.0, 0.0, 0.0}};
 	Vector L, nL, H;//, LplusV;
-	// if(!l || !N || !V || !p || !Cb || !Cs){
-	// 	printf("Null passed to lighting_shading\n");
-	// 	return;
-	// }
+	if(!l || !N || !V || !p || !Cb || !Cs){
+		printf("Null passed to lighting_shading\n");
+		return;
+	}
+	vector_normalize(N);
+	for (i = 0; i < l->nLights; i++)
+	{
+		switch(l->light[i].type){
 
-	// Sum all of the light source contributions together 
-	// clip the result to the range [0, 1]
-	switch(l->light[i].type){
+			case LightAmbient:
+				if(verbose) printf("Ambient Light\n");
+				curc.c[0] += Cb->c[0] * l->light[i].color.c[0];
+				curc.c[1] += Cb->c[1] * l->light[i].color.c[1];
+				curc.c[2] += Cb->c[2] * l->light[i].color.c[2];
+				break;
 
-		case LightAmbient:
-			printf("Ambient Light\n");
-			for (i = 0; i < l->nLights; i++){
-				curc.c[0] += (Cb->c[0] * l->light[i].color.c[0]);
-				curc.c[1] += (Cb->c[1] * l->light[i].color.c[1]);
-				curc.c[2] += (Cb->c[2] * l->light[i].color.c[2]);
-			}
-			printf("light %d: %.2f %.2f %.2f\n", i, curc.c[0], curc.c[1], curc.c[2]);
-
-			break;
-
-		case LightDirect:
-			printf("Direct Light\n");
-			for (i = 0; i < l->nLights; i++){
-
+			case LightDirect:
+				if(verbose) printf("Direct Light\n");
 				vector_set(&L, 	-1 * l->light[i].direction.val[0], 
 								-1 * l->light[i].direction.val[1],
 								-1 * l->light[i].direction.val[2]);
@@ -163,32 +137,27 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
 								invlenLplusV*(L.val[1] + V->val[1]), 
 								invlenLplusV*(L.val[2] + V->val[2]) );
-				if(oneSided && vector_dot(&L, N) < 0){
+				if(!oneSided && vector_dot(&L, N) < 0){
 					N->val[0] *= -1;
 					N->val[1] *= -1;
 					N->val[2] *= -1;
 				}
-
 				LdotN = vector_dot(&L, N);
-				
 				if(LdotN > 0){
 					HdotNpowS = pow(vector_dot(&H, N), s);
-					curc.c[0] += 	(Cb->c[0] * l->light[i].color.c[0] * LdotN + 
-									Cs->c[0] * l->light[i].color.c[0] * HdotNpowS);
-					curc.c[1] += 	(Cb->c[1] * l->light[i].color.c[1] * LdotN + 
-									Cs->c[1] * l->light[i].color.c[1] * HdotNpowS);
-					curc.c[2] += 	(Cb->c[2] * l->light[i].color.c[2] * LdotN + 
-									Cs->c[2] * l->light[i].color.c[2] * HdotNpowS);
+					curc.c[0] += 	Cb->c[0] * l->light[i].color.c[0] * LdotN + 
+									Cs->c[0] * l->light[i].color.c[0] * HdotNpowS;
+					curc.c[1] += 	Cb->c[1] * l->light[i].color.c[1] * LdotN + 
+									Cs->c[1] * l->light[i].color.c[1] * HdotNpowS;
+					curc.c[2] += 	Cb->c[2] * l->light[i].color.c[2] * LdotN + 
+									Cs->c[2] * l->light[i].color.c[2] * HdotNpowS;
 				}
-			}
-			printf("light %d: %.2f %.2f %.2f\n", i, curc.c[0], curc.c[1], curc.c[2]);
+				break;
 
-			break;
-
-		case LightPoint:
-			printf("Point Light\n");
-			for (i = 0; i < l->nLights; i++){
-
+			case LightPoint:
+				if(verbose) printf("Point Light %.3f, %.3f, %.3f\n",l->light[i].color.c[0],
+														l->light[i].color.c[1],
+														l->light[i].color.c[2]);
 				vector_set(&L, 	l->light[i].position.val[0] - p->val[0], 
 								l->light[i].position.val[1] - p->val[1], 
 								l->light[i].position.val[2] - p->val[2] );
@@ -201,7 +170,7 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
 								invlenLplusV*(L.val[1] + V->val[1]), 
 								invlenLplusV*(L.val[2] + V->val[2]) );
-				if(oneSided && vector_dot(&L, N) < 0){
+				if(!oneSided && vector_dot(&L, N) < 0){
 					N->val[0] *= -1;
 					N->val[1] *= -1;
 					N->val[2] *= -1;
@@ -209,23 +178,17 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 				LdotN = vector_dot(&L, N);
 				if(LdotN > 0){
 					HdotNpowS = pow(vector_dot(&H, N), s);
-					curc.c[0] += 	(Cb->c[0] * l->light[i].color.c[0] * LdotN + 
-									Cs->c[0] * l->light[i].color.c[0] * HdotNpowS);
-					curc.c[1] += 	(Cb->c[1] * l->light[i].color.c[1] * LdotN + 
-									Cs->c[1] * l->light[i].color.c[1] * HdotNpowS);
-					curc.c[2] += 	(Cb->c[2] * l->light[i].color.c[2] * LdotN + 
-									Cs->c[2] * l->light[i].color.c[2] * HdotNpowS);
+					curc.c[0] += 	Cb->c[0] * l->light[i].color.c[0] * LdotN + 
+									Cs->c[0] * l->light[i].color.c[0] * HdotNpowS;
+					curc.c[1] += 	Cb->c[1] * l->light[i].color.c[1] * LdotN + 
+									Cs->c[1] * l->light[i].color.c[1] * HdotNpowS;
+					curc.c[2] += 	Cb->c[2] * l->light[i].color.c[2] * LdotN + 
+									Cs->c[2] * l->light[i].color.c[2] * HdotNpowS;
 				}
-			}
+				break;
 
-			printf("light %d: %.2f %.2f %.2f\n", i, curc.c[0], curc.c[1], curc.c[2]);
-
-			break;
-
-		case LightSpot:
-			printf("Spot Light\n");
-			for (i = 0; i < l->nLights; i++){
-
+			case LightSpot:
+				if(verbose) printf("Spot Light\n");
 				vector_set(&L, 	-1 * (l->light[i].position.val[0] - p->val[0]), 
 								-1 * (l->light[i].position.val[1] - p->val[1]), 
 								-1 * (l->light[i].position.val[2] - p->val[2]) );
@@ -238,7 +201,7 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
 								invlenLplusV*(L.val[1] + V->val[1]), 
 								invlenLplusV*(L.val[2] + V->val[2]) );
-				if(oneSided && vector_dot(&L, N) < 0){
+				if(!oneSided && vector_dot(&L, N) < 0){
 					N->val[0] *= -1;
 					N->val[1] *= -1;
 					N->val[2] *= -1;
@@ -261,18 +224,18 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 									Cs->c[2] * l->light[i].color.c[2] * HdotNpowS) * 
 									spotSharp;
 				}
-			}
-			printf("light %d: %.2f %.2f %.2f\n", i, curc.c[0], curc.c[1], curc.c[2]);
-			break;
+				break;
 
-		default:
-			break;
+			default:
+				break;
+		}
+		if(verbose) printf("light %d: %.2f %.2f %.2f\n", i, curc.c[0], curc.c[1], curc.c[2]);
 	}
 
 	// clip colors to that are over-saturated down to one
-	c->c[0] = curc.c[0] > 1.0 ? 1.0 : curc.c[0];
-	c->c[1] = curc.c[1] > 1.0 ? 1.0 : curc.c[1];
-	c->c[2] = curc.c[2] > 1.0 ? 1.0 : curc.c[2];
+	c->c[0] = curc.c[0];// > 1.0 ? 1.0 : curc.c[0];
+	c->c[1] = curc.c[1];// > 1.0 ? 1.0 : curc.c[1];
+	c->c[2] = curc.c[2];// > 1.0 ? 1.0 : curc.c[2];
 }
 
 

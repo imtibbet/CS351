@@ -4,10 +4,8 @@
  *
  * The color function implementations
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "color.h"
+
+#include "graphics.h"
 
 // copies the Color data.
 void color_copy(Color *to, Color *from){

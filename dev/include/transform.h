@@ -2,9 +2,6 @@
 
 #define TRANSFORM_H
 
-#include "primitives.h"
-#include "point.h"
-
 typedef struct {
 	float m[4][4];
 } Matrix;

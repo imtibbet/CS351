@@ -4,12 +4,8 @@
  *
  * The heirarchical model
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-#include "heirarchy.h"
+
+#include "graphics.h"
 
 // 2D and Generic Module Function
 
@@ -349,7 +345,32 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 	Module *thickLineMod = module_create();			
 	Element *thickLineE;
 	float dx, dy, dz, lineLength;
-	Vector u, v, w;*/
+	Vector u, v, w;
+	
+				// in ObjLine case statement
+				if(antialias){
+					dx = tempLine.b.val[0]-tempLine.a.val[0];
+					dy = tempLine.b.val[1]-tempLine.a.val[1];
+					dz = tempLine.b.val[2]-tempLine.a.val[2];
+					lineLength = sqrt(dx*dx+dy*dy+dz*dz);
+					module_scale( thickLineMod, 1, lineLength, 1 );
+					vector_set(&v, dx, dy, dz);
+					vector_normalize(&v);
+					vector_set(&u, -dz, dx, dy);
+					vector_cross(&u, &v, &w);
+					vector_cross(&v, &w, &u);
+					vector_normalize(&u);
+					vector_normalize(&w);
+					module_rotateXYZ( thickLineMod, &u, &v, &w );
+					module_translate( thickLineMod,	tempLine.a.val[0], 
+													tempLine.a.val[1], 
+													tempLine.a.val[2] );
+					module_cylinder( thickLineMod, 4, 1, 1, 0, 0, 0 );
+					thickLineE = element_init(ObjModule, thickLineMod);
+					thickLineE->next = e->next;
+					e->next = thickLineE;
+				}
+	*/
 	
 	// all locally needed variables
 	Matrix LTM, tempGTM;
@@ -389,28 +410,6 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				line_normalize(&tempLine);
 				line_draw(&tempLine, src, ds->color);
 				if(verbose) line_print(&tempLine, stdout);
-				/*if(antialias){
-					dx = tempLine.b.val[0]-tempLine.a.val[0];
-					dy = tempLine.b.val[1]-tempLine.a.val[1];
-					dz = tempLine.b.val[2]-tempLine.a.val[2];
-					lineLength = sqrt(dx*dx+dy*dy+dz*dz);
-					module_scale( thickLineMod, 1, lineLength, 1 );
-					vector_set(&v, dx, dy, dz);
-					vector_normalize(&v);
-					vector_set(&u, -dz, dx, dy);
-					vector_cross(&u, &v, &w);
-					vector_cross(&v, &w, &u);
-					vector_normalize(&u);
-					vector_normalize(&w);
-					module_rotateXYZ( thickLineMod, &u, &v, &w );
-					module_translate( thickLineMod,	tempLine.a.val[0], 
-													tempLine.a.val[1], 
-													tempLine.a.val[2] );
-					module_cylinder( thickLineMod, 4, 1, 1, 0, 0, 0 );
-					thickLineE = element_init(ObjModule, thickLineMod);
-					thickLineE->next = e->next;
-					e->next = thickLineE;
-				}*/
 				break;
 			case ObjPolyline:
 				if(verbose) printf("drawing ObjPolyline\n");
@@ -600,20 +599,12 @@ void module_cube(Module *md, int solid){
 	Vector tn[4], front, back, left, right, top, bottom;
 	int i;
 	
-  // test9a:	
-  // the example cube is blue (Y/-Y), red (Z/-Z), yellow (X/-X)
-  // these colors should be the body colors
-	Color Grey;
-	Color Dark;
-	color_set(&Grey, 0.6, 0.65, 0.67 );
-	color_set(&Dark, 0.2, 0.2, 0.2 );
-	module_surfaceColor( md, &Dark );
-	module_bodyColor( md, &Dark );
-  // test9a:	
-	
 	// initialize polygon
 	polygon_init( &p );
-	polygon_setSided( &p, 0 );
+	polygon_setSided( &p, 1 );
+	
+	// initialize line
+	line_zBuffer(&l, 1);
 	
 	// corners of a cube, centered at (0, 0, 0)
 	point_set3D( &v[0], -0.5, -0.5, -0.5 );
@@ -765,9 +756,15 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
     Point v[5];
     Line l;
     Element *e;
+	Vector tn[4], front, back, left, right, bottom;
     int i;
-
-    polygon_init(&side);
+    
+	// initialize polygon
+	polygon_init( &side );
+	polygon_setSided( &side, 1 );
+	
+	// initialize line
+	line_zBuffer(&l, 1);
 
     // corners of the pyramid
     point_set3D(&v[0], -1, -1, -1 );
@@ -810,12 +807,22 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 
 		//printf("successfully passed to module\n");
     } else{
+	 	// use polygons ( 5 of them )
+		vector_set(&front, 0, 1, -1);
+		vector_set(&back, 0, 1, 1);
+		vector_set(&left, -1, 1, 0);
+		vector_set(&right, 1, 1, 0);
+		vector_set(&bottom, 0, -1, 0);
 
     	// front side
 	    point_copy(&tv[0], &v[0]);
 	    point_copy(&tv[1], &v[1]);
 	    point_copy(&tv[2], &v[4]);
 	    polygon_set(&side, 3, tv);
+		vector_copy( &tn[0], &front );
+		vector_copy( &tn[1], &front );
+		vector_copy( &tn[2], &front );
+		polygon_setNormals( &p, 3, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -824,11 +831,20 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 	    point_copy(&tv[1], &v[2]);
 	    point_copy(&tv[2], &v[4]);
 	    polygon_set(&side, 3, tv);
+		vector_copy( &tn[0], &back );
+		vector_copy( &tn[1], &back );
+		vector_copy( &tn[2], &back );
+		polygon_setNormals( &p, 3, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
 	    // bottom side
 	    polygon_set(&side, 4, &(v[0]));
+		vector_copy( &tn[0], &bottom );
+		vector_copy( &tn[1], &bottom );
+		vector_copy( &tn[2], &bottom );
+		vector_copy( &tn[3], &bottom );
+		polygon_setNormals( &p, 4, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -837,6 +853,10 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 	    point_copy(&tv[1], &v[3]);
 	    point_copy(&tv[2], &v[4]);
 	    polygon_set(&side, 3, tv);
+		vector_copy( &tn[0], &left );
+		vector_copy( &tn[1], &left );
+		vector_copy( &tn[2], &left );
+		polygon_setNormals( &p, 3, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -845,6 +865,10 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 	    point_copy(&tv[1], &v[2]);
 	    point_copy(&tv[2], &v[4]);
 	    polygon_set(&side, 3, tv); 
+		vector_copy( &tn[0], &right );
+		vector_copy( &tn[1], &right );
+		vector_copy( &tn[2], &right );
+		polygon_setNormals( &p, 3, tn );
 		e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -859,10 +883,11 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 */
 void module_cylinder( Module *mod, int sides, int fill, int size, float x, float y, float z) {
 	Polygon p;
-	Point xtop, xbot;
+	Point xtop, xbot, pt[4];;
 	Element *e;
 	Line l;
 	double x1, x2, z1, z2;
+	Vector tn[4], top, side, bottom;
 	int i;
 
 	if(!mod){
@@ -875,34 +900,49 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 	module_translate(mod, (float)x, (float)y, (float)z);
 	//printf("parameters set\n");
 
+	// initialize polygon
 	polygon_init( &p );
+	polygon_setSided( &p, 1 );
+	
+	// initialize line
+	line_zBuffer(&l, 1);
+	
 	point_set3D( &xtop, 0, 1.0, 0.0 );
 	point_set3D( &xbot, 0, 0.0, 0.0 );
 
 	if (fill == 1){
+
+		vector_set(&top, 0, 1, 0);
+		vector_set(&bottom, 0, -1, 0);
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
-			Point pt[4];
+			vector_set(&side, 0, 1, 0);
 
-			x1 = cos( i * M_PI * 2.0 / sides );
-			z1 = sin( i * M_PI * 2.0 / sides );
-			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
-			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+			x1 = cos( i * M_PI * 2.0 / sides );// 1
+			z1 = sin( i * M_PI * 2.0 / sides );// 0
+			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // cos(2pi/4)=0
+			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // sin(2pi/4)=1
 
 			point_copy( &pt[0], &xtop );
 			point_set3D( &pt[1], x1, 1.0, z1 );
 			point_set3D( &pt[2], x2, 1.0, z2 );
-
 			polygon_set( &p, 3, pt );
+			vector_copy( &tn[0], &top );
+			vector_copy( &tn[1], &top );
+			vector_copy( &tn[2], &top );
+			polygon_setNormals( &p, 3, tn );
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
 
 			point_copy( &pt[0], &xbot );
 			point_set3D( &pt[1], x1, 0.0, z1 );
 			point_set3D( &pt[2], x2, 0.0, z2 );
-
 			polygon_set( &p, 3, pt );
+			vector_copy( &tn[0], &bottom );
+			vector_copy( &tn[1], &bottom );
+			vector_copy( &tn[2], &bottom );
+			polygon_setNormals( &p, 3, tn );
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
 
@@ -910,8 +950,12 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 			point_set3D( &pt[1], x2, 0.0, z2 );
 			point_set3D( &pt[2], x2, 1.0, z2 );
 			point_set3D( &pt[3], x1, 1.0, z1 );
-
 			polygon_set( &p, 4, pt );
+			vector_copy( &tn[0], &side );
+			vector_copy( &tn[1], &side );
+			vector_copy( &tn[2], &side );
+			vector_copy( &tn[3], &side );
+			polygon_setNormals( &p, 4, tn );
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
 		}
@@ -919,7 +963,6 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
-			Point pt[4];
 
 			x1 = cos( i * M_PI * 2.0 / sides );
 			z1 = sin( i * M_PI * 2.0 / sides );
@@ -983,6 +1026,7 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 void module_cone( Module *mod, int sides, int fill, int size, float x, float y, float z) {
 	Polygon p;
 	Point xtop, xbot;
+	Vector pt[6], top, side, bottom;
 	Element *e;
 	Line l;
 	double x1, x2, z1, z2;
@@ -998,7 +1042,13 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 	module_translate(mod, (float)x, (float)y, (float)z);
 	printf("parameters set\n");
 
+	// initialize polygon
 	polygon_init( &p );
+	polygon_setSided( &p, 1 );
+	
+	// initialize line
+	line_zBuffer(&l, 1);
+	
 	point_set3D( &xtop, 0, 1.0, 0.0 );
 	point_set3D( &xbot, 0, 0.0, 0.0 );
 
@@ -1006,7 +1056,6 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
-			Point pt[6];
 
 			x1 = cos( i * M_PI * 2.0 / sides );
 			z1 = sin( i * M_PI * 2.0 / sides );
@@ -1016,16 +1065,24 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 			point_copy( &pt[0], &xbot );
 			point_set3D( &pt[1], x1, 0.0, z1 );
 			point_set3D( &pt[2], x2, 0.0, z2 );
-
 			polygon_set( &p, 3, pt );
+			vector_copy( &pt[0], &bottom );
+			vector_copy( &pt[1], &bottom );
+			vector_copy( &pt[2], &bottom );
+			polygon_setNormals( &p, 3, pt );
+
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
 
 			point_set3D( &pt[3], x1, 0.0, z1 );
 			point_set3D( &pt[4], x2, 0.0, z2 );
 			point_copy( &pt[5], &xtop);
-
 			polygon_set( &p, 3, &pt[3] );
+			vector_copy( &pt[0], &top );
+			vector_copy( &pt[1], &top );
+			vector_copy( &pt[2], &top );
+			polygon_setNormals( &p, 3, pt );
+
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
 		}
@@ -1180,6 +1237,12 @@ void module_bezierCurve(Module *m, BezierCurve *b, int divisions){
 		return;
 	}
 	
+	// initialize line
+	line_zBuffer(&tempLine, b->zBuffer);
+	
+	// initialize temporary curve
+	tempbez.zBuffer = b->zBuffer;
+	
 	// base case, add six lines to module
 	if(divisions == 0){
 		line_set(&tempLine, b->c[0], b->c[1]);
@@ -1219,6 +1282,16 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 		printf("Null passed to module_bezierSurface\n");
 		return;
 	}
+	
+	// initialize polygon
+	polygon_setSided( temptri, 0 );
+	polygon_zBuffer(temptri, b->zBuffer);
+	
+	// initialize line
+	line_zBuffer(&tempLine, b->zBuffer);
+	
+	// initialize temporary surface
+	tempBezSurf.zBuffer = b->zBuffer;
 	
 	// base case
 	if(divisions == 0){

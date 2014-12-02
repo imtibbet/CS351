@@ -2,8 +2,6 @@
 
 #define FRACTALS_H
 
-#include "image.h"
-
 void mandelbrot( Image *dst, float x0, float y0, float dx);
 void julia(Image *dst, float x0, float y0, float dx); 
 

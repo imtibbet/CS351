@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
   ds = drawstate_create();
   point_copy(&(ds->viewer), &(view.vrp));
 	ds->shade = ShadeGouraud;
-	//	ds->shade = ShadeFlat;
+	//ds->shade = ShadeFlat;
 
   matrix_identity(&GTM);
   module_draw(cube, &VTM, &GTM, ds, light, src);

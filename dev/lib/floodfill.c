@@ -4,10 +4,7 @@
 *
 * The floodfill scanline algorithm
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "floodfill.h"
+#include "graphics.h"
 
 void floodfill(Image *src, Color fillc, Color borderc, int xSeed, int ySeed){
     FPixelStackItem *stack;

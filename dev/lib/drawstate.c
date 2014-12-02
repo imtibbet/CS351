@@ -4,10 +4,8 @@
  *
  * The heirarchical model
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "drawstate.h"
+
+#include "graphics.h"
 
 // Draw State
 
@@ -22,12 +20,13 @@ DrawState *drawstate_create(){
 	}
 	
 	// set defaults
-	ds->shade = ShadeConstant;
+	color_set(&(ds->color), 1.0, 1.0, 1.0);
 	color_set(&(ds->flatColor), 1.0, 1.0, 1.0);
 	color_set(&(ds->body), 1.0, 1.0, 1.0);
-	color_set(&(ds->surface), 1.0, 1.0, 1.0);
-	color_set(&(ds->color), 1.0, 1.0, 1.0);
-	ds->zBufferFlag = 0;
+	color_set(&(ds->surface), 0.1, 0.1, 0.1);
+	ds->surfaceCoeff = 10;
+	ds->shade = ShadeConstant;
+	ds->zBufferFlag = 1;
 	point_set3D(&(ds->viewer), 0.0, 0.0, 0.0);
 	return ds;
 }
@@ -40,7 +39,7 @@ void drawstate_setColor( DrawState *s, Color c ){
 		printf("Null DrawState passed to drawstate_setColor\n");
 		return;
 	}
-	s->color = c;
+	color_copy(&(s->color), &c);
 }
 
 /*
@@ -51,7 +50,7 @@ void drawstate_setBody( DrawState *s, Color c ){
 		printf("Null DrawState passed to drawstate_setBody\n");
 		return;
 	}
-	s->body = c;
+	color_copy(&(s->body), &c);
 }
 
 /*
@@ -62,7 +61,7 @@ void drawstate_setSurface( DrawState *s, Color c ){
 		printf("Null DrawState passed to drawstate_setSurface\n");
 		return;
 	}
-	s->surface = c;
+	color_copy(&(s->surface), &c);
 }
 
 /*

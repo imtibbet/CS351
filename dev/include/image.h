@@ -2,9 +2,6 @@
 
 #define IMAGES_H
 
-#include "color.h"
-#include "ppmIO.h"
-
 typedef struct {
 	float rgb[3];
 	float a;

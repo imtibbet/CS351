@@ -9,12 +9,6 @@
 
 #define LIGHTING_H
 
-#include <math.h>
-#include "point.h"
-#include "transform.h"
-#include "color.h"
-#include "image.h"
-
 //extern const int MAX_LIGHTS;
 
 typedef enum {
@@ -41,11 +35,6 @@ typedef struct {
 } Lighting;
 
 // Light functions
-
-/*
- * allocate and return a new light structure set to default values.
- */
-Light *light_create( void );
 
 /*
  * initialize the light to default values.

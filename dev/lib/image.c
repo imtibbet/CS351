@@ -4,12 +4,8 @@
  *
  * The images structure function implementations
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
-#include "image.h"
+
+#include "graphics.h"
 
 // Constructors and destructors:
 /*

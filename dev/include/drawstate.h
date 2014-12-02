@@ -9,9 +9,6 @@
 
 #define DRAWSTATE_H
 
-#include "point.h"
-#include "color.h"
-
 // determine how an object is drawn into the image.
 typedef enum { 
 	ShadeFrame, // draw only the borders of objects, including polygons.

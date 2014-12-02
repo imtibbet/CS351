@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = testLighting_shading test9a test9b test9c test9d
+EXECUTABLES = pyramid-test pyramid-test-gif cylinder-test cylinder-test-gif cone-test cone-gif fire fireside
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = testLighting_shading.o test9a.o test9b.o test9c.o test9d.o
+_OBJ = pyramid-test.o pyramid-test-gif.o cylinder-test.o cylinder-test-gif.o cone-test.o cone-gif.o fire.o fireside.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))

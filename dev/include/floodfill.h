@@ -2,8 +2,6 @@
 
 #define FLOODFILL_H
 
-#include "image.h"
-
 typedef struct {
 	FPixel *p;
 	int x;

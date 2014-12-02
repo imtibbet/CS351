@@ -4,10 +4,8 @@
  *
  * The transformation function implementations
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "transform.h"
+
+#include "graphics.h"
 
 // vector
 

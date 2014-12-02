@@ -9,10 +9,6 @@
 
 #define HEIRARCHY_H
 
-#include "primitives.h"
-#include "transform.h"
-#include "bezier.h"
-
 typedef enum { // example of an enumerated type
 	ObjNone,
 	ObjLine,
