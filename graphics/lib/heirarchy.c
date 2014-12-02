@@ -756,6 +756,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
     Point v[5];
     Line l;
     Element *e;
+	Vector tn[4], front, back, left, right, bottom;
     int i;
     
 	// initialize polygon
@@ -806,12 +807,22 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 
 		//printf("successfully passed to module\n");
     } else{
+	 	// use polygons ( 5 of them )
+		vector_set(&front, 0, 1, -1);
+		vector_set(&back, 0, 1, 1);
+		vector_set(&left, -1, 1, 0);
+		vector_set(&right, 1, 1, 0);
+		vector_set(&bottom, 0, -1, 0);
 
     	// front side
 	    point_copy(&tv[0], &v[0]);
 	    point_copy(&tv[1], &v[1]);
 	    point_copy(&tv[2], &v[4]);
 	    polygon_set(&side, 3, tv);
+		vector_copy( &tn[0], &front );
+		vector_copy( &tn[1], &front );
+		vector_copy( &tn[2], &front );
+		polygon_setNormals( &p, 3, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -820,11 +831,20 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 	    point_copy(&tv[1], &v[2]);
 	    point_copy(&tv[2], &v[4]);
 	    polygon_set(&side, 3, tv);
+		vector_copy( &tn[0], &back );
+		vector_copy( &tn[1], &back );
+		vector_copy( &tn[2], &back );
+		polygon_setNormals( &p, 3, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
 	    // bottom side
 	    polygon_set(&side, 4, &(v[0]));
+		vector_copy( &tn[0], &bottom );
+		vector_copy( &tn[1], &bottom );
+		vector_copy( &tn[2], &bottom );
+		vector_copy( &tn[3], &bottom );
+		polygon_setNormals( &p, 4, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -833,6 +853,10 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 	    point_copy(&tv[1], &v[3]);
 	    point_copy(&tv[2], &v[4]);
 	    polygon_set(&side, 3, tv);
+		vector_copy( &tn[0], &left );
+		vector_copy( &tn[1], &left );
+		vector_copy( &tn[2], &left );
+		polygon_setNormals( &p, 3, tn );
 	    e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -841,6 +865,10 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 	    point_copy(&tv[1], &v[2]);
 	    point_copy(&tv[2], &v[4]);
 	    polygon_set(&side, 3, tv); 
+		vector_copy( &tn[0], &right );
+		vector_copy( &tn[1], &right );
+		vector_copy( &tn[2], &right );
+		polygon_setNormals( &p, 3, tn );
 		e = element_init(ObjPolygon, &side);
 		module_insert(md, e);
 
@@ -855,10 +883,11 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 */
 void module_cylinder( Module *mod, int sides, int fill, int size, float x, float y, float z) {
 	Polygon p;
-	Point xtop, xbot;
+	Point xtop, xbot, pt[4];;
 	Element *e;
 	Line l;
 	double x1, x2, z1, z2;
+	Vector tn[4], top, side, bottom;
 	int i;
 
 	if(!mod){
@@ -882,29 +911,38 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 	point_set3D( &xbot, 0, 0.0, 0.0 );
 
 	if (fill == 1){
+
+		vector_set(&top, 0, 1, 0);
+		vector_set(&bottom, 0, -1, 0);
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
-			Point pt[4];
+			vector_set(&side, 0, 1, 0);
 
-			x1 = cos( i * M_PI * 2.0 / sides );
-			z1 = sin( i * M_PI * 2.0 / sides );
-			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
-			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+			x1 = cos( i * M_PI * 2.0 / sides );// 1
+			z1 = sin( i * M_PI * 2.0 / sides );// 0
+			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // cos(2pi/4)=0
+			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // sin(2pi/4)=1
 
 			point_copy( &pt[0], &xtop );
 			point_set3D( &pt[1], x1, 1.0, z1 );
 			point_set3D( &pt[2], x2, 1.0, z2 );
-
 			polygon_set( &p, 3, pt );
+			vector_copy( &tn[0], &top );
+			vector_copy( &tn[1], &top );
+			vector_copy( &tn[2], &top );
+			polygon_setNormals( &p, 3, tn );
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
 
 			point_copy( &pt[0], &xbot );
 			point_set3D( &pt[1], x1, 0.0, z1 );
 			point_set3D( &pt[2], x2, 0.0, z2 );
-
 			polygon_set( &p, 3, pt );
+			vector_copy( &tn[0], &bottom );
+			vector_copy( &tn[1], &bottom );
+			vector_copy( &tn[2], &bottom );
+			polygon_setNormals( &p, 3, tn );
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
 
@@ -912,8 +950,12 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 			point_set3D( &pt[1], x2, 0.0, z2 );
 			point_set3D( &pt[2], x2, 1.0, z2 );
 			point_set3D( &pt[3], x1, 1.0, z1 );
-
 			polygon_set( &p, 4, pt );
+			vector_copy( &tn[0], &side );
+			vector_copy( &tn[1], &side );
+			vector_copy( &tn[2], &side );
+			vector_copy( &tn[3], &side );
+			polygon_setNormals( &p, 4, tn );
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);
 		}
@@ -921,7 +963,6 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
-			Point pt[4];
 
 			x1 = cos( i * M_PI * 2.0 / sides );
 			z1 = sin( i * M_PI * 2.0 / sides );
