@@ -918,13 +918,14 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
-			vector_set(&side, cos( i * M_PI * 2.0 / sides ), 0, sin( i * M_PI * 2.0 / sides ));
 
 			x1 = cos( i * M_PI * 2.0 / sides );// 1
 			z1 = sin( i * M_PI * 2.0 / sides );// 0
 			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // cos(2pi/4)=0
 			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // sin(2pi/4)=1
 
+			vector_set(&side, x1, 1, z1);
+			
 			point_copy( &pt[0], &xtop );
 			point_set3D( &pt[1], x1, 1.0, z1 );
 			point_set3D( &pt[2], x2, 1.0, z2 );
@@ -1059,13 +1060,14 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
-			vector_set(&side, cos( i * M_PI * 2.0 / sides ), 1, sin( i * M_PI * 2.0 / sides ));
 			Point pt[6];
 
 			x1 = cos( i * M_PI * 2.0 / sides );
 			z1 = sin( i * M_PI * 2.0 / sides );
 			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
 			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+
+			vector_set(&side, x1, 1, z1);
 
 			point_copy( &pt[0], &xbot );
 			point_set3D( &pt[1], x1, 0.0, z1 );
