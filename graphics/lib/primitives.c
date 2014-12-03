@@ -2122,6 +2122,7 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 			polygon_setColors(p, p->nVertex, setColors);
 			break;
 		default:
+			printf("polygon_shade not defined for shades other than ShadeGouraud or ShadeFlat\n");
 			break;
 	}
 }
