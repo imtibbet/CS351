@@ -593,7 +593,7 @@ void module_cube(Module *md, int solid){
 	}
 	Element *e;
  	Polygon p;
-	Point v[8];
+	Point v[8], pt[4];
 	Line l;
 	Vector n[4];
 	int i;

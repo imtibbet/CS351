@@ -389,8 +389,8 @@ int main(int argc, char *argv[]) {
   light->light[0].position.val[0] = view.vrp.val[0];
   light->light[0].position.val[1] = view.vrp.val[1];
   light->light[0].position.val[2] = view.vrp.val[2];
-  light->light[0].color.c[0] = 
-  light->light[0].color.c[1] = 
+  light->light[0].color.c[0] = 1;
+  light->light[0].color.c[1] = 1;
   light->light[0].color.c[2] = 1;
   light->nLights = 1;
   
