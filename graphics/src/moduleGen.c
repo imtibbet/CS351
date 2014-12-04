@@ -506,6 +506,21 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					module_surfaceColor(mod[activeMod]->module, &(c[j]->item.color));
 			} 
 			
+			// put bodyColor
+			else if(strcmp(secondword, "bodyColor") == 0){
+				searchname = strtok (NULL, delim);
+				for(j=0;j<numcolors;j++){
+					if(strcmp(c[j]->name, searchname) == 0){
+						break;
+					}
+				}
+				if(j==numcolors){
+					if(verbose) printf("%s color not found\n", searchname);
+				}
+				else
+					module_bodyColor(mod[activeMod]->module, &(c[j]->item.color));
+			} 
+			
 			// put point
 			else if(strcmp(secondword, "point") == 0){
 				searchname = strtok (NULL, delim);
@@ -621,6 +636,18 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				color_set(&tempcolor, x, y, z);
 				module_surfaceColor(mod[activeMod]->module, &tempcolor);
 			} 
+		
+			// add bodyColor
+			else if(strcmp(secondword, "bodyColor") == 0){
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
+				z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
+				color_set(&tempcolor, x, y, z);
+				module_bodyColor(mod[activeMod]->module, &tempcolor);
+			}
 		
 			// add line
 			else if(strcmp(secondword, "line") == 0){
