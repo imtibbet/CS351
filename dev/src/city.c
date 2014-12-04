@@ -213,8 +213,10 @@ int main(int argc, char *argv[]) {
 	Point temp;
 	point_copy(&temp, &(view.vrp));
 
+	Color ltGrey = {{0.7, 0.7, 0.7}};
+
 	light = lighting_create();
-	lighting_add(light, LightPoint, &White, NULL, &temp, 0.0, 0.0 );
+	lighting_add(light, LightAmbient, &White, NULL, &temp, 0.0, 0.0 );
 
 	// draw scene
 	for ( i = 0; i < 22; i++){
