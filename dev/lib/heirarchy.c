@@ -594,9 +594,8 @@ void module_cube(Module *md, int solid){
 	Element *e;
  	Polygon p;
 	Point v[8];
-	Point tv[4];
 	Line l;
-	Vector tn[4], front, back, left, right, top, bottom;
+	Vector n[4];
 	int i;
 	
 	// initialize polygon
@@ -655,6 +654,7 @@ void module_cube(Module *md, int solid){
 	}
 	else{
 	 	// use polygons ( 6 of them )
+	 	Point pt[4];
 		polygon_init( &p );
 		point_set3D( &pt[0], -1, -1, -1 );
 		point_set3D( &pt[1], -1, -1,  1 );
@@ -664,7 +664,7 @@ void module_cube(Module *md, int solid){
 		for(i=0;i<4;i++)
 		  vector_set( &(n[i]), -1, 0, 0 );
 		polygon_setNormals( &p, 4, n );
-		module_polygon( mod, &p );
+		module_polygon( md, &p );
 
 		point_set3D( &pt[0], 1, -1, -1 );
 		point_set3D( &pt[1], 1, -1,  1 );
@@ -674,7 +674,7 @@ void module_cube(Module *md, int solid){
 		for(i=0;i<4;i++)
 		  vector_set( &(n[i]), 1, 0, 0 );
 		polygon_setNormals( &p, 4, n );
-		module_polygon( mod, &p );
+		module_polygon( md, &p );
 
 		point_set3D( &pt[0], -1, -1, -1 );
 		point_set3D( &pt[1], -1, -1,  1 );
@@ -684,7 +684,7 @@ void module_cube(Module *md, int solid){
 		for(i=0;i<4;i++)
 		  vector_set( &(n[i]), 0, -1, 0 );
 		polygon_setNormals( &p, 4, n );
-		module_polygon( mod, &p );
+		module_polygon( md, &p );
 
 		point_set3D( &pt[0], -1, 1, -1 );
 		point_set3D( &pt[1], -1, 1,  1 );
@@ -694,7 +694,7 @@ void module_cube(Module *md, int solid){
 		for(i=0;i<4;i++)
 		  vector_set( &(n[i]), 0, 1, 0 );
 		polygon_setNormals( &p, 4, n );
-		module_polygon( mod, &p );
+		module_polygon( md, &p );
 
 		point_set3D( &pt[0], -1, -1, -1 );
 		point_set3D( &pt[1], -1,  1, -1 );
@@ -704,7 +704,7 @@ void module_cube(Module *md, int solid){
 		for(i=0;i<4;i++)
 		  vector_set( &(n[i]), 0, 0, -1 );
 		polygon_setNormals( &p, 4, n );
-		module_polygon( mod, &p );
+		module_polygon( md, &p );
 
 		point_set3D( &pt[0], -1, -1, 1 );
 		point_set3D( &pt[1], -1,  1, 1 );
@@ -714,7 +714,7 @@ void module_cube(Module *md, int solid){
 		for(i=0;i<4;i++)
 		  vector_set( &(n[i]), 0, 0, 1 );
 		polygon_setNormals( &p, 4, n );
-		module_polygon( mod, &p );
+		module_polygon( md, &p );
 	}
 	// clean up
 	polygon_clear(&p);
@@ -861,11 +861,11 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 */
 void module_cylinder( Module *mod, int sides, int fill, int size, float x, float y, float z) {
 	Polygon p;
-	Point xtop, xbot;
 	Element *e;
+	Point xtop, xbot, pt[4];
 	Line l;
 	double x1, x2, z1, z2;
-	Vector top, side, bottom;
+	Vector top, bottom;
 	int i;
 
 	if(!mod){
@@ -936,9 +936,7 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
     		polygon_set( &p, 4, pt );
     		polygon_setNormals( &p, 4, n );
     		module_polygon( mod, &p );
-  		}
-	polygon_clear( &p );
-}
+    	}		
 	} else{
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
@@ -1009,7 +1007,7 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 	Element *e;
 	Line l;
 	double x1, x2, z1, z2;
-	Vector tn[4], side, bottom;
+	Vector bottom;
 	int i;
 
 	if(!mod){
