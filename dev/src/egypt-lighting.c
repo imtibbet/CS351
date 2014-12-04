@@ -260,6 +260,7 @@ int main(int argc, char *argv[]) {
   const int cols = 660*2;
   Color White = {{1.0, 1.0, 1.0}};
 
+  sand = module_create();
   khuf = module_create();
   khaf = module_create();
   menk = module_create();
@@ -274,7 +275,7 @@ int main(int argc, char *argv[]) {
             alpha = 0.0;
         point_set3D( &(view.vrp), 40*alpha, 140*alpha, -170*alpha - (alpha*170-cos(alpha)*170) );
     } else {
-    point_set3D( &(view.vrp), -40, 0, 50 );
+        point_set3D( &(view.vrp), -40, 0, 50 );
     }
   // set up the view
   vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
@@ -307,15 +308,17 @@ int main(int argc, char *argv[]) {
   light = lighting_create();
   lighting_add( light, LightPoint, &White, NULL, &(view.vrp), 0, 0 );
 
+  printf("added light\n");
+
   // create the image and drawstate
   src = image_create( rows, cols );
   ds = drawstate_create();
   ds->shade = ShadeFlat;
   printf("created the image and drawstate\n");
 
-  module_draw(sand, &vtm, &gtm, ds, NULL, src );
-  module_draw(giza, &vtm, &gtm, ds, NULL, src); 
-  module_draw(cairo, &vtm, &gtm, ds, NULL, src);
+  module_draw(sand, &vtm, &gtm, ds, light, src );
+  module_draw(giza, &vtm, &gtm, ds, light, src); 
+  module_draw(cairo, &vtm, &gtm, ds, light, src);
 
   printf("drew the scene\n");
 
@@ -327,8 +330,6 @@ int main(int argc, char *argv[]) {
 
   // write out the image
   image_write(src, "egypt-lighting.ppm");
-
-  image_free( src );
 
   // free the modules
   module_delete(sand);

@@ -199,11 +199,11 @@ int readPLY(char filename[], int *nPolygons, Polygon **plist, Color **clist, int
 		// read the vertices
 		for(i=0;i<numVertex;i++) {
 			for(j=0;j<3;j++)
-				fscanf(fp, "%f", &(vertex[i].val[j]));
+				fscanf(fp, "%lf", &(vertex[i].val[j]));
 			vertex[i].val[3] = 1.0;
 
 			for(j=0;j<3;j++)
-				fscanf(fp, "%f", &(normal[i].val[j]));
+				fscanf(fp, "%lf", &(normal[i].val[j]));
 			normal[i].val[3] = 0.0;
 
 			for(j=0;j<2;j++)
@@ -269,8 +269,12 @@ int readPLY(char filename[], int *nPolygons, Polygon **plist, Color **clist, int
 				ty.val[1] = p[i].vertex[2].val[1] - p[i].vertex[1].val[1];
 				ty.val[2] = p[i].vertex[2].val[2] - p[i].vertex[1].val[2];
 
+				
+				vector_print(&tx, stdout);
+				vector_print(&ty, stdout);
 				vector_cross(&tx, &ty, &tn);
 				vector_normalize(&tn);
+				vector_print(&tn, stdout);
 
 				for(j=0;j<nv;j++)
 					p[i].normal[j] = tn;

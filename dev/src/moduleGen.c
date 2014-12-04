@@ -491,6 +491,36 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					module_color(mod[activeMod]->module, &(c[j]->item.color));
 			} 
 			
+			// put surfaceColor
+			else if(strcmp(secondword, "surfaceColor") == 0){
+				searchname = strtok (NULL, delim);
+				for(j=0;j<numcolors;j++){
+					if(strcmp(c[j]->name, searchname) == 0){
+						break;
+					}
+				}
+				if(j==numcolors){
+					if(verbose) printf("%s color not found\n", searchname);
+				}
+				else
+					module_surfaceColor(mod[activeMod]->module, &(c[j]->item.color));
+			} 
+			
+			// put bodyColor
+			else if(strcmp(secondword, "bodyColor") == 0){
+				searchname = strtok (NULL, delim);
+				for(j=0;j<numcolors;j++){
+					if(strcmp(c[j]->name, searchname) == 0){
+						break;
+					}
+				}
+				if(j==numcolors){
+					if(verbose) printf("%s color not found\n", searchname);
+				}
+				else
+					module_bodyColor(mod[activeMod]->module, &(c[j]->item.color));
+			} 
+			
 			// put point
 			else if(strcmp(secondword, "point") == 0){
 				searchname = strtok (NULL, delim);
@@ -594,6 +624,30 @@ static int parseModule(int activeMod, ModuleItem **mod,
 				color_set(&tempcolor, x, y, z);
 				module_color(mod[activeMod]->module, &tempcolor);
 			} 
+		
+			// add surfaceColor
+			else if(strcmp(secondword, "surfaceColor") == 0){
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
+				z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
+				color_set(&tempcolor, x, y, z);
+				module_surfaceColor(mod[activeMod]->module, &tempcolor);
+			} 
+		
+			// add bodyColor
+			else if(strcmp(secondword, "bodyColor") == 0){
+				xstr = strtok (NULL, delim);
+				ystr = strtok (NULL, delim);
+				zstr = strtok (NULL, delim);
+				x = stringToFloat(xstr, numbs, numnumbers, mod[activeMod]);
+				y = stringToFloat(ystr, numbs, numnumbers, mod[activeMod]);
+				z = stringToFloat(zstr, numbs, numnumbers, mod[activeMod]);
+				color_set(&tempcolor, x, y, z);
+				module_bodyColor(mod[activeMod]->module, &tempcolor);
+			}
 		
 			// add line
 			else if(strcmp(secondword, "line") == 0){
@@ -912,6 +966,11 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 	View3D view3D;
 	Matrix vtm;
 	Matrix gtm;
+	Color Ambient, White;
+	Lighting *light = lighting_create();
+	color_set( &Ambient, 0.1, 0.1, 0.1 );
+	color_set( &White, 1.0, 1.0, 1.0 );
+	lighting_add( light, LightAmbient, &Ambient, NULL, NULL, 0, 0 );
 
 	// variables for parsing input file
 	const int maxdef = 1000;
@@ -957,7 +1016,7 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 
 	// init
 	ds = drawstate_create();
-	ds->shade = ShadeConstant;
+	ds->shade = ShadeGouraud;
 	color_set(&background, 0.0, 0.0, 0.0);
 
 	// loop until EOF is reached, generating modules
@@ -983,7 +1042,7 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 			continue;
 		}
 		
-		// check for anti alis (only keyword without second word
+		// check for antialias (only keyword without second word)
 		if(strcmp(firstword, "antialias") == 0){
 			if(verbose) printf("anti aliasing on\n");
 			antialias = 1;
@@ -1093,6 +1152,25 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 					}
 				}
 			}
+		}
+		
+		// set a shade style
+		else if(strcmp(firstword, "shade") == 0){
+		
+			if(strcmp(secondword, "gouraud") == 0)
+				ds->shade = ShadeGouraud;
+		
+			else if(strcmp(secondword, "flat") == 0)
+				ds->shade = ShadeFlat;
+		
+			else if(strcmp(secondword, "constant") == 0)
+				ds->shade = ShadeConstant;
+		
+			else if(strcmp(secondword, "depth") == 0)
+				ds->shade = ShadeDepth;
+			
+			else
+				printf("shade %s not defined\n", secondword);
 		}
 		
 		// define named primitives
@@ -1333,6 +1411,7 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 				y = stringToFloat(ystr, numbs, numnumbers, NULL);
 				z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				point_set3D(&(view3D.vrp), x, y, z);
+				lighting_add( light, LightPoint, &White, NULL, &(view3D.vrp), 0, 0 );
 			}
 			
 			// 3D vpn
@@ -1550,7 +1629,14 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 			}
 		} else {
 			if(verbose) printf("drawing module %s\n", mod[drawMod]->name);
-			module_draw(mod[drawMod]->module, &vtm, &gtm, ds, NULL, src);
+			if(is2D)
+				module_draw(mod[drawMod]->module, &vtm, &gtm, ds, NULL, src);
+			else if (is3D)
+				module_draw(mod[drawMod]->module, &vtm, &gtm, ds, light, src);
+			else {
+				printf("no view defined, use view2D or view3D keyword\n");
+				exit(0);
+			}
 			image_write(src, outfilename);
 			if(verbose) printf("image %s written\n", outfilename);
 			if(antialias){
@@ -1571,6 +1657,7 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 
 	// rest of the clean up
 	free(ds);
+	free(light);
 	for(j=0;j<numcolors;j++){
 		if(verbose) printf("freeing color named %s\n", c[j]->name);
 		free(c[j]);
@@ -1603,18 +1690,15 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 int main(int argc, char *argv[]) {
 	FILE *infile;
 	int verbose = 0;
-	char *infilename;
-	char *outfilename = "moduleGen.ppm";
-	char *usage = "Usage: <input filename> [output filename] [verbose 0 or 1]\n";
+	char *infilename, *outfilename;
+	char *usage = "Usage: <input filename> <output filename> [verbose, default 0]\n";
 	srand(time(NULL));
 
 	// grab input filename from command line
-	if( argc < 2 ) {
-		printf("Error: require input filename as command line parameter\n");
+	if( argc < 3 ) {
+		printf("Error: require input and ouput filename as command line parameter\n");
 		printf(usage);
 		return(0);
-	} else if (argc < 3) {
-		infilename =  argv[1];
 	} else if (argc < 4) {
 		infilename =  argv[1];
 		outfilename = argv[2];  

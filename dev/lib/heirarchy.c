@@ -655,88 +655,66 @@ void module_cube(Module *md, int solid){
 	}
 	else{
 	 	// use polygons ( 6 of them )
-		vector_set(&front, 0, 0, -1);
-		vector_set(&back, 0, 0, 1);
-		vector_set(&left, -1, 0, 0);
-		vector_set(&right, 1, 0, 0);
-		vector_set(&top, 0, 1, 0);
-		vector_set(&bottom, 0, -1, 0);
+		polygon_init( &p );
+		point_set3D( &pt[0], -1, -1, -1 );
+		point_set3D( &pt[1], -1, -1,  1 );
+		point_set3D( &pt[2], -1,  1,  1 );
+		point_set3D( &pt[3], -1,  1, -1 );
+		polygon_set( &p, 4, pt );
+		for(i=0;i<4;i++)
+		  vector_set( &(n[i]), -1, 0, 0 );
+		polygon_setNormals( &p, 4, n );
+		module_polygon( mod, &p );
 
-		// front side
-		polygon_set( &p, 4, &(v[0]) );
-		vector_copy( &tn[0], &front );
-		vector_copy( &tn[1], &front );
-		vector_copy( &tn[2], &front );
-		vector_copy( &tn[3], &front );
-		polygon_setNormals( &p, 4, tn );
-		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		point_set3D( &pt[0], 1, -1, -1 );
+		point_set3D( &pt[1], 1, -1,  1 );
+		point_set3D( &pt[2], 1,  1,  1 );
+		point_set3D( &pt[3], 1,  1, -1 );
+		polygon_set( &p, 4, pt );
+		for(i=0;i<4;i++)
+		  vector_set( &(n[i]), 1, 0, 0 );
+		polygon_setNormals( &p, 4, n );
+		module_polygon( mod, &p );
 
-		// back side
-		polygon_set( &p, 4, &(v[4]) );
-		vector_copy( &tn[0], &back );
-		vector_copy( &tn[1], &back );
-		vector_copy( &tn[2], &back );
-		vector_copy( &tn[3], &back );
-		polygon_setNormals( &p, 4, tn );
-		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		point_set3D( &pt[0], -1, -1, -1 );
+		point_set3D( &pt[1], -1, -1,  1 );
+		point_set3D( &pt[2],  1, -1,  1 );
+		point_set3D( &pt[3],  1, -1, -1 );
+		polygon_set( &p, 4, pt );
+		for(i=0;i<4;i++)
+		  vector_set( &(n[i]), 0, -1, 0 );
+		polygon_setNormals( &p, 4, n );
+		module_polygon( mod, &p );
 
-		// top side
-		point_copy( &tv[0], &v[2] );
-		point_copy( &tv[1], &v[3] );
-		point_copy( &tv[2], &v[7] );
-		point_copy( &tv[3], &v[6] );
-		polygon_set( &p, 4, tv );
-		vector_copy( &tn[0], &top );
-		vector_copy( &tn[1], &top );
-		vector_copy( &tn[2], &top );
-		vector_copy( &tn[3], &top );
-		polygon_setNormals( &p, 4, tn );
-		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		point_set3D( &pt[0], -1, 1, -1 );
+		point_set3D( &pt[1], -1, 1,  1 );
+		point_set3D( &pt[2],  1, 1,  1 );
+		point_set3D( &pt[3],  1, 1, -1 );
+		polygon_set( &p, 4, pt );
+		for(i=0;i<4;i++)
+		  vector_set( &(n[i]), 0, 1, 0 );
+		polygon_setNormals( &p, 4, n );
+		module_polygon( mod, &p );
 
-		// bottom side
-		point_copy( &tv[0], &v[0] );
-		point_copy( &tv[1], &v[1] );
-		point_copy( &tv[2], &v[5] );
-		point_copy( &tv[3], &v[4] );
-		polygon_set( &p, 4, tv );
-		vector_copy( &tn[0], &bottom );
-		vector_copy( &tn[1], &bottom );
-		vector_copy( &tn[2], &bottom );
-		vector_copy( &tn[3], &bottom );
-		polygon_setNormals( &p, 4, tn );
-		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		point_set3D( &pt[0], -1, -1, -1 );
+		point_set3D( &pt[1], -1,  1, -1 );
+		point_set3D( &pt[2],  1,  1, -1 );
+		point_set3D( &pt[3],  1, -1, -1 );
+		polygon_set( &p, 4, pt );
+		for(i=0;i<4;i++)
+		  vector_set( &(n[i]), 0, 0, -1 );
+		polygon_setNormals( &p, 4, n );
+		module_polygon( mod, &p );
 
-		// left side
-		point_copy( &tv[0], &v[0] );
-		point_copy( &tv[1], &v[3] );
-		point_copy( &tv[2], &v[7] );
-		point_copy( &tv[3], &v[4] );
-		polygon_set( &p, 4, tv );
-		vector_copy( &tn[0], &left );
-		vector_copy( &tn[1], &left );
-		vector_copy( &tn[2], &left );
-		vector_copy( &tn[3], &left );
-		polygon_setNormals( &p, 4, tn );
-		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
-
-		// right side
-		point_copy( &tv[0], &v[1] );
-		point_copy( &tv[1], &v[2] );
-		point_copy( &tv[2], &v[6] );
-		point_copy( &tv[3], &v[5] );
-		polygon_set( &p, 4, tv );
-		vector_copy( &tn[0], &right );
-		vector_copy( &tn[1], &right );
-		vector_copy( &tn[2], &right );
-		vector_copy( &tn[3], &right );
-		polygon_setNormals( &p, 4, tn );
-		e = element_init(ObjPolygon, &p);
-		module_insert(md, e);
+		point_set3D( &pt[0], -1, -1, 1 );
+		point_set3D( &pt[1], -1,  1, 1 );
+		point_set3D( &pt[2],  1,  1, 1 );
+		point_set3D( &pt[3],  1, -1, 1 );
+		polygon_set( &p, 4, pt );
+		for(i=0;i<4;i++)
+		  vector_set( &(n[i]), 0, 0, 1 );
+		polygon_setNormals( &p, 4, n );
+		module_polygon( mod, &p );
 	}
 	// clean up
 	polygon_clear(&p);
@@ -879,15 +857,15 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 }
 
 /*
-* Sourced from coursework file test6b.c (Bruce Maxwell)
+* Sourced from coursework file test6b.c, test9b.c (Bruce Maxwell)
 */
 void module_cylinder( Module *mod, int sides, int fill, int size, float x, float y, float z) {
 	Polygon p;
-	Point xtop, xbot, pt[4];;
+	Point xtop, xbot;
 	Element *e;
 	Line l;
 	double x1, x2, z1, z2;
-	Vector tn[4], top, side, bottom;
+	Vector top, side, bottom;
 	int i;
 
 	if(!mod){
@@ -914,51 +892,53 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 
 		vector_set(&top, 0, 1, 0);
 		vector_set(&bottom, 0, -1, 0);
-		// make a fan for the top and bottom sides
-		// and quadrilaterals for the sides
+
 		for(i=0;i<sides;i++) {
-			vector_set(&side, 0, 1, 0);
+    		Point pt[4];
+    		Vector n[4];
+    		int j;
 
-			x1 = cos( i * M_PI * 2.0 / sides );// 1
-			z1 = sin( i * M_PI * 2.0 / sides );// 0
-			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // cos(2pi/4)=0
-			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // sin(2pi/4)=1
+    		x1 = cos( i * M_PI * 2.0 / sides );
+    		z1 = sin( i * M_PI * 2.0 / sides );
+    		x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+    		z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
 
-			point_copy( &pt[0], &xtop );
-			point_set3D( &pt[1], x1, 1.0, z1 );
-			point_set3D( &pt[2], x2, 1.0, z2 );
-			polygon_set( &p, 3, pt );
-			vector_copy( &tn[0], &top );
-			vector_copy( &tn[1], &top );
-			vector_copy( &tn[2], &top );
-			polygon_setNormals( &p, 3, tn );
-			e = element_init(ObjPolygon, &p);
-			module_insert(mod, e);
+    		point_copy( &pt[0], &xtop );
+    		point_set3D( &pt[1], x1, 1.0, z1 );
+    		point_set3D( &pt[2], x2, 1.0, z2 );
 
-			point_copy( &pt[0], &xbot );
-			point_set3D( &pt[1], x1, 0.0, z1 );
-			point_set3D( &pt[2], x2, 0.0, z2 );
-			polygon_set( &p, 3, pt );
-			vector_copy( &tn[0], &bottom );
-			vector_copy( &tn[1], &bottom );
-			vector_copy( &tn[2], &bottom );
-			polygon_setNormals( &p, 3, tn );
-			e = element_init(ObjPolygon, &p);
-			module_insert(mod, e);
+    		polygon_set( &p, 3, pt );
+    		for(j=0;j<3;j++)
+	    		vector_set( &(n[j]), 0, 1, 0 );
+    		polygon_setNormals( &p, 3, n );
+    		module_polygon( mod, &p );
 
-			point_set3D( &pt[0], x1, 0.0, z1 );
-			point_set3D( &pt[1], x2, 0.0, z2 );
-			point_set3D( &pt[2], x2, 1.0, z2 );
-			point_set3D( &pt[3], x1, 1.0, z1 );
-			polygon_set( &p, 4, pt );
-			vector_copy( &tn[0], &side );
-			vector_copy( &tn[1], &side );
-			vector_copy( &tn[2], &side );
-			vector_copy( &tn[3], &side );
-			polygon_setNormals( &p, 4, tn );
-			e = element_init(ObjPolygon, &p);
-			module_insert(mod, e);
-		}
+    		point_copy( &pt[0], &xbot );
+    		point_set3D( &pt[1], x1, 0.0, z1 );
+    		point_set3D( &pt[2], x2, 0.0, z2 );
+
+    		polygon_set( &p, 3, pt );
+    		for(j=0;j<3;j++)
+	    		vector_set( &(n[j]), 0, -1, 0 );
+    		polygon_setNormals( &p, 3, n );
+    		module_polygon( mod, &p );
+
+    		point_set3D( &pt[0], x1, 0.0, z1 );
+    		point_set3D( &pt[1], x2, 0.0, z2 );
+    		point_set3D( &pt[2], x2, 1.0, z2 );
+    		point_set3D( &pt[3], x1, 1.0, z1 );
+
+    		vector_set( &n[0], x1, 0.0, z1 );
+    		vector_set( &n[1], x2, 0.0, z2 );
+    		vector_set( &n[2], x2, 0.0, z2 );
+    		vector_set( &n[3], x1, 0.0, z1 );
+    
+    		polygon_set( &p, 4, pt );
+    		polygon_setNormals( &p, 4, n );
+    		module_polygon( mod, &p );
+  		}
+	polygon_clear( &p );
+}
 	} else{
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
@@ -1026,10 +1006,10 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 void module_cone( Module *mod, int sides, int fill, int size, float x, float y, float z) {
 	Polygon p;
 	Point xtop, xbot;
-	Vector pt[6], tn[6], top, side, bottom;
 	Element *e;
 	Line l;
 	double x1, x2, z1, z2;
+	Vector tn[4], side, bottom;
 	int i;
 
 	if(!mod){
@@ -1053,39 +1033,44 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 	point_set3D( &xbot, 0, 0.0, 0.0 );
 
 	if (fill == 1){
+		vector_set(&bottom, 0, -1, 0);
+
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
+    		Point pt[4];
+    		Vector n[4];
+    		int j;
 
-			x1 = cos( i * M_PI * 2.0 / sides );
-			z1 = sin( i * M_PI * 2.0 / sides );
-			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
-			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+    		x1 = cos( i * M_PI * 2.0 / sides );
+    		z1 = sin( i * M_PI * 2.0 / sides );
+    		x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+    		z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
 
-			point_copy( &pt[0], &xbot );
-			point_set3D( &pt[1], x1, 0.0, z1 );
-			point_set3D( &pt[2], x2, 0.0, z2 );
-			polygon_set( &p, 3, pt );
-			vector_copy( &tn[0], &bottom );
-			vector_copy( &tn[1], &bottom );
-			vector_copy( &tn[2], &bottom );
-			polygon_setNormals( &p, 3, tn );
+    		point_copy( &pt[0], &xbot );
+    		point_set3D( &pt[1], x1, 0.0, z1 );
+    		point_set3D( &pt[2], x2, 0.0, z2 );
 
-			e = element_init(ObjPolygon, &p);
-			module_insert(mod, e);
+    		polygon_set( &p, 3, pt );
+    		for(j=0;j<3;j++)
+	    		vector_set( &(n[j]), 0, -1, 0 );
+    		polygon_setNormals( &p, 3, n );
+    		module_polygon( mod, &p );
 
-			point_set3D( &pt[3], x1, 0.0, z1 );
-			point_set3D( &pt[4], x2, 0.0, z2 );
-			point_copy( &pt[5], &xtop);
-			polygon_set( &p, 3, &pt[3] );
-			vector_copy( &tn[0], &top );
-			vector_copy( &tn[1], &top );
-			vector_copy( &tn[2], &top );
-			polygon_setNormals( &p, 3, tn );
+    		point_set3D( &pt[0], x1, 0.0, z1 );
+    		point_set3D( &pt[1], x2, 0.0, z2 );
+    		point_set3D( &pt[2], x2, 1.0, z2 );
+    		point_set3D( &pt[3], x1, 1.0, z1 );
 
-			e = element_init(ObjPolygon, &p);
-			module_insert(mod, e);
-		}
+    		vector_set( &n[0], x1, 0.0, z1 );
+    		vector_set( &n[1], x2, 0.0, z2 );
+    		vector_set( &n[2], x2, 0.0, z2 );
+    		vector_set( &n[3], x1, 0.0, z1 );
+    
+    		polygon_set( &p, 4, pt );
+    		polygon_setNormals( &p, 4, n );
+    		module_polygon( mod, &p );
+  		}
 	} else{
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
@@ -1274,6 +1259,8 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 	Line tempLine;
 	Point grid[7][7];
 	Point controls[7];
+	Vector normals[4];
+	Vector tangent1, tangent2;
 	Point deCast[7];
 	Point surfacePoints[16];
 	BezierSurface tempBezSurf;
@@ -1295,6 +1282,7 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 	
 	// base case
 	if(divisions == 0){
+
 		// lines
 		if(solid == 0){
 			for(i=0;i<4;i++){
@@ -1306,16 +1294,52 @@ void module_bezierSurface(Module *m, BezierSurface *b, int divisions, int solid)
 				}
 			}
 		} 
-		// triangles
+		
+		// triangles, one sided so normals don't have to be consistent
 		else {
 			controls[0] = b->c[0][0];
 			controls[1] = b->c[0][3];
 			controls[2] = b->c[3][3];
 			controls[3] = b->c[3][0];
 			controls[4] = b->c[0][0];
+
+			vector_set(&tangent1, 	b->c[0][1].val[0] - b->c[0][0].val[0],
+									b->c[0][1].val[1] - b->c[0][0].val[1],
+									b->c[0][1].val[2] - b->c[0][0].val[2] );
+			vector_set(&tangent2, 	b->c[1][0].val[0] - b->c[0][0].val[0],
+									b->c[1][0].val[1] - b->c[0][0].val[1],
+									b->c[1][0].val[2] - b->c[0][0].val[2] );
+			vector_cross(&tangent1, &tangent2, &(normals[0]));
+
+			vector_set(&tangent1, 	b->c[0][2].val[0] - b->c[0][3].val[0],
+									b->c[0][2].val[1] - b->c[0][3].val[1],
+									b->c[0][2].val[2] - b->c[0][3].val[2] );
+			vector_set(&tangent2, 	b->c[1][3].val[0] - b->c[0][3].val[0],
+									b->c[1][3].val[1] - b->c[0][3].val[1],
+									b->c[1][3].val[2] - b->c[0][3].val[2] );
+			vector_cross(&tangent1, &tangent2, &(normals[1]));
+
+			vector_set(&tangent1, 	b->c[3][1].val[0] - b->c[3][0].val[0],
+									b->c[3][1].val[1] - b->c[3][0].val[1],
+									b->c[3][1].val[2] - b->c[3][0].val[2] );
+			vector_set(&tangent2, 	b->c[2][0].val[0] - b->c[3][0].val[0],
+									b->c[2][0].val[1] - b->c[3][0].val[1],
+									b->c[2][0].val[2] - b->c[3][0].val[2] );
+			vector_cross(&tangent1, &tangent2, &(normals[2]));
+
+			vector_set(&tangent1, 	b->c[3][1].val[0] - b->c[3][3].val[0],
+									b->c[3][1].val[1] - b->c[3][3].val[1],
+									b->c[3][1].val[2] - b->c[3][3].val[2] );
+			vector_set(&tangent2, 	b->c[1][3].val[0] - b->c[3][3].val[0],
+									b->c[1][3].val[1] - b->c[3][3].val[1],
+									b->c[1][3].val[2] - b->c[3][3].val[2] );
+			vector_cross(&tangent1, &tangent2, &(normals[3]));
+
 			polygon_set(temptri, 3, &(controls[0]));
+			polygon_setNormals(temptri, 3, &(normals[0]));
 			module_polygon(m, temptri);
 			polygon_set(temptri, 3, &(controls[2]));
+			polygon_setNormals(temptri, 3, &(normals[1]));
 			module_polygon(m, temptri);
 		}
 	}

@@ -1616,16 +1616,6 @@ static Edge *makeEdgeRec( Point start, Point end, Color c1, Color c2, Image *src
 	edge->cIntersect.c[0] = c1.c[0]*edge->zIntersect + xAdjust*edge->dcPerScan.c[0];
 	edge->cIntersect.c[1] = c1.c[1]*edge->zIntersect + xAdjust*edge->dcPerScan.c[1];
 	edge->cIntersect.c[2] = c1.c[2]*edge->zIntersect + xAdjust*edge->dcPerScan.c[2];
-	  
-	if( edge->xIntersect > 350.0 && edge->yStart < 105 ) {
-    	printf("c1: %.2f %.2f %.2f\n", c1.c[0], c1.c[1], c1.c[2]);
-    	printf("c2: %.2f %.2f %.2f\n", c2.c[0], c2.c[1], c2.c[2]);
-  
-		printf("xIntersect, ystart: %.2f, %d\n", edge->xIntersect, edge->yStart);
-
-		printf("dcPerScan: %.5f, %.5f, %.5f\n", edge->dcPerScan.c[0], edge->dcPerScan.c[1], edge->dcPerScan.c[2]);
-		printf("cIntersect: %.2f, %.2f, %.2f\n", edge->cIntersect.c[0], edge->cIntersect.c[1], edge->cIntersect.c[2]);
-	}
 	
 	// adjust if the edge starts above the image
 	// move the intersections down to scanline zero
@@ -2067,8 +2057,8 @@ void polygon_drawFillB(Polygon *p, Image *src, Color c){
 void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 	DrawState *ds = (DrawState *)drawstate;
 	Lighting *light = (Lighting *)lighting;
-	Point tempVert;
-	Vector V, tempNorm;
+	Point avgLocation;
+	Vector V, avgNormal;
 	int i;
 	Color destc, setColors[p->nVertex];
 
@@ -2089,16 +2079,26 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 		 */
 		case ShadeFlat:
 			//printf("ShadeFlat\n");
-			point_copy(&tempVert, &(p->vertex[0]));
-			vector_copy(&tempNorm, &(p->normal[0]));
+			point_copy(&avgLocation, &(p->vertex[0]));
+			vector_copy(&avgNormal, &(p->normal[0]));
 			for (i = 1; i < p->nVertex; i++) {
-				point_avg(&tempVert, &tempVert, &(p->vertex[i]));
-				vector_avg(&tempNorm, &tempNorm, &(p->normal[i]));
+				point_set3D(&avgLocation, avgLocation.val[0] + p->vertex[i].val[0],
+										avgLocation.val[1] + p->vertex[i].val[1],
+										avgLocation.val[2] + p->vertex[i].val[2] );
+				point_set3D(&avgNormal, avgNormal.val[0] + p->vertex[i].val[0],
+										avgNormal.val[1] + p->vertex[i].val[1],
+										avgNormal.val[2] + p->vertex[i].val[2] );
 			}
-			vector_set(&V, 	ds->viewer.val[0] - tempVert.val[0],
-							ds->viewer.val[1] - tempVert.val[1],
-							ds->viewer.val[2] - tempVert.val[2] );
-			lighting_shading(light, &tempNorm, &V, &tempVert, 
+			point_set3D(&avgLocation, avgLocation.val[0] / p->nVertex,
+									avgLocation.val[1] / p->nVertex,
+									avgLocation.val[2] / p->nVertex );
+			point_set3D(&avgNormal, avgNormal.val[0] / p->nVertex,
+									avgNormal.val[1] / p->nVertex,
+									avgNormal.val[2] / p->nVertex );
+			vector_set(&V, 	ds->viewer.val[0] - avgLocation.val[0],
+							ds->viewer.val[1] - avgLocation.val[1],
+							ds->viewer.val[2] - avgLocation.val[2] );
+			lighting_shading(light, &avgNormal, &V, &avgLocation, 
 							&(ds->body), &(ds->surface), ds->surfaceCoeff, 
 							p->oneSided, &destc);
 			for (i = 0; i < p->nVertex; i++) {
@@ -2122,6 +2122,7 @@ void polygon_shade(Polygon *p, void *lighting, void *drawstate){
 			polygon_setColors(p, p->nVertex, setColors);
 			break;
 		default:
+			printf("polygon_shade not defined for shades other than ShadeGouraud or ShadeFlat\n");
 			break;
 	}
 }
