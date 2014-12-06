@@ -21,18 +21,15 @@ int main(int argc, char *argv[]) {
 	Module *b[22];
 	Module *city;
 	Polygon p;
-	Point pt[4];
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
-	float bodyWidth = 2.0;
 	srand(time(NULL));
 	char command[256];
-	float alpha, x[21];
+	float alpha;
 
-	Color Blue = {{0.0, 0.0, 1.0}};
 	Color Grey = {{0.5, 0.5, 0.5}};
-
+	city = module_create();
 // grab command line argument to determine viewpoint
     // and set up the view structure
     if( argc > 1 ) {
@@ -41,7 +38,7 @@ int main(int argc, char *argv[]) {
             alpha = 0.0;
         point_set3D( &(view.vrp), 120*alpha, 80*alpha, -80*alpha - (1.0-cos(alpha)*80) );
     } else {
-		point_set3D( &(view.vrp), 120, 80, -80 );
+		point_set3D( &(view.vrp), 50, 0, -30 );
     }
 	// set up the view
 	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], 
@@ -53,7 +50,6 @@ int main(int argc, char *argv[]) {
 	view.b = 50;
 	view.screenx = cols;
 	view.screeny = rows;
-	int r;
 
 	printf("set up view\n");
 
@@ -201,27 +197,63 @@ int main(int argc, char *argv[]) {
  	module_color(b[21], &Grey);
  	module_cube(b[21], 1);
 
+ 	// organize into a city
+ 	for ( i = 0; i < 22; i++){
+ 		module_module(city, b[i]);
+	}
+
 	// create the image and drawstate
 	src = image_create( rows, cols );
-	image_fillColor(src, Blue);
 	ds = drawstate_create();
-	ds->shade = ShadeFlat;
 	printf("created the image and drawstate\n");
 
-	Color White = {{1, 1, 1}};
+	point_copy(&(ds->viewer), &(view.vrp));
+	ds->shade = ShadeGouraud;
 
-	Point temp;
-	point_copy(&temp, &(view.vrp));
+	//lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p, 
+	//Color *Cb, Color *Cs, float s, int oneSided, Color *c)
 
-	Color ltGrey = {{0.7, 0.7, 0.7}};
+	//A reasonable way to structure the code is as follows. (Bruce Maxwell)
+
+	// Before the loop over lights, normalize N and V
+
+	// Within the loop
+
+	//  Within the Point Lighting case (and Spot, and Direct)
+	//    Calculate L
+	//    Normalize L
+
+	//    Calculate theta = L*N
+	//    if the polygon is one-sided and L*N is negative
+	//      continue
+
+	//    Calculate sigma = V*N
+	//    if (theta < 0 and  sigma > 0) or (theta > 0 and sigma < 0)
+	//      continue
+
+	//    Calculate H
+	//    Calculate beta = H*N
+	//    if L*N < 0
+	//      negate theta
+	//      negate beta
+
+	//    calculate shading
+
+	// light = lighting_create();
+	// lighting_add(light, LightAmbient, &White, NULL, &temp, 0.0, 0.0 );
 
 	light = lighting_create();
-	lighting_add(light, LightAmbient, &White, NULL, &temp, 0.0, 0.0 );
+	light->light[0].type = LightPoint;
+	light->light[0].position.val[0] = view.vrp.val[0];
+	light->light[0].position.val[1] = view.vrp.val[1];
+	light->light[0].position.val[2] = view.vrp.val[2];
+	light->light[0].color.c[0] = 1;
+	light->light[0].color.c[1] = 1;
+	light->light[0].color.c[2] = 1;
+	light->nLights = 1;
 
 	// draw scene
-	for ( i = 0; i < 22; i++){
-		module_draw(b[i], &vtm, &gtm, ds, light, src );
-	}
+	module_draw(city, &vtm, &gtm, ds, light, src );
 
 	printf("drew the scene\n");
 
