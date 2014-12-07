@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = pyramid-test pyramid-test-gif cylinder-test cylinder-test-gif cone-test cone-gif fire fireside
+EXECUTABLES = test9a test9b test9c test9d testLighting_shading egypt2 egypt-lighting city2 city2-gif
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ = pyramid-test.o pyramid-test-gif.o cylinder-test.o cylinder-test-gif.o cone-test.o cone-gif.o fire.o fireside.o
+_OBJ =  test9a.o test9b.o test9c.o test9d.o testLighting_shading.o egypt.o egypt-lighting.o city.o city-gif.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -189,6 +189,14 @@ test9b: $(ODIR)/test9b.o
 test9c: $(ODIR)/test9c.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 test9d: $(ODIR)/test9d.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+egypt-lighting: $(ODIR)/egypt-lighting.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+egypt2: $(ODIR)/egypt.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+city2: $(ODIR)/city.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+city2-gif: $(ODIR)/city-gif.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
