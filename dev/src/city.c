@@ -18,9 +18,9 @@ int main(int argc, char *argv[]) {
 	Lighting *light;
 	Image *src;
 	int i;
-	int numBuildings;
+	int numBuildings = 22;
 	Module *b[numBuildings];
-	Module *city;
+	Module *city, *terrain;
 	Polygon p;
 	View3D view;
 	Matrix vtm, gtm;
@@ -29,9 +29,18 @@ int main(int argc, char *argv[]) {
 	char command[256];
 	float alpha;
 
+	// set up color palette
 	Color Grey = {{0.5, 0.5, 0.5}};
+	Color blueGrey = {{29/255.0, 30/255.0, 25/255.0}};
+	Color brown =  {{72/255.0, 57/255.0, 42/255.0}};
+	Color wBrown = {{50/255.0, 31/255.0, 12/255.0}};
+	Color sandyBrown = {{87/255.0, 68/255.0, 44/255.0}};
+	Color ltBrown = {{147/255.0, 106/255.0, 57/255.0}};
+
 	city = module_create();
-// grab command line argument to determine viewpoint
+	terrain = module_create();
+
+	// grab command line argument to determine viewpoint
     // and set up the view structure
     if( argc > 1 ) {
         alpha = atof( argv[1] );
@@ -39,7 +48,7 @@ int main(int argc, char *argv[]) {
             alpha = 0.0;
         point_set3D( &(view.vrp), 120*alpha, 80*alpha, -80*alpha - (1.0-cos(alpha)*80) );
     } else {
-		point_set3D( &(view.vrp), 40, 0, -100 );
+		point_set3D( &(view.vrp), 40, 0, -110 );
     }
 	// set up the view
 	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], 
@@ -57,12 +66,10 @@ int main(int argc, char *argv[]) {
 	matrix_setView3D( &vtm, &view );
  	matrix_identity( &gtm );
 
- 	numBuildings = 22;
-
  	// buildings
  	b[0] = module_create();
  	module_scale( b[0], 4, 20, 4);
- 	module_translate( b[0], -60, 18, 20);
+ 	module_translate( b[0], -60, 18, 15);
  	module_color(b[0], &Grey);
  	module_cube(b[0], 1);
  	b[1] = module_create();
@@ -72,7 +79,7 @@ int main(int argc, char *argv[]) {
  	module_cube(b[1], 1);
   	b[2] = module_create();
  	module_scale( b[2], 5, 15, 5);
- 	module_translate( b[2], -60, 12.5, 20);
+ 	module_translate( b[2], -60, 12.5, 30);
  	module_color( b[2], &Grey);
  	module_cube( b[2], 1 );
 
@@ -110,7 +117,7 @@ int main(int argc, char *argv[]) {
  	module_cube(b[8], 1);
  	b[9] = module_create();
  	module_scale( b[9], 2, 3, 2);
- 	module_translate( b[9], 0, 0, -5);
+ 	module_translate( b[9], 0, 0, -7.5);
  	module_color(b[9], &Grey);
  	module_cube(b[9], 1);
  	b[10] = module_create();
@@ -131,12 +138,12 @@ int main(int argc, char *argv[]) {
  	module_cube(b[12], 1);
  	b[13] = module_create();
  	module_scale( b[13], 5, 15, 5);
- 	module_translate( b[13], 20, 12.5, 20);
+ 	module_translate( b[13], 20, 12.5, 15);
  	module_color( b[13], &Grey);
  	module_cube( b[13], 1);
   	b[14] = module_create();
  	module_scale( b[14], 7, 2, 3);
- 	module_translate( b[14], 20, 0, 10);
+ 	module_translate( b[14], 20, 0, 0);
  	module_color(b[14], &Grey);
  	module_cube(b[14], 1);
 
@@ -147,12 +154,12 @@ int main(int argc, char *argv[]) {
  	module_cube(b[15], 1);
  	b[16] = module_create();
  	module_scale( b[16], 4, 5, 6);
- 	module_translate( b[16], 40, 2, 10);
+ 	module_translate( b[16], 40, 2, 15);
  	module_color(b[16], &Grey);
  	module_cube(b[16], 1);
  	b[17] = module_create();
  	module_scale( b[17], 7, 10, 5);
- 	module_translate( b[17], 40, 7.5, 25);
+ 	module_translate( b[17], 40, 7.5, 30);
  	module_color(b[17], &Grey);
  	module_cube(b[17], 1);
 
@@ -163,7 +170,7 @@ int main(int argc, char *argv[]) {
  	module_cube(b[18], 1);
  	b[19] = module_create();
  	module_scale( b[19], 8, 4, 3);
- 	module_translate( b[19], 60, 2.5, 15);
+ 	module_translate( b[19], 60, 2.5, 10);
  	module_color(b[19], &Grey);
  	module_cube(b[19], 1);
 
@@ -182,6 +189,14 @@ int main(int argc, char *argv[]) {
  	for ( i = 0; i < numBuildings; i++){
  		module_module(city, b[i]);
 	}
+
+ 	// so our city isn't floating in space...
+ 	b[22] = module_create();
+ 	module_scale(b[22], 75, 1, 26);
+ 	module_translate(b[22], 0, -2.5, 13);
+ 	module_color(b[22], &blueGrey);
+ 	module_cube(b[22], 1);
+ 	module_module(terrain, b[22]);
 
 	// create the image and drawstate
 	src = image_create( rows, cols );
@@ -202,6 +217,7 @@ int main(int argc, char *argv[]) {
 	light->nLights = 1;
 
 	// draw scene
+	module_draw(terrain, &vtm, &gtm, ds, light, src);
 	module_draw(city, &vtm, &gtm, ds, light, src );
 
 	printf("drew the scene\n");
@@ -218,6 +234,7 @@ int main(int argc, char *argv[]) {
 
 	// free the modules
 	module_delete( city );
+	module_delete( terrain );
 	printf("module freed\n");
 
 	// free drawstate

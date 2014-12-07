@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 	int frame;
 	  
 	for(frame=0;frame<frames;frame++){
-		sprintf(command,"../bin/city 0.%02d",frame);
+		sprintf(command,"../bin/city2 0.%02d",frame);
 		system(command);
 		sprintf(filename,"mv city.ppm %03dcity.ppm",frame);
 		system(filename);
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	
 	// shrinking back down to give continuous loop
 	for(frame=frames-5; frame>-1; frame--){
-		sprintf(command,"../bin/city 0.%02d", frame);
+		sprintf(command,"../bin/city2 0.%02d", frame);
 		system(command);
 		sprintf(filename,"mv city.ppm %03dcity.ppm", 200-frame);
 		system(filename);
