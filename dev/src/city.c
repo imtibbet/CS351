@@ -19,7 +19,6 @@ int main(int argc, char *argv[]) {
 	Image *src;
 	Module *b;
 	Module *city, *terrain;
-	Polygon p;
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
@@ -300,14 +299,10 @@ int main(int argc, char *argv[]) {
 	sprintf(command, "convert -scale %03dx%03d city.ppm city.ppm", cols/2, rows/2);
 	system(command);
 
-	// free the polygon data
-	polygon_clear( &p );
-	printf("polygon freed\n");
-
 	// free the modules
 	module_delete( city );
 	module_delete( terrain );
-	printf("module freed\n");
+	printf("modules freed\n");
 
 	// free drawstate
 	free(ds);

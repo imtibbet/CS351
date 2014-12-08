@@ -17,23 +17,23 @@ int main(int argc, char *argv[]) {
 	int frame;
 	  
 	for(frame=0;frame<frames;frame++){
-		sprintf(command,"../bin/egypt 0.%02d",frame);
+		sprintf(command,"../bin/egypt-lighting 0.%02d",frame);
 		system(command);
-		sprintf(filename,"mv egypt.ppm %03degypt.ppm",frame);
+		sprintf(filename,"mv egypt-lighting.ppm %03degypt-lighting.ppm",frame);
 		system(filename);
 	}
 	
 	// shrinking back down to give continuous loop
 	for(frame=frames-5; frame>-1; frame--){
-		sprintf(command,"../bin/egypt 0.%02d", frame);
+		sprintf(command,"../bin/egypt-lighting 0.%02d", frame);
 		system(command);
-		sprintf(filename,"mv egypt.ppm %03degypt.ppm", 201-frame);
+		sprintf(filename,"mv egypt-lighting.ppm %03degypt-lighting.ppm", 201-frame);
 		system(filename);
 	}
 
 	printf("converting to gif...\n");
-	system("convert -delay 1.5 -loop 0 *egypt.ppm egypt.gif");
-	system("rm *egypt.ppm");
+	system("convert -delay 1.5 -loop 0 *egypt-lighting.ppm egypt.gif");
+	system("rm *egypt-lighting.ppm");
 	system("animate egypt.gif");
 	return(0);
 }
