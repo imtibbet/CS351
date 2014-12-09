@@ -19,5 +19,6 @@
 #include "bezier.h"
 #include "heirarchy.h"
 #include "plyRead.h"
+#include "swarm.h"
 
 #endif
