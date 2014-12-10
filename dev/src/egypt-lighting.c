@@ -196,11 +196,18 @@ static Module* sandscape(){
 
   // set up color palette
   Color brown =  {{72/255.0, 57/255.0, 42/255.0}};
+  Color blueGrey = {{29/255.0, 30/255.0, 25/255.0}};
   Color wBrown = {{50/255.0, 31/255.0, 12/255.0}};
   Color sandyBrown = {{87/255.0, 68/255.0, 44/255.0}};
   Color ltBrown = {{147/255.0, 106/255.0, 57/255.0}};
   Color sandy = {{0.68, 0.52, 0.28}};
 
+  b = module_create();
+  module_scale(b, 85, 1, 26);
+  module_translate(b, 0, -2, 78);
+  module_bodyColor(b, &blueGrey);
+  module_cube(b, 1);
+  module_module(terrain, b);
   b = module_create();
   module_scale(b, 85, 1, 90);
   module_translate(b, 0, -2.5, 13);
