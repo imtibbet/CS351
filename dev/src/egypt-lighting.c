@@ -267,8 +267,7 @@ int main(int argc, char *argv[]) {
   const int cols = 660*2;
 
     // set up color palette
-  Color White = {{1.0, 1.0, 1.0}};
-
+  Color navy = {{25/255.0, 25/255.0, 112/255.0}};
   cairo = module_create();
   sand = module_create();
   giza = module_create();
@@ -315,6 +314,7 @@ int main(int argc, char *argv[]) {
 
   // create the image and drawstate
   src = image_create( rows, cols );
+  image_fillColor(src, navy);
   ds = drawstate_create();
   point_copy(&(ds->viewer), &(view.vrp));
   ds->shade = ShadeGouraud;

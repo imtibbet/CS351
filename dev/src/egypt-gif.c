@@ -24,15 +24,15 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// shrinking back down to give continuous loop
-	for(frame=frames-5; frame>-1; frame--){
+	for(frame=(frames-1); frame>-1; frame--){
 		sprintf(command,"../bin/egypt-lighting 0.%02d", frame);
 		system(command);
-		sprintf(filename,"mv egypt-lighting.ppm %03degypt-lighting.ppm", 201-frame);
+		sprintf(filename,"mv egypt-lighting.ppm %03degypt-lighting.ppm", 200-frame);
 		system(filename);
 	}
 
 	printf("converting to gif...\n");
-	system("convert -delay 1.5 -loop 0 *egypt-lighting.ppm egypt.gif");
+	system("convert -delay 4 -loop 0 *egypt-lighting.ppm egypt.gif");
 	system("rm *egypt-lighting.ppm");
 	system("animate egypt.gif");
 	return(0);
