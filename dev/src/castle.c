@@ -250,8 +250,8 @@ static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 
 int main(int argc, char *argv[]) {
 	// initialize fields
-	const int rows = 600*2;
-	const int cols = 700*2;
+	const int rows = 500*2;
+	const int cols = 560*2;
 	Image *src;
 	Lighting *light;
 	Module *tower0, *tower1, *tower2, *tower3;
@@ -275,10 +275,10 @@ int main(int argc, char *argv[]) {
 	src = image_create( rows, cols );
 
 	// set up the view
-	point_set3D( &(view.vrp), 0, 45, -70);
+	point_set3D( &(view.vrp), 0, 42, -120);
 	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 	vector_set( &(view.vup), 0, 1, 0 );
-	view.d = 5;
+	view.d = 8;
 	view.du = 6;
 	view.f = 1;
 	view.b = 200;
@@ -308,7 +308,7 @@ int main(int argc, char *argv[]) {
 		light->light[0].position.val[1] = 25;
 		light->light[0].position.val[2] = 0;
 		light->light[1].position.val[0] = 0;
-		light->light[1].position.val[1] = 25;
+		light->light[1].position.val[1] = 26;
 		light->light[1].position.val[2] = 0;
 		light->light[0].color.c[0] = 1;
 		light->light[0].color.c[1] = 241/255.0;
