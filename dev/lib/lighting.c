@@ -89,7 +89,7 @@ void lighting_add( Lighting *l, LightType type, Color *c, Vector *dir,
 		point_copy(&light.position, pos);
 	}
 	if (type == LightSpot){
-		light.cutoff = cutoff;
+		light.cutoff = cutoff*M_PI/180.0;
 		light.sharpness = sharpness;
 	}
 	light_copy(&(l->light[l->nLights++]), &light);
@@ -104,7 +104,7 @@ void lighting_add( Lighting *l, LightType type, Color *c, Vector *dir,
 void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p, 
 	Color *Cb, Color *Cs, float s, int oneSided, Color *c){
 	int i, verbose = 0;
-	float LdotN, HdotNpowS, nLdotD, spotSharp, invlenLplusV;
+	float LdotN, VdotN, HdotN, HdotNpowS, nLdotD, spotSharp, invlenLplusV;
 	Color curc = {{0.0, 0.0, 0.0}};
 	Vector L, nL, H;//, LplusV;
 	if(!l || !N || !V || !p || !Cb || !Cs){
@@ -130,28 +130,30 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 								-1 * l->light[i].direction.val[2]);
 				vector_normalize(&L);
 				vector_normalize(V);
-				//vector_set(&LplusV,	L.val[0] + V->val[0], 
-				//					L.val[1] + V->val[1], 
-				//					L.val[2] + V->val[2] );
-				invlenLplusV = 0.5;//1/vector_length(&LplusV);
+				LdotN = vector_dot(&L, N);
+				if(oneSided && LdotN < 0)
+					continue;
+				
+				VdotN = vector_dot(V, N);
+				if((LdotN < 0 && VdotN > 0) || (LdotN > 0 && VdotN < 0))
+					continue;
+					
+				invlenLplusV = 0.5;
 				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
 								invlenLplusV*(L.val[1] + V->val[1]), 
 								invlenLplusV*(L.val[2] + V->val[2]) );
-				if(!oneSided && vector_dot(&L, N) < 0){
-					N->val[0] *= -1;
-					N->val[1] *= -1;
-					N->val[2] *= -1;
+				HdotN = vector_dot(&H, N);
+				if(LdotN < 0){
+					LdotN *= -1;
+					HdotN *= -1;
 				}
-				LdotN = vector_dot(&L, N);
-				if(LdotN > 0){
-					HdotNpowS = pow(vector_dot(&H, N), s);
-					curc.c[0] += 	Cb->c[0] * l->light[i].color.c[0] * LdotN + 
-									Cs->c[0] * l->light[i].color.c[0] * HdotNpowS;
-					curc.c[1] += 	Cb->c[1] * l->light[i].color.c[1] * LdotN + 
-									Cs->c[1] * l->light[i].color.c[1] * HdotNpowS;
-					curc.c[2] += 	Cb->c[2] * l->light[i].color.c[2] * LdotN + 
-									Cs->c[2] * l->light[i].color.c[2] * HdotNpowS;
-				}
+				HdotNpowS = pow(HdotN, s);
+				curc.c[0] += 	Cb->c[0] * l->light[i].color.c[0] * LdotN + 
+								Cs->c[0] * l->light[i].color.c[0] * HdotNpowS;
+				curc.c[1] += 	Cb->c[1] * l->light[i].color.c[1] * LdotN + 
+								Cs->c[1] * l->light[i].color.c[1] * HdotNpowS;
+				curc.c[2] += 	Cb->c[2] * l->light[i].color.c[2] * LdotN + 
+								Cs->c[2] * l->light[i].color.c[2] * HdotNpowS;
 				break;
 
 			case LightPoint:
@@ -163,67 +165,74 @@ void lighting_shading( Lighting *l, Vector *N, Vector *V, Point *p,
 								l->light[i].position.val[2] - p->val[2] );
 				vector_normalize(&L);
 				vector_normalize(V);
-				//vector_set(&LplusV,	L.val[0] + V->val[0], 
-				//					L.val[1] + V->val[1], 
-				//					L.val[2] + V->val[2] );
-				invlenLplusV = 0.5;//1/vector_length(&LplusV);
+				LdotN = vector_dot(&L, N);
+				if(oneSided && LdotN < 0)
+					continue;
+				
+				VdotN = vector_dot(V, N);
+				if((LdotN < 0 && VdotN > 0) || (LdotN > 0 && VdotN < 0))
+					continue;
+					
+				invlenLplusV = 0.5;
 				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
 								invlenLplusV*(L.val[1] + V->val[1]), 
 								invlenLplusV*(L.val[2] + V->val[2]) );
-				if(!oneSided && vector_dot(&L, N) < 0){
-					N->val[0] *= -1;
-					N->val[1] *= -1;
-					N->val[2] *= -1;
+				HdotN = vector_dot(&H, N);
+				if(LdotN < 0){
+					LdotN *= -1;
+					HdotN *= -1;
 				}
-				LdotN = vector_dot(&L, N);
-				if(LdotN > 0){
-					HdotNpowS = pow(vector_dot(&H, N), s);
-					curc.c[0] += 	Cb->c[0] * l->light[i].color.c[0] * LdotN + 
-									Cs->c[0] * l->light[i].color.c[0] * HdotNpowS;
-					curc.c[1] += 	Cb->c[1] * l->light[i].color.c[1] * LdotN + 
-									Cs->c[1] * l->light[i].color.c[1] * HdotNpowS;
-					curc.c[2] += 	Cb->c[2] * l->light[i].color.c[2] * LdotN + 
-									Cs->c[2] * l->light[i].color.c[2] * HdotNpowS;
-				}
+				HdotNpowS = pow(HdotN, s);
+				curc.c[0] += 	Cb->c[0] * l->light[i].color.c[0] * LdotN + 
+								Cs->c[0] * l->light[i].color.c[0] * HdotNpowS;
+				curc.c[1] += 	Cb->c[1] * l->light[i].color.c[1] * LdotN + 
+								Cs->c[1] * l->light[i].color.c[1] * HdotNpowS;
+				curc.c[2] += 	Cb->c[2] * l->light[i].color.c[2] * LdotN + 
+								Cs->c[2] * l->light[i].color.c[2] * HdotNpowS;
 				break;
 
 			case LightSpot:
 				if(verbose) printf("Spot Light\n");
-				vector_set(&L, 	-1 * (l->light[i].position.val[0] - p->val[0]), 
-								-1 * (l->light[i].position.val[1] - p->val[1]), 
-								-1 * (l->light[i].position.val[2] - p->val[2]) );
+				vector_set(&L, 	l->light[i].position.val[0] - p->val[0], 
+								l->light[i].position.val[1] - p->val[1], 
+								l->light[i].position.val[2] - p->val[2] );
 				vector_normalize(&L);
 				vector_normalize(V);
-				//vector_set(&LplusV,	L.val[0] + V->val[0], 
-				//					L.val[1] + V->val[1], 
-				//					L.val[2] + V->val[2] );
-				invlenLplusV = 0.5;//1/vector_length(&LplusV);
-				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
-								invlenLplusV*(L.val[1] + V->val[1]), 
-								invlenLplusV*(L.val[2] + V->val[2]) );
-				if(!oneSided && vector_dot(&L, N) < 0){
-					N->val[0] *= -1;
-					N->val[1] *= -1;
-					N->val[2] *= -1;
-				}
-				LdotN = vector_dot(&L, N);
 				vector_set(&nL,	-1 * L.val[0], // negative L
 								-1 * L.val[1], 
 								-1 * L.val[2] );
 				nLdotD = vector_dot(&nL, &(l->light[i].direction));
-				if(	LdotN > 0 && nLdotD > cos(l->light[i].cutoff)){
-					HdotNpowS = pow(vector_dot(&H, N), s);
-					spotSharp = pow(nLdotD, l->light[i].sharpness);
-					curc.c[0] += 	(Cb->c[0] * l->light[i].color.c[0] * LdotN + 
-									Cs->c[0] * l->light[i].color.c[0] * HdotNpowS) * 
-									spotSharp;
-					curc.c[1] += 	(Cb->c[1] * l->light[i].color.c[1] * LdotN + 
-									Cs->c[1] * l->light[i].color.c[1] * HdotNpowS) * 
-									spotSharp;
-					curc.c[2] += 	(Cb->c[2] * l->light[i].color.c[2] * LdotN + 
-									Cs->c[2] * l->light[i].color.c[2] * HdotNpowS) * 
-									spotSharp;
+				if(nLdotD < cos(l->light[i].cutoff))
+					continue;
+
+				LdotN = vector_dot(&L, N);
+				if(oneSided && LdotN < 0)
+					continue;
+
+				VdotN = vector_dot(V, N);
+				if((LdotN < 0 && VdotN > 0) || (LdotN > 0 && VdotN < 0))
+					continue;
+					
+				invlenLplusV = 0.5;
+				vector_set(&H,	invlenLplusV*(L.val[0] + V->val[0]), 
+								invlenLplusV*(L.val[1] + V->val[1]), 
+								invlenLplusV*(L.val[2] + V->val[2]) );
+				HdotN = vector_dot(&H, N);
+				if(LdotN < 0){
+					LdotN *= -1;
+					HdotN *= -1;
 				}
+				HdotNpowS = pow(HdotN, s);
+				spotSharp = pow(nLdotD, l->light[i].sharpness);
+				curc.c[0] += 	(Cb->c[0] * l->light[i].color.c[0] * LdotN + 
+								Cs->c[0] * l->light[i].color.c[0] * HdotNpowS) * 
+								spotSharp;
+				curc.c[1] += 	(Cb->c[1] * l->light[i].color.c[1] * LdotN + 
+								Cs->c[1] * l->light[i].color.c[1] * HdotNpowS) * 
+								spotSharp;
+				curc.c[2] += 	(Cb->c[2] * l->light[i].color.c[2] * LdotN + 
+								Cs->c[2] * l->light[i].color.c[2] * HdotNpowS) * 
+								spotSharp;
 				break;
 
 			default:
