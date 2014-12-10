@@ -254,6 +254,22 @@ static Module* pyramid(int size, float x, float y, float z){
   return((Module*)pyra);
 }
 
+static Module* tree(int size, float x, float y, float z);
+static Module* tree(int size, float x, float y, float z){
+  Module *tree;
+  Color wBrown = {{50/255.0, 31/255.0, 12/255.0}};
+
+  tree = module_create();
+  // module scale
+  module_bodyColor(tree, &wBrown);
+  module_cylinder(tree, 8, 1, x, y, z);
+
+  //leaves out of bezier surfaces
+
+  return((Module*)pyra);
+}
+
+
 int main(int argc, char *argv[]) {
   Image *src;
   Module *cairo, *sand, *giza, *khuf, *khaf, *menk;
@@ -267,7 +283,7 @@ int main(int argc, char *argv[]) {
   const int cols = 660*2;
 
     // set up color palette
-  Color navy = {{25/255.0, 25/255.0, 112/255.0}};
+  Color navy = {{0, 0, 112/255.0}};
   cairo = module_create();
   sand = module_create();
   giza = module_create();

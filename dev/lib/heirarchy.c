@@ -859,7 +859,7 @@ void module_pyramid(Module *md, int solid, float size, float x, float y, float z
 /*
 * Sourced from coursework file test6b.c, test9b.c (Bruce Maxwell)
 */
-void module_cylinder( Module *mod, int sides, int fill, int size, float x, float y, float z) {
+void module_cylinder( Module *mod, int sides, int fill, float x, float y, float z) {
 	Polygon p;
 	Element *e;
 	Point xtop, xbot, pt[4];
@@ -873,10 +873,7 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 		return;
 	}
 
-	// set cylinder parameters
-    module_scale(mod, (int)size, (int)size, (int)size);
 	module_translate(mod, (float)x, (float)y, (float)z);
-	//printf("parameters set\n");
 
 	// initialize polygon
 	polygon_init( &p );
