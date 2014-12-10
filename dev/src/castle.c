@@ -38,9 +38,9 @@ static Module * genTower(float x, float y, float z){
 	roof = module_create();
 
 	// basic tower cylinder
-	module_scale(t, 1, 3, 1);
+	module_scale(t, 1, 8, 1);
 	module_bodyColor(t, &grey);
-	module_cylinder(t, 20, 1, 8, x, y, z);
+	module_cylinder(t, 20, 1, x, y, z);
 	module_module(tower, t);
 
 	// wooden posts to support the roof of the tower

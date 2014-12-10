@@ -254,20 +254,20 @@ static Module* pyramid(int size, float x, float y, float z){
   return((Module*)pyra);
 }
 
-static Module* tree(int size, float x, float y, float z);
-static Module* tree(int size, float x, float y, float z){
-  Module *tree;
-  Color wBrown = {{50/255.0, 31/255.0, 12/255.0}};
+// static Module* tree(int size, float x, float y, float z);
+// static Module* tree(int size, float x, float y, float z){
+//   Module *tree;
+//   Color wBrown = {{50/255.0, 31/255.0, 12/255.0}};
 
-  tree = module_create();
-  // module scale
-  module_bodyColor(tree, &wBrown);
-  module_cylinder(tree, 8, 1, x, y, z);
+//   tree = module_create();
+//   // module scale
+//   module_bodyColor(tree, &wBrown);
+//   module_cylinder(tree, 8, 1, x, y, z);
 
-  //leaves out of bezier surfaces
+//   //leaves out of bezier surfaces
 
-  return((Module*)pyra);
-}
+//   return((Module*)pyra);
+// }
 
 
 int main(int argc, char *argv[]) {
