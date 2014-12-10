@@ -1023,7 +1023,7 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 }
 
 /*
-* Sourced from coursework file test6b.c (Bruce Maxwell)
+* makes a cone, stored in Module *mod
 */
 void module_cone( Module *mod, int sides, int fill, int size, float x, float y, float z) {
 	Polygon p;
@@ -1031,7 +1031,7 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 	Element *e;
 	Line l;
 	double x1, x2, z1, z2;
-	Vector tn[4], side, bottom;
+	Vector bottom;
 	int i;
 
 	if(!mod){
@@ -1053,44 +1053,43 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 	
 	point_set3D( &xtop, 0, 1.0, 0.0 );
 	point_set3D( &xbot, 0, 0.0, 0.0 );
+	vector_set( &bottom, 0, -1, 0 );
 
 	if (fill == 1){
-		vector_set(&bottom, 0, -1, 0);
 
-		// make a fan for the top and bottom sides
+		// make a fan for the bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
-			Point pt[6];
+    		Point pt[3];
+    		Vector n[3];
+    		int j;
 
-			x1 = cos( i * M_PI * 2.0 / sides );
-			z1 = sin( i * M_PI * 2.0 / sides );
-			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
-			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+    		x1 = cos( i * M_PI * 2.0 / sides );
+    		z1 = sin( i * M_PI * 2.0 / sides );
+    		x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
+    		z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
 
-			vector_set(&side, 0.5*(x1+x2), 1, 0.5*(z1+z2));
+    		for(j=0;j<3;j++)
+	    		vector_copy(&(n[j]), &bottom);
 
-			point_copy( &pt[0], &xbot );
-			point_set3D( &pt[1], x1, 0.0, z1 );
-			point_set3D( &pt[2], x2, 0.0, z2 );
-			polygon_set( &p, 3, pt );
-			vector_copy( &tn[0], &bottom );
-			vector_copy( &tn[1], &bottom );
-			vector_copy( &tn[2], &bottom );
-			polygon_setNormals( &p, 3, tn );
-			e = element_init(ObjPolygon, &p);
-			module_insert(mod, e);
+    		point_copy( &pt[0], &xbot );
+    		point_set3D( &pt[1], x1, 0.0, z1 );
+    		point_set3D( &pt[2], x2, 0.0, z2 );
+    		polygon_set( &p, 3, pt );
 
-			point_set3D( &pt[3], x1, 0.0, z1 );
-			point_set3D( &pt[4], x2, 0.0, z2 );
-			point_copy( &pt[5], &xtop);
-			polygon_set( &p, 3, &pt[3] );
-			vector_copy( &tn[0], &side );
-			vector_copy( &tn[1], &side );
-			vector_copy( &tn[2], &side );
-			polygon_setNormals( &p, 3, tn );
-			e = element_init(ObjPolygon, &p);
-			module_insert(mod, e);
-		}
+    		polygon_setNormals( &p, 3, n );
+    		module_polygon( mod, &p );
+
+    		point_copy( &pt[0], &xtop );
+    		polygon_set( &p, 3, pt );
+
+    		vector_set( &(n[0]), (x1+x2)/2, 1, (z1+z2)/2 );
+			vector_set( &(n[1]), x1, 0, z1 );
+			vector_set( &(n[2]), x2, 0, z2 );
+
+    		polygon_setNormals( &p, 3, n );
+    		module_polygon( mod, &p );
+  		}
 	} else{
 		// make a fan for the top and bottom sides
 		// and quadrilaterals for the sides
@@ -1137,7 +1136,7 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 		}
 	}
 	polygon_clear( &p );
-} 
+}
 
 // Shading/Color Module Functions
 

@@ -311,6 +311,7 @@ int main(int argc, char *argv[]) {
   ds = drawstate_create();
   point_copy(&(ds->viewer), &(view.vrp));
   ds->shade = ShadeGouraud;
+  ds->surfaceCoeff = 7;
   printf("created the image and drawstate\n");
 
   // make two lights: point for contrast, ambient for general brightness

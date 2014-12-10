@@ -394,7 +394,6 @@ int main(int argc, char *argv[]) {
   light->light[0].color.c[2] = 1;
   light->nLights = 1;
   
-
   // draw into the scene
   module_draw( scene, &vtm, &gtm, ds, light, src );
 

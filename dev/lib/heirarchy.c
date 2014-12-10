@@ -999,7 +999,7 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 }
 
 /*
-* Sourced from coursework file test6b.c (Bruce Maxwell)
+* makes a cone, stored in Module *mod
 */
 void module_cone( Module *mod, int sides, int fill, int size, float x, float y, float z) {
 	Polygon p;
@@ -1029,15 +1029,15 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
 	
 	point_set3D( &xtop, 0, 1.0, 0.0 );
 	point_set3D( &xbot, 0, 0.0, 0.0 );
+	vector_set( &bottom, 0, -1, 0 );
 
 	if (fill == 1){
-		vector_set(&bottom, 0, -1, 0);
 
-		// make a fan for the top and bottom sides
+		// make a fan for the bottom sides
 		// and quadrilaterals for the sides
 		for(i=0;i<sides;i++) {
-    		Point pt[4];
-    		Vector n[4];
+    		Point pt[3];
+    		Vector n[3];
     		int j;
 
     		x1 = cos( i * M_PI * 2.0 / sides );
@@ -1045,28 +1045,25 @@ void module_cone( Module *mod, int sides, int fill, int size, float x, float y, 
     		x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides );
     		z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides );
 
+    		for(j=0;j<3;j++)
+	    		vector_copy(&(n[j]), &bottom);
+
     		point_copy( &pt[0], &xbot );
     		point_set3D( &pt[1], x1, 0.0, z1 );
     		point_set3D( &pt[2], x2, 0.0, z2 );
-
     		polygon_set( &p, 3, pt );
-    		for(j=0;j<3;j++)
-	    		vector_set( &(n[j]), 0, -1, 0 );
+
     		polygon_setNormals( &p, 3, n );
     		module_polygon( mod, &p );
 
-    		point_set3D( &pt[0], x1, 0.0, z1 );
-    		point_set3D( &pt[1], x2, 0.0, z2 );
-    		point_set3D( &pt[2], x2, 1.0, z2 );
-    		point_set3D( &pt[3], x1, 1.0, z1 );
+    		point_copy( &pt[0], &xtop );
+    		polygon_set( &p, 3, pt );
 
-    		vector_set( &n[0], x1, 0.0, z1 );
-    		vector_set( &n[1], x2, 0.0, z2 );
-    		vector_set( &n[2], x2, 0.0, z2 );
-    		vector_set( &n[3], x1, 0.0, z1 );
-    
-    		polygon_set( &p, 4, pt );
-    		polygon_setNormals( &p, 4, n );
+    		vector_set( &(n[0]), (x1+x2)/2, 1, (z1+z2)/2 );
+			vector_set( &(n[1]), x1, 0, z1 );
+			vector_set( &(n[2]), x2, 0, z2 );
+
+    		polygon_setNormals( &p, 3, n );
     		module_polygon( mod, &p );
   		}
 	} else{

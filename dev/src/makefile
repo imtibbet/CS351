@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = test9a test9b test9c test9d testLighting_shading egypt-lighting egypt2-gif city2 city2-gif
+EXECUTABLES = test9a test9b test9c test9d testLighting_shading egypt-lighting egypt2-gif city2 city2-gif castle-lighting
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ =  test9a.o test9b.o test9c.o test9d.o testLighting_shading.o egypt.o egypt-lighting.o egypt-gif.o city.o city-gif.o
+_OBJ =  test9a.o test9b.o test9c.o test9d.o testLighting_shading.o egypt.o egypt-lighting.o egypt-gif.o city.o city-gif.o castle.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -197,6 +197,8 @@ egypt2-gif: $(ODIR)/egypt-gif.o
 city2: $(ODIR)/city.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 city2-gif: $(ODIR)/city-gif.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+castle-lighting: $(ODIR)/castle.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean

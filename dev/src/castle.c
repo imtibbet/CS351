@@ -39,94 +39,87 @@ static Module * genTower(float x, float y, float z){
 
 	// basic tower cylinder
 	module_scale(t, 1, 3, 1);
-	module_color(t, &grey);
-	module_cylinder(t, 20, 1, 8, x, y, z);
-	module_module(tower, t);
-
-	// smaller cylinder placed inside for staircase (flickering) effect
-	t = module_create();
-	module_scale(t, .8, 3, .8);
-	module_color(t, &dkGrey);
+	module_bodyColor(t, &grey);
 	module_cylinder(t, 20, 1, 8, x, y, z);
 	module_module(tower, t);
 
 	// wooden posts to support the roof of the tower
-	module_scale(sup, 1, 5.5, 1);
+	module_scale(sup, .75, 4, .75);
 	module_translate(sup, x-4, y+25, z-4);
-	module_color(sup, &brown);
+	module_bodyColor(sup, &brown);
 	module_cube(sup, 1);
 	module_module(tower, sup);
 	sup = module_create();
-	module_scale(sup, 1, 5.5, 1);
+	module_scale(sup, .75, 4, .75);
 	module_translate(sup, x+4, y+25, z-4);
-	module_color(sup, &brown);
+	module_bodyColor(sup, &brown);
 	module_cube(sup, 1);
 	module_module(tower, sup);
 	sup = module_create();
-	module_scale(sup, 1, 5.5, 1);
+	module_scale(sup, .75, 4, .75);
 	module_translate(sup, x-4, y+25, z+4);
-	module_color(sup, &brown);
+	module_bodyColor(sup, &brown);
 	module_cube(sup, 1);
 	module_module(tower, sup);
 	sup = module_create();
-	module_scale(sup, 1, 5.5, 1);
+	module_scale(sup, .75, 4, .75);
 	module_translate(sup, x+4, y+25, z+4);
-	module_color(sup, &brown);
+	module_bodyColor(sup, &brown);
 	module_cube(sup, 1);
 	module_module(tower, sup);
 
 	// decorative stonework 1
-	module_scale(stone, 2, 3, 2);
-	module_translate(stone, x-7, y+24, z);
-	module_color(stone, &dkGrey);
+	module_scale(stone, 1, 1.5, 1);
+	module_translate(stone, x-7.2, y+24, z);
+	module_bodyColor(stone, &dkGrey);
 	module_cube(stone, 1);
 	module_module(tower, stone);
 	stone = module_create();
-	module_scale(stone, 2, 3, 2);
-	module_translate(stone, x+7, y+24, z);
-	module_color(stone, &dkGrey);
+	module_scale(stone, 1, 1.5, 1);
+	module_translate(stone, x+7.2, y+24, z);
+	module_bodyColor(stone, &dkGrey);
 	module_cube(stone, 1);
 	module_module(tower, stone);
 	stone = module_create();
-	module_scale(stone, 2, 3, 2);
-	module_translate(stone, x, y+24, z-7);
-	module_color(stone, &dkGrey);
+	module_scale(stone, 1, 1.5, 1);
+	module_translate(stone, x, y+24, z-7.2);
+	module_bodyColor(stone, &dkGrey);
 	module_cube(stone, 1);
 	module_module(tower, stone);
 	stone = module_create();
-	module_scale(stone, 2, 3, 2);
-	module_translate(stone, x, y+24, z+7);
-	module_color(stone, &dkGrey);
+	module_scale(stone, 1, 1.5, 1);
+	module_translate(stone, x, y+24, z+7.2);
+	module_bodyColor(stone, &dkGrey);
 	module_cube(stone, 1);
 	module_module(tower, stone);
 	// offset decorative stonework 2
 	stone = module_create();
-	module_scale(stone, 2, 3, 2);
+	module_scale(stone, 1, 1.5, 1);
 	module_translate(stone, x-5, y+23, z-5);
-	module_color(stone, &dkGrey);
+	module_bodyColor(stone, &dkGrey);
 	module_cube(stone, 1);
 	module_module(tower, stone);
 	stone = module_create();
-	module_scale(stone, 2, 3, 2);
+	module_scale(stone, 1, 1.5, 1);
 	module_translate(stone, x+5, y+23, z-5);
-	module_color(stone, &dkGrey);
+	module_bodyColor(stone, &dkGrey);
 	module_cube(stone, 1);
 	module_module(tower, stone);
 	stone = module_create();
-	module_scale(stone, 2, 3, 2);
+	module_scale(stone, 1, 1.5, 1);
 	module_translate(stone, x-5, y+23, z+5);
-	module_color(stone, &dkGrey);
+	module_bodyColor(stone, &dkGrey);
 	module_cube(stone, 1);
 	module_module(tower, stone);
 	stone = module_create();
-	module_scale(stone, 2, 3, 2);
+	module_scale(stone, 1, 1.5, 1);
 	module_translate(stone, x+5, y+23, z+5);
-	module_color(stone, &dkGrey);
+	module_bodyColor(stone, &dkGrey);
 	module_cube(stone, 1);
 	module_module(tower, stone);
 	
 	// roof of the tower
-	module_color(roof, &dkBrown);
+	module_bodyColor(roof, &dkBrown);
 	module_cone(roof, 8, 1, 8, x, y+28, z);
 	module_module(tower, roof);
 
@@ -212,7 +205,7 @@ static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 		// printf("module scaled\n");
 		module_translate((Module*)f[i], x+3.0, y, z);
 		// printf("module translated\n");
-		module_color((Module*)f[i], &(ds->surface));
+		module_bodyColor((Module*)f[i], &(ds->surface));
 		// printf("ds->surface->c[1] %f\n", ds->surface.c[1]);
 		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
 		// printf("surface set\n");
@@ -224,7 +217,7 @@ static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 		module_scale((Module*)f[i], (float)((rand()%10)+5)/scale, (float)((rand()%30)+5)/scale, (float)((rand()%20)+1)/scale);
 		module_translate((Module*)f[i], x+2.0, y, z);
 		module_rotateY((Module*)f[i], 0, 1.3);
-		module_color((Module*)f[i], &(ds->surface));
+		module_bodyColor((Module*)f[i], &(ds->surface));
 		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
 		module_module((Module*)fire, (Module*)f[i]);
 
@@ -234,7 +227,7 @@ static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 		module_translate((Module*)f[i], x+2.0, y, z);
 		module_rotateY((Module*)f[i], 0, 1);
 		module_rotateY((Module*)f[i], 0, 1.3);
-		module_color((Module*)f[i], &(ds->surface));
+		module_bodyColor((Module*)f[i], &(ds->surface));
 		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
 		module_module((Module*)fire, (Module*)f[i]);
 
@@ -245,7 +238,7 @@ static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 		module_rotateY((Module*)f[i], 0, 1);
 		module_rotateY((Module*)f[i], 0, 1);
 		module_rotateY((Module*)f[i], 0, 1.3);
-		module_color((Module*)f[i], &(ds->surface));
+		module_bodyColor((Module*)f[i], &(ds->surface));
 		module_bezierSurface((Module*)f[i], &bc, divisions, 1);
 		module_module((Module*)fire, (Module*)f[i]);
 	}
@@ -257,9 +250,10 @@ static Module* genFire(float x, float y, float z, int divisions, DrawState *ds){
 
 int main(int argc, char *argv[]) {
 	// initialize fields
-	const int rows = 500*2;
-	const int cols = 560*2;
+	const int rows = 600*2;
+	const int cols = 700*2;
 	Image *src;
+	Lighting *light;
 	Module *tower0, *tower1, *tower2, *tower3;
 	Module *flames[60], *wall;
 	View3D view;
@@ -276,7 +270,8 @@ int main(int argc, char *argv[]) {
 
 	// create drawstate + image
 	ds = drawstate_create();
-	ds->shade=ShadeDepth;
+	ds->shade = ShadeGouraud;
+	ds->surfaceCoeff = 5;
 	src = image_create( rows, cols );
 
 	// set up the view
@@ -286,7 +281,7 @@ int main(int argc, char *argv[]) {
 	view.d = 5;
 	view.du = 6;
 	view.f = 1;
-	view.b = 150;
+	view.b = 200;
 	view.screenx = cols;
 	view.screeny = rows;
 
@@ -304,41 +299,60 @@ int main(int argc, char *argv[]) {
 		tower3 = genTower(-50, 0, -50);
 		flames[frame] = module_create();
 		flames[frame] = genFire(0, 25, 0, 4, ds);
+
+		point_copy(&(ds->viewer), &(view.vrp));
+		light = lighting_create();
+		light->light[0].type = LightPoint;
+		light->light[1].type = LightAmbient;
+		light->light[0].position.val[0] = 0;
+		light->light[0].position.val[1] = 25;
+		light->light[0].position.val[2] = 0;
+		light->light[1].position.val[0] = 0;
+		light->light[1].position.val[1] = 25;
+		light->light[1].position.val[2] = 0;
+		light->light[0].color.c[0] = 1;
+		light->light[0].color.c[1] = 241/255.0;
+		light->light[0].color.c[2] = 224/255.0;
+		light->light[1].color.c[0] = 1;
+		light->light[1].color.c[1] = 241/255.0;
+		light->light[1].color.c[2] = 224/255.0;
+		light->nLights = 2;
+		
 		wall = module_create();
-		module_scale(wall, 50, 23, 1);
+		module_scale(wall, 24, 10, 1);
 		module_translate(wall, 25, 10, 0);
 		module_rotateY((Module*)wall, 0, 1);
-		module_color((Module*)wall, &dkGrey);
+		module_bodyColor((Module*)wall, &dkGrey);
 		module_cube(wall, 1);
-		module_draw(wall, &vtm, &gtm, ds, NULL, src);
+		module_draw(wall, &vtm, &gtm, ds, light, src);
 		wall = module_create();
-		module_scale(wall, 50, 23, 1);
+		module_scale(wall, 24, 10, 1);
 		module_translate(wall, -25, 10, 0);
-		module_color((Module*)wall, &dkGrey);
+		module_bodyColor((Module*)wall, &dkGrey);
 		module_cube(wall, 1);
-		module_draw(wall, &vtm, &gtm, ds, NULL, src);
+		module_draw(wall, &vtm, &gtm, ds, light, src);
 		wall = module_create();
-		module_scale(wall, 50, 23, 1);
+		module_scale(wall, 24, 10, 1);
 		module_translate(wall, 25, 10, -50);
 		module_rotateY((Module*)wall, 0, 1);
-		module_color((Module*)wall, &dkGrey);
+		module_bodyColor((Module*)wall, &dkGrey);
 		module_cube(wall, 1);
-		module_draw(wall, &vtm, &gtm, ds, NULL, src);
+		module_draw(wall, &vtm, &gtm, ds, light, src);
 		wall = module_create();
-		module_scale(wall, 50, 23, 1);
+		module_scale(wall, 24, 10, 1);
 		module_translate(wall, -25, 10, -50);
-		module_color((Module*)wall, &dkGrey);
+		module_bodyColor((Module*)wall, &dkGrey);
 		module_cube(wall, 1);
-		module_draw(wall, &vtm, &gtm, ds, NULL, src);
+		module_draw(wall, &vtm, &gtm, ds, light, src);
 
 		char buffer[256];
 		matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
 		// draw tower and flames
-		module_draw( flames[frame], &vtm, &gtm, ds, NULL, src);
-		module_draw( tower0, &vtm, &gtm, ds, NULL, src );
-		module_draw( tower1, &vtm, &gtm, ds, NULL, src );
-		module_draw( tower2, &vtm, &gtm, ds, NULL, src );
-		module_draw( tower3, &vtm, &gtm, ds, NULL, src );
+		module_draw( flames[frame], &vtm, &gtm, ds, light, src);
+		module_draw( tower0, &vtm, &gtm, ds, light, src );
+		module_draw( tower1, &vtm, &gtm, ds, light, src );
+		module_draw( tower2, &vtm, &gtm, ds, light, src );
+		module_draw( tower3, &vtm, &gtm, ds, light, src );
 
 		// write out image
 		sprintf(buffer, "tower-frame%03d.ppm", frame);
@@ -352,7 +366,7 @@ int main(int argc, char *argv[]) {
 
 	// convert to gif
 	printf("converting to gif...\n");
-	system("convert -delay 3 -loop 0 tower-frame*.ppm tower.gif");
+	system("convert -delay 5 -loop 0 tower-frame*.ppm tower.gif");
 	printf("converted gif\n");
 	// remove ppm files
 	system("rm tower-frame*.ppm");
