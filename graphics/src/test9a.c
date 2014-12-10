@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
   View3D view;
 
   Lighting *light;
+  Vector spotDir;
 
 	color_set( &White, 1.0, 1.0, 1.0 );
 	color_set( &Grey, 0.6, 0.62, 0.64 );
@@ -41,6 +42,7 @@ int main(int argc, char *argv[]) {
   // set the View parameters
   point_set3D(&(view.vrp), 5, 5, -7.0);
   vector_set(&(view.vpn), -5, -5, 7);
+  vector_copy(&spotDir, &(view.vpn));
   vector_set(&(view.vup), 0.0, 1.0, 0.0);
   view.d = 2.0;
   view.du = 1.6;
@@ -69,7 +71,7 @@ int main(int argc, char *argv[]) {
   // manually add a light source to the Lighting structure
   // put it in the same place as the eye in world space
   light = lighting_create();
-  lighting_add( light, LightPoint, &White, NULL, &(view.vrp), 0, 0 );
+  lighting_add( light, LightSpot, &White, &spotDir, &(view.vrp), 10, 1 );
 
   // set the shading to Gouraud
   ds = drawstate_create();

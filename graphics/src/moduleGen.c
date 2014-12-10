@@ -820,6 +820,7 @@ static int parseModule(int activeMod, ModuleItem **mod,
 					if(nextword)
 						solid = atoi(nextword);
 				}
+				module_teapot(mod[activeMod]->module, divisions, solid);
 			}
 		
 			// add identity
@@ -966,11 +967,6 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 	View3D view3D;
 	Matrix vtm;
 	Matrix gtm;
-	Color Ambient, White;
-	Lighting *light = lighting_create();
-	color_set( &Ambient, 0.1, 0.1, 0.1 );
-	color_set( &White, 1.0, 1.0, 1.0 );
-	lighting_add( light, LightAmbient, &Ambient, NULL, NULL, 0, 0 );
 
 	// variables for parsing input file
 	const int maxdef = 1000;
@@ -1012,12 +1008,15 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 	ModuleItem 	*mod[maxdef];
 	Point temppts[maxpts];
 	float x, y, z;
-	Color background;
+	Color background, Ambient, ViewLight;
+	Lighting *light = lighting_create();
 
 	// init
 	ds = drawstate_create();
 	ds->shade = ShadeGouraud;
 	color_set(&background, 0.0, 0.0, 0.0);
+	color_set( &Ambient, 0.1, 0.1, 0.1 );
+	color_set( &ViewLight, 1.0, 1.0, 1.0 );
 
 	// loop until EOF is reached, generating modules
 	if(verbose) printf("looping until EOF\n");
@@ -1154,6 +1153,31 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 			}
 		}
 		
+		// set a light color
+		else if(strcmp(firstword, "light") == 0){
+			for(j=0;j<numcolors;j++){
+				if(strncmp(c[j]->name, secondword, strlen(secondword)) == 0){
+					break;
+				}
+			}
+			if(j<numcolors){
+				if(verbose) printf("set light to color %s\n", secondword);
+				color_copy(&ViewLight, &(c[j]->item.color));
+			}
+			else{
+				ystr = strtok(NULL, delim);
+				if(ystr){
+					zstr = strtok(NULL, delim);
+					if(zstr){
+						x = stringToFloat(secondword, numbs, numnumbers, NULL);
+						y = stringToFloat(ystr, numbs, numnumbers, NULL);
+						z = stringToFloat(zstr, numbs, numnumbers, NULL);
+						color_set(&ViewLight, x, y, z);
+					}
+				}
+			}
+		}
+		
 		// set a shade style
 		else if(strcmp(firstword, "shade") == 0){
 		
@@ -1168,6 +1192,9 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 		
 			else if(strcmp(secondword, "depth") == 0)
 				ds->shade = ShadeDepth;
+		
+			else if(strcmp(secondword, "frame") == 0)
+				ds->shade = ShadeFrame;
 			
 			else
 				printf("shade %s not defined\n", secondword);
@@ -1411,7 +1438,6 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 				y = stringToFloat(ystr, numbs, numnumbers, NULL);
 				z = stringToFloat(zstr, numbs, numnumbers, NULL);
 				point_set3D(&(view3D.vrp), x, y, z);
-				lighting_add( light, LightPoint, &White, NULL, &(view3D.vrp), 0, 0 );
 			}
 			
 			// 3D vpn
@@ -1557,6 +1583,9 @@ static void genModules(FILE *infile, char *infilename, char *outfilename,
 			if(verbose) printf("\n3D view matrix:\n");
 			if(verbose) matrix_print(&vtm, stdout);
 			src = image_create( view3D.screeny, view3D.screenx );
+			lighting_add( light, LightAmbient, &Ambient, NULL, NULL, 0, 0 );
+			lighting_add( light, LightPoint, &ViewLight, NULL, &(view3D.vrp), 0, 0 );
+			point_copy(&(ds->viewer), &(view3D.vrp));
 		} else {
 			printf("no view defined, use view2D or view3D keyword\n");
 			exit(0);

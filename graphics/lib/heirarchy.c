@@ -887,7 +887,7 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 	Element *e;
 	Line l;
 	double x1, x2, z1, z2;
-	Vector tn[4], top, side, bottom;
+	Vector tn[4], top, bottom;
 	int i;
 
 	if(!mod){
@@ -924,8 +924,6 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 			x2 = cos( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // cos(2pi/4)=0
 			z2 = sin( ( (i+1)%sides ) * M_PI * 2.0 / sides ); // sin(2pi/4)=1
 
-			vector_set(&side, 0.5*(x1+x2), 0, 0.5*(z1+z2));
-
 			point_copy( &pt[0], &xtop );
 			point_set3D( &pt[1], x1, 1.0, z1 );
 			point_set3D( &pt[2], x2, 1.0, z2 );
@@ -953,10 +951,10 @@ void module_cylinder( Module *mod, int sides, int fill, int size, float x, float
 			point_set3D( &pt[2], x2, 1.0, z2 );
 			point_set3D( &pt[3], x1, 1.0, z1 );
 			polygon_set( &p, 4, pt );
-			vector_copy( &tn[0], &side );
-			vector_copy( &tn[1], &side );
-			vector_copy( &tn[2], &side );
-			vector_copy( &tn[3], &side );
+			vector_set( &tn[0], x1, 0, z1 );
+			vector_set( &tn[1], x2, 0, z2 );
+			vector_set( &tn[2], x2, 0, z2 );
+			vector_set( &tn[3], x1, 0, z1 );
 			polygon_setNormals( &p, 4, tn );
 			e = element_init(ObjPolygon, &p);
 			module_insert(mod, e);

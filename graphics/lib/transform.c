@@ -747,7 +747,7 @@ void matrix_perspective(Matrix *m, double d){
  void matrix_setView3D(Matrix *vtm, View3D *view){
  	
  	Vector u, nvup, nvpn; // all new vectors to prevent modifying view values
- 	double bp, dp, fp;
+ 	double bp, dp;//, fp;
  	
  	// set height of view to match aspect ratio of image
  	double dv = (view->du) * (view->screeny) / (view->screenx);
@@ -798,7 +798,7 @@ void matrix_perspective(Matrix *m, double d){
 	// Scale to the cannonical view volume CVV
 	bp = view->b + view->d;
 	dp = (view->d)/bp;
-	fp = ((view->f)+(view->d))/bp;
+	//fp = ((view->f)+(view->d))/bp;
 	matrix_scale(vtm, 2*(view->d)/(bp*(view->du)), 2*(view->d)/(bp*dv), 1/bp);
   	// printf("After scaling to CVV\n");	
  	// matrix_print(vtm, stdout);
