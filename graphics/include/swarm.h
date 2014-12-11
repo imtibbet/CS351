@@ -5,20 +5,22 @@
 typedef struct {
 	Point location;
 	Vector velocity;
-	Module shape;
-	Color c;
+	Module *shape;
+	Color color;
 } Leader;
 
 typedef struct {
 	Point location;
 	float deflection;
 	float speed;
-	Module shape;
-	Color c;
-	Leader boss;
+	Module *shape;
+	Color color;
+	Leader *boss;
 } Actor;
 
 typedef struct {
+	int numLeaders;
+	int numActors;
 	Leader *leaders;
 	Actor *actors;
 } Swarm;
@@ -44,6 +46,11 @@ void leader_setVelocity(Leader *l, Vector *velocity);
  * set the leader color
  */
 void leader_setColor(Leader *l, Color *c);
+
+/*
+ * update the leader's location
+ */
+void leader_update(Leader *l);
 
 // Actor
 

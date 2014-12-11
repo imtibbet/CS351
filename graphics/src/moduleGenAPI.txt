@@ -47,6 +47,10 @@ manimate i 0 360
 # -> sets the background color of the image on which the scene will be drawn
 background Blue
 
+# light <color c>
+# -> sets the light color for the scene
+light red
+
 ###############################################################################
 
 # draw <modulename>
@@ -121,6 +125,12 @@ put module person leglen=1.5
 # put color <varname>
 put color Blue
 
+# put surfaceColor <varname>
+put surfaceColor Blue
+
+# put bodyColor <varname>
+put bodyColor Blue
+
 # put point <varname>
 put point origin
 
@@ -144,6 +154,12 @@ put polyline backwardsl
 
 # add color <num r> <num g> <num b>
 add color 0.2 0.2 0.6
+
+# add surfaceColor <num r> <num g> <num b>
+add surfaceColor 0.2 0.2 0.6
+
+# add bodyColor <num r> <num g> <num b>
+add bodyColor 0.2 0.2 0.6
 
 # add point <num x> <num y> [num z]
 add point 0 0
