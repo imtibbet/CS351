@@ -1,10 +1,8 @@
 /*
-Astrid Moore (Bruce Maxwell)
-Fall 2014
-
-Example of a 3D scene model
-
-draws a castle
+ * author: Astrid Moore + Ian Tibbetts 
+ * date: 12/11/12
+ *
+ * Test of the swarm's behaviors.
  */
 
 #include "graphics.h"
@@ -19,23 +17,29 @@ int main(int argc, char *argv[]) {
 	const int cols = 560*2;
 	Image *src;
 	Lighting *light;
-	Module *b;
+	Module *b, *terrain;
+	Swarm *cubeSwarm;
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
-	Color blue, green, dkGrey;
 	int frame;
 	char command[256];
-	color_set(&blue, 0, 0, 1);
-	color_set(&green, 0, 1, 0);
-	color_set(&dkGrey, (float)(98/255.0), (float)(106/255.0), 
-		(float)(101/255.0));
 	srand(time(NULL));
+
+	// set up color palette
+	Color Grey = {{0.5, 0.5, 0.5}};
+	Color ltGrey = {{0.7, 0.7, 0.7}};
+	Color blueGrey = {{29/255.0, 30/255.0, 25/255.0}};
+	Color brown =  {{72/255.0, 57/255.0, 42/255.0}};
+	Color wBrown = {{50/255.0, 31/255.0, 12/255.0}};
+	Color sandyBrown = {{87/255.0, 68/255.0, 44/255.0}};
+	Color ltBrown = {{147/255.0, 106/255.0, 57/255.0}};
+
+	terrain = module_create();
 
 	// create drawstate + image
 	ds = drawstate_create();
 	ds->shade = ShadeGouraud;
-	ds->surfaceCoeff = 5;
 	src = image_create( rows, cols );
 
 	// set up the view
@@ -52,7 +56,9 @@ int main(int argc, char *argv[]) {
 	matrix_setView3D( &vtm, &view );
 	matrix_identity( &gtm );
 
-	for (frame=0; frame<60; frame++){
+	cubeSwarm = swarm_create((Point*){{0, 0, 0}}, (Vector*){{0, 0, 3}}, 3, 4);
+
+	for (frame=0; frame<120; frame++){
 	 	// keep ground matt for contrast by withholding surface color
 	 	b = module_create();
 	 	module_scale(b, 77, 1, 26);
@@ -96,25 +102,22 @@ int main(int argc, char *argv[]) {
 		light->light[1].position.val[1] = 26;
 		light->light[1].position.val[2] = 0;
 		light->light[0].color.c[0] = 1;
-		light->light[0].color.c[1] = 241/255.0;
-		light->light[0].color.c[2] = 224/255.0;
+		light->light[0].color.c[1] = 1;
+		light->light[0].color.c[2] = 1;
 		light->light[1].color.c[0] = 1;
-		light->light[1].color.c[1] = 241/255.0;
-		light->light[1].color.c[2] = 224/255.0;
+		light->light[1].color.c[1] = 1;
+		light->light[1].color.c[2] = 1;
 		light->nLights = 2;
 		
-		
-
 		char buffer[256];
-		matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
-		// draw tower and flames
-		module_draw( flames[frame], &vtm, &gtm, ds, light, src);
-
+		// matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
+		// draw terrain
+		module_draw( terrain, &vtm, &gtm, ds, light, src);
 
 		// write out image
-		sprintf(buffer, "tower-frame%03d.ppm", frame);
+		sprintf(buffer, "test10a-frame%03d.ppm", frame);
 		image_write(src, buffer);
-		sprintf(command, "convert -scale %03dx%03d tower-frame%03d.ppm tower-frame%03d.ppm", 
+		sprintf(command, "convert -scale %03dx%03d test10a-frame%03d.ppm test10a-frame%03d.ppm", 
 		cols/2, rows/2, frame, frame);
 		system(command);
 		// reset image
@@ -123,26 +126,19 @@ int main(int argc, char *argv[]) {
 
 	// convert to gif
 	printf("converting to gif...\n");
-	system("convert -delay 5 -loop 0 tower-frame*.ppm tower.gif");
+	system("convert -delay 3 -loop 0 test10a-frame*.ppm test10a.gif");
 	printf("converted gif\n");
 	// remove ppm files
-	system("rm tower-frame*.ppm");
+	system("rm test10a-frame*.ppm");
 	printf("animating gif...\n");
 	// animate gif
-	system("animate tower.gif");
+	system("animate test10a.gif");
 
 	// free drawstate, image, modules
 	free(ds);
 	image_free(src);
-	module_delete(tower0);
-	module_delete(tower1);
-	module_delete(tower2);
-	module_delete(tower3);
-	module_delete(wall);
-
-	for (frame = 0; frame < 60; frame++){
-		module_delete(flames[frame]);
-	}
+	module_delete(b);
+	module_delete(terrain);
 
 	return(0);
 }
