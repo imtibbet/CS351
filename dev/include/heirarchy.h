@@ -196,8 +196,8 @@ void module_pyramid(Module *md, int solid, float size,
 /*
 * Sourced from coursework file test6b.c (Bruce Maxwell)
 */
-void module_cylinder( Module *mod, int sides, int fill, float x, 
-					float y, float z);
+void module_cylinder( Module *mod, int sides, int fill, int size, 
+					float x, float y, float z);
 
 /*
  * insert cone into the module

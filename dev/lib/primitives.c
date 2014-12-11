@@ -1916,7 +1916,7 @@ End Scanline Fill
  */
 void polygon_drawShade(Polygon *p, Image *src, void *drawstate, void *lighting){
 	DrawState *ds = (DrawState *)drawstate;
-	Lighting *light = (Lighting *)lighting;
+	// Lighting *light = (Lighting *)lighting; // for phong shading
 
 	// check for badly formed p
 	if(p){
