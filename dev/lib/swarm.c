@@ -18,10 +18,15 @@ static inline float point_dist(Point *x, Point *y){
 /*
  * set the leader shape to the module and assign defaults to other attributes
  */
-void leader_init(Leader *l, Module *shape){
+void leader_init(Leader *l){
 	point_set3D(&(l->location), 0.0, 0.0, 0.0);
 	vector_set(&(l->velocity), 0.0, 0.0, 0.0);
 	color_set(&(l->color), 1.0, 1.0, 1.0);
+	
+	// create an empty module 
+	Module *shape;
+	shape = module_create();
+
 	l->shape = shape;
 }
 
@@ -47,6 +52,17 @@ void leader_setColor(Leader *l, Color *c){
 }
 
 /*
+ * set the Module* shape of the leader
+ */
+ void leader_setModule(Leader *l, Module *shape){
+ 	if(l->shape){
+ 		module_delete(l->shape);
+ 	}
+ 	
+ 	l->shape = shape;
+ }
+
+/*
  * update the leader's location
  */
 void leader_update(Leader *l){
@@ -61,7 +77,7 @@ void leader_update(Leader *l){
  * set the actor shape to the module and assign defaults to other attributes
  */
 void actor_init(Actor *a, Module *shape, Leader *boss){
-	a->deflection = a->speed = 0.0;
+	a->dispersion = a->speed = 0.0;
 	point_set3D(&(a->location), 0.0, 0.0, 0.0);
 	color_set(&(a->color), 1.0, 1.0, 1.0);
 	a->shape = shape;

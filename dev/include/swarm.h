@@ -30,7 +30,7 @@ typedef struct {
 /*
  * set the leader shape to the module and assign defaults to other attributes
  */
-void leader_init(Leader *l, Module *shape);
+void leader_init(Leader *l);
 
 /*
  * set the leader location
@@ -51,6 +51,11 @@ void leader_setColor(Leader *l, Color *c);
  * update the leader's location
  */
 void leader_update(Leader *l);
+
+/*
+ * set the Module* shape of the leader
+ */
+ void leader_setModule(Leader *l, Module *shape);
 
 // Actor
 
@@ -89,7 +94,7 @@ void actor_setBoss(Actor *a, Leader *boss);
  * -moving towards the leader
  * -staying a minimum distance from other actors
  */
-void actor_update(Actor *a, Leader *boss, Actor *others, int nothers);
+void actor_update(Actor *a, Actor *others, int nothers);
 
 // Swarm
 
