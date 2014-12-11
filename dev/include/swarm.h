@@ -62,7 +62,7 @@ void leader_update(Leader *l);
 /*
  * set the actor shape to the module and assign defaults to other attributes
  */
-void actor_init(Actor *a, Module *shape, Leader *boss);
+void actor_init(Actor *a, Leader *boss);
 
 /*
  * set the actor location

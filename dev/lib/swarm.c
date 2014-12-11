@@ -58,7 +58,7 @@ void leader_setColor(Leader *l, Color *c){
  	if(l->shape){
  		module_delete(l->shape);
  	}
- 	
+
  	l->shape = shape;
  }
 
@@ -76,12 +76,17 @@ void leader_update(Leader *l){
 /*
  * set the actor shape to the module and assign defaults to other attributes
  */
-void actor_init(Actor *a, Module *shape, Leader *boss){
+void actor_init(Actor *a, Leader *boss){
 	a->dispersion = a->speed = 0.0;
 	point_set3D(&(a->location), 0.0, 0.0, 0.0);
 	color_set(&(a->color), 1.0, 1.0, 1.0);
-	a->shape = shape;
+
 	a->boss = boss;
+
+	Module *shape;
+	shape = module_create();
+	a->shape = shape;
+
 }
 
 /*
@@ -187,7 +192,7 @@ Swarm *swarm_create(Point *start, Vector *initVel, int numLeaders, int numActors
 	for(i=0; i<numLeaders; i++){
 		leader_init(&(s->leaders[i]));
 		for(j=0; j<numActorsPerLeader; j++){
-			actor_init(&(s->actors[j+(i*numActorsPerLeader)]));
+			actor_init(&(s->actors[j+(i*numActorsPerLeader)]), &(s->leaders[i]));
 		}
 	}
 	return s;
@@ -226,7 +231,7 @@ void swarm_update(Swarm *s){
 	int i, verbose = 1;
 	if(verbose) printf("updating swarm\n");
 	for (i = 0; i < s->numActors; i++)
-		actor_update(&(s->actors[i]));
+		actor_update(&(s->actors[i]), &(s->actors[i+1]), &(s->numActors));
 	for (i = 0; i < s->numLeaders; i++)
 		leader_update(&(s->leaders[i]));
 }
