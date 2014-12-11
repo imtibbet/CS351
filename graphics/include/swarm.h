@@ -11,7 +11,7 @@ typedef struct {
 
 typedef struct {
 	Point location;
-	float deflection;
+	float dispersion;
 	float speed;
 	Module *shape;
 	Color color;
@@ -35,7 +35,7 @@ void leader_init(Leader *l, Module *shape);
 /*
  * set the leader location
  */
-void leader_setLocation(Leader *l, Point *location);
+void leader_setLocation(Leader *l, float x, float y, float z);
 
 /*
  * set the leader velocity
@@ -52,17 +52,22 @@ void leader_setColor(Leader *l, Color *c);
  */
 void leader_update(Leader *l);
 
+/*
+ * set the Module* shape of the leader
+ */
+ void leader_setModule(Leader *l, Module *shape);
+
 // Actor
 
 /*
  * set the actor shape to the module and assign defaults to other attributes
  */
-void actor_init(Actor *a, Module *shape, Leader *boss);
+void actor_init(Actor *a, Leader *boss, Module *shape);
 
 /*
  * set the actor location
  */
-void actor_setLocation(Actor *a, Point *location);
+void actor_setLocation(Actor *a, float x, float y, float z);
 
 /*
  * set the actor speed
@@ -89,7 +94,12 @@ void actor_setBoss(Actor *a, Leader *boss);
  * -moving towards the leader
  * -staying a minimum distance from other actors
  */
-void actor_update(Actor *a, Leader *boss, Actor *others, int nothers);
+void actor_update(Actor *a, Actor *others, int nothers);
+
+/*
+ * set the Module* shape of the leader
+ */
+ void actor_setModule(Actor *a, Module *shape);
 
 // Swarm
 
@@ -97,7 +107,8 @@ void actor_update(Actor *a, Leader *boss, Actor *others, int nothers);
  * Place a swarm at start with a number of leaders that all have 
  * the same initial velocity. 
  */
-Swarm *swarm_create(Point *start, Vector *initVel, int numLeaders, int numActors);
+Swarm *swarm_create(Point *start, Vector *initVel, Module *shape, int numLeaders, 
+					int numActors, int spread);
 
 /*
  * free the swarm memory, setting numbers to zero
@@ -114,6 +125,10 @@ void swarm_free(Swarm *s);
  */
 void swarm_update(Swarm *s);
 
-
+/* 
+ * draws the swarm
+ */
+ void swarm_draw(Swarm *s, Matrix *VTM, Matrix *GTM, DrawState *ds, 
+				Lighting *lighting, Image *src);
 
 #endif

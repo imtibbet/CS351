@@ -18,18 +18,19 @@ static inline float point_dist(Point *x, Point *y){
 /*
  * set the leader shape to the module and assign defaults to other attributes
  */
-void leader_init(Leader *l, Module *shape){
+void leader_init(Leader *l, Module* shape){
 	point_set3D(&(l->location), 0.0, 0.0, 0.0);
 	vector_set(&(l->velocity), 0.0, 0.0, 0.0);
 	color_set(&(l->color), 1.0, 1.0, 1.0);
+
 	l->shape = shape;
 }
 
 /*
  * set the leader location
  */
-void leader_setLocation(Leader *l, Point *location){
-	point_copy(&(l->location), location);
+void leader_setLocation(Leader *l, float x, float y, float z){
+	point_set3D(&(l->location), x, y, z);
 }
 
 /*
@@ -47,9 +48,23 @@ void leader_setColor(Leader *l, Color *c){
 }
 
 /*
+ * set the Module* shape of the leader
+ */
+ void leader_setModule(Leader *l, Module *shape){
+ 	if(l->shape){
+ 		module_delete(l->shape);
+ 	}
+
+ 	l->shape = shape;
+ }
+
+/*
  * update the leader's location
  */
 void leader_update(Leader *l){
+	int verbose = 1;
+	if(verbose) printf("updating leader\n");
+
 	l->location.val[0] += l->velocity.val[0];
 	l->location.val[1] += l->velocity.val[1];
 	l->location.val[2] += l->velocity.val[2];
@@ -60,19 +75,21 @@ void leader_update(Leader *l){
 /*
  * set the actor shape to the module and assign defaults to other attributes
  */
-void actor_init(Actor *a, Module *shape, Leader *boss){
-	a->deflection = a->speed = 0.0;
+void actor_init(Actor *a, Leader *boss, Module* shape){
+	a->dispersion = a->speed = 0.5;
 	point_set3D(&(a->location), 0.0, 0.0, 0.0);
 	color_set(&(a->color), 1.0, 1.0, 1.0);
-	a->shape = shape;
+
 	a->boss = boss;
+	a->shape = shape;
+
 }
 
 /*
  * set the actor location
  */
-void actor_setLocation(Actor *a, Point *location){
-	point_copy(&(a->location), location);
+void actor_setLocation(Actor *a, float x, float y, float z){
+	point_set3D(&(a->location), x, y, z);
 }
 
 /*
@@ -113,6 +130,7 @@ void actor_update(Actor *a, Actor *others, int nothers){
 	if(verbose) printf("updating actor\n");
 	float dist, closest[2];
 	Actor closestActors[2];
+
 	Vector toBoss, awayFromOthers, heading;
 	Point otherAvgLoc;
 
@@ -132,16 +150,20 @@ void actor_update(Actor *a, Actor *others, int nothers){
 		}
 	}
 
+	int x1, z1;
+	x1 = (float)cos((rand() % 2)*M_PI*2);
+	z1 = (float)sin((rand() % 2)*M_PI*2);
+
 	// calculate vector away from average position of others
 	point_avg(&otherAvgLoc, &(closestActors[0].location), &(closestActors[1].location));
-	vector_set(&awayFromOthers, a->location.val[0] - otherAvgLoc.val[0], 
+	vector_set(&awayFromOthers, a->location.val[0] - otherAvgLoc.val[0] + x1, 
 								a->location.val[1] - otherAvgLoc.val[1], 
-								a->location.val[2] - otherAvgLoc.val[2] );
+								a->location.val[2] - otherAvgLoc.val[2] + z1);
 
 	// calculate vector to leader
 	vector_set(&toBoss, a->boss->location.val[0] - a->location.val[0],
 						a->boss->location.val[1] - a->location.val[1],
-						a->boss->location.val[2] - a->location.val[2] ); 
+						a->boss->location.val[2] - a->location.val[2]); 
 
 	// new heading is the average of the two (normalize them first?)
 	vector_normalize(&toBoss); // by normalizing out bugs move at pretty constant speed
@@ -154,24 +176,58 @@ void actor_update(Actor *a, Actor *others, int nothers){
 	a->location.val[2] += heading.val[2] * a->speed;
 }
 
+/*
+ * set the Module* shape of the leader
+ */
+ void actor_setModule(Actor *a, Module *shape){
+ 	if(a->shape){
+ 		module_delete(a->shape);
+ 	}
+
+ 	a->shape = shape;
+ }
+
 // Swarm
 
 /*
  * Place a swarm at start with a number of leaders that all have 
  * the same initial velocity. 
  */
-Swarm *swarm_create(Point *start, Vector *initVel, int numLeaders, int numActorsPerLeader){
+Swarm *swarm_create(Point *start, Vector *initVel, Module *shape, 
+					int numLeaders, int numActorsPerLeader, int spread){
 	int i, j, verbose = 1;
+ 	float genX, genY, genZ;
+	int d_spread = 2*spread;
+	Vector *rand_vect, *velocity;
+
+	// random vector gen
+	// rand_vect = (Vector*){(rand() % initVel->val[0]), ((rand() % initVel->val[1])/2), 
+	// 			 (rand() % initVel->val[2]), 0}
+	// vector_avg(velocity, initVel, rand_vect);
+	// vector_normalize(velocity);
+
 	if(verbose) printf("creating swarm\n");
+
 	Swarm *s = malloc(sizeof(Swarm));
 	s->leaders = malloc(sizeof(Leader)*numLeaders);
 	s->actors = malloc(sizeof(Actor)*numActorsPerLeader*numLeaders);
 	s->numActors = numActorsPerLeader*numLeaders;
 	s->numLeaders = numLeaders;
 	for(i=0; i<numLeaders; i++){
-		leader_init(&(s->leaders[i]));
+		genX = spread - (float)(rand() % d_spread) + 2;
+		genY = spread - (float)(rand() % d_spread);
+		genZ = spread - (float)(rand() % d_spread) + 2;
+		leader_init(&(s->leaders[i]), shape);
+		leader_setLocation(&(s->leaders[i]), start->val[0] + genX, start->val[1] + genY, 
+						   start->val[2] + genZ);
+		leader_setVelocity(&(s->leaders[i]), initVel);
 		for(j=0; j<numActorsPerLeader; j++){
-			actor_init(&(s->actors[j+(i*numActorsPerLeader)]));
+			genX = spread - (float)(rand() % d_spread);
+			genY = spread - (float)(rand() % d_spread);
+			genZ = spread - (float)(rand() % d_spread);
+			actor_init(&(s->actors[j+(i*numActorsPerLeader)]), &(s->leaders[i]), shape);
+			actor_setLocation(&(s->actors[i]), start->val[0] + genX, start->val[1] + genY, 
+				 				start->val[2] + genZ);
 		}
 	}
 	return s;
@@ -210,11 +266,55 @@ void swarm_update(Swarm *s){
 	int i, verbose = 1;
 	if(verbose) printf("updating swarm\n");
 	for (i = 0; i < s->numActors; i++)
-		actor_update(&(s->actors[i]));
+		actor_update(&(s->actors[i]), &(s->actors[i+1]), s->numActors);
 	for (i = 0; i < s->numLeaders; i++)
 		leader_update(&(s->leaders[i]));
 }
 
+/* 
+ * draws the swarm
+ */
+ void swarm_draw(Swarm *s, Matrix *VTM, Matrix *GTM, DrawState *ds, 
+				Lighting *lighting, Image *src){
+ 	int i;
+ 	Element *e, *e_old;
+	Matrix m;
+
+ 	if (!s){
+ 		printf("no swarm to draw!\n");
+ 	}
+
+ 	// draw actors
+ 	for (i = 0; i < s->numActors; i++){
+ 		matrix_identity(&m);
+		matrix_translate(&m, s->actors[i].location.val[0], s->actors[i].location.val[1], 
+							s->actors[i].location.val[2]);
+		e = element_init(ObjMatrix, &m);
+		e_old = s->actors[i].shape->head;
+		s->actors[i].shape->head = e;
+		e->next = e_old;
+		module_draw(s->actors[i].shape, VTM, GTM, ds, lighting, src);
+		s->actors[i].shape->head = e_old;
+
+		element_delete(e);
+	}
+
+	// draw leaders
+	for (i = 0; i < s->numLeaders; i++){
+		matrix_identity(&m);
+		matrix_translate(&m, s->leaders[i].location.val[0], s->leaders[i].location.val[1], 
+							s->leaders[i].location.val[2]);
+		e = element_init(ObjMatrix, &m);
+		e_old = s->leaders[i].shape->head;
+		s->leaders[i].shape->head = e;
+		e->next = e_old;
+		module_draw(s->leaders[i].shape, VTM, GTM, ds, lighting, src);
+		s->leaders[i].shape->head = e_old;
+
+		element_delete(e);
+	}
+ }
+ 
 
 
 
