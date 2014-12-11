@@ -198,6 +198,13 @@ Swarm *swarm_create(Point *start, Vector *initVel, Module *shape,
 	int i, j, verbose = 1;
  	float genX, genY, genZ;
 	int d_spread = 2*spread;
+	Vector *rand_vect, *velocity;
+
+	// random vector gen
+	// rand_vect = (Vector*){(rand() % initVel->val[0]), ((rand() % initVel->val[1])/2), 
+	// 			 (rand() % initVel->val[2]), 0}
+	// vector_avg(velocity, initVel, rand_vect);
+	// vector_normalize(velocity);
 
 	if(verbose) printf("creating swarm\n");
 
@@ -207,17 +214,17 @@ Swarm *swarm_create(Point *start, Vector *initVel, Module *shape,
 	s->numActors = numActorsPerLeader*numLeaders;
 	s->numLeaders = numLeaders;
 	for(i=0; i<numLeaders; i++){
-		genX = spread - (float)(rand() % d_spread) + 1;
-		genY = spread - (float)(rand() % d_spread) + 1;
-		genZ = spread - (float)(rand() % d_spread) + 1;
+		genX = spread - (float)(rand() % d_spread) + 2;
+		genY = spread - (float)(rand() % d_spread);
+		genZ = spread - (float)(rand() % d_spread) + 2;
 		leader_init(&(s->leaders[i]), shape);
 		leader_setLocation(&(s->leaders[i]), start->val[0] + genX, start->val[1] + genY, 
 						   start->val[2] + genZ);
 		leader_setVelocity(&(s->leaders[i]), initVel);
 		for(j=0; j<numActorsPerLeader; j++){
-			genX = spread - (float)(rand() % d_spread) + 1;
-			genY = spread - (float)(rand() % d_spread) + 1;
-			genZ = spread - (float)(rand() % d_spread) + 1;
+			genX = spread - (float)(rand() % d_spread);
+			genY = spread - (float)(rand() % d_spread);
+			genZ = spread - (float)(rand() % d_spread);
 			actor_init(&(s->actors[j+(i*numActorsPerLeader)]), &(s->leaders[i]), shape);
 			actor_setLocation(&(s->actors[i]), start->val[0] + genX, start->val[1] + genY, 
 				 				start->val[2] + genZ);
