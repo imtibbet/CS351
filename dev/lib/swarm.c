@@ -175,6 +175,17 @@ void actor_update(Actor *a, Actor *others, int nothers){
 	a->location.val[2] += heading.val[2] * a->speed;
 }
 
+/*
+ * set the Module* shape of the leader
+ */
+ void actor_setModule(Actor *a, Module *shape){
+ 	if(a->shape){
+ 		module_delete(a->shape);
+ 	}
+
+ 	a->shape = shape;
+ }
+
 // Swarm
 
 /*
