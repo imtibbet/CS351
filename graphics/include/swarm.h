@@ -57,7 +57,7 @@ void leader_update(Leader *l);
 /*
  * set the actor shape to the module and assign defaults to other attributes
  */
-void actor_init(Actor *a, Module *shape);
+void actor_init(Actor *a, Module *shape, Leader *boss);
 
 /*
  * set the actor location
@@ -65,9 +65,14 @@ void actor_init(Actor *a, Module *shape);
 void actor_setLocation(Actor *a, Point *location);
 
 /*
- * set the actor velocity
+ * set the actor speed
  */
-void actor_setVelocity(Actor *a, Vector *velocity);
+void actor_setSpeed(Actor *a, float speed);
+
+/*
+ * set the actor dispersion
+ */
+void actor_setDispersion(Actor *a, float dispersion);
 
 /*
  * set the actor color
@@ -84,7 +89,7 @@ void actor_setBoss(Actor *a, Leader *boss);
  * -moving towards the leader
  * -staying a minimum distance from other actors
  */
-void actor_update(Actor *a, Leader *boss, Actor *others);
+void actor_update(Actor *a, Leader *boss, Actor *others, int nothers);
 
 // Swarm
 
@@ -93,6 +98,21 @@ void actor_update(Actor *a, Leader *boss, Actor *others);
  * the same initial velocity. 
  */
 Swarm *swarm_create(Point *start, Vector *initVel, int numLeaders, int numActors);
+
+/*
+ * free the swarm memory, setting numbers to zero
+ */
+void swarm_clear(Swarm *s);
+
+/*
+ * free the swarm memory, including the pointer to the swarm
+ */
+void swarm_free(Swarm *s);
+
+/*
+ * update the swarm's leaders and actors
+ */
+void swarm_update(Swarm *s);
 
 
 
