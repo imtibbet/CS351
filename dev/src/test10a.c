@@ -17,7 +17,9 @@ int main(int argc, char *argv[]) {
 	const int cols = 560*2;
 	Image *src;
 	Lighting *light;
-	Module *b, *terrain;
+	Module *b, *terrain, *cube;
+	Point start;
+	Vector velocity;
 	Swarm *cubeSwarm;
 	View3D view;
 	Matrix vtm, gtm;
@@ -34,8 +36,13 @@ int main(int argc, char *argv[]) {
 	Color wBrown = {{50/255.0, 31/255.0, 12/255.0}};
 	Color sandyBrown = {{87/255.0, 68/255.0, 44/255.0}};
 	Color ltBrown = {{147/255.0, 106/255.0, 57/255.0}};
+	Color yellow = {{253/255.0, 127/255.0, 25/255.0}};
 
 	terrain = module_create();
+	cube = module_create();
+
+	point_set3D(&start, 200, 0, 0);
+	vector_set(&velocity, 0.5, 0, 0);
 
 	// create drawstate + image
 	ds = drawstate_create();
@@ -43,10 +50,10 @@ int main(int argc, char *argv[]) {
 	src = image_create( rows, cols );
 
 	// set up the view
-	point_set3D( &(view.vrp), 0, 42, -120);
+	point_set3D( &(view.vrp), 0, 42, -100);
 	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 	vector_set( &(view.vup), 0, 1, 0 );
-	view.d = 8;
+	view.d = 6;
 	view.du = 6;
 	view.f = 1;
 	view.b = 200;
@@ -56,9 +63,13 @@ int main(int argc, char *argv[]) {
 	matrix_setView3D( &vtm, &view );
 	matrix_identity( &gtm );
 
-	cubeSwarm = swarm_create((Point*){{0, 0, 0}}, (Vector*){{0, 0, 3}}, 3, 4);
+	module_bodyColor(cube, &yellow);
+	module_scale(cube, 2, 2, 2);
+	module_cube(cube, 1);
 
-	for (frame=0; frame<120; frame++){
+	cubeSwarm = swarm_create(&start, &velocity, cube, 4, 5, 10);
+
+	for (frame=0; frame<60; frame++){
 	 	// keep ground matt for contrast by withholding surface color
 	 	b = module_create();
 	 	module_scale(b, 77, 1, 26);
@@ -112,7 +123,9 @@ int main(int argc, char *argv[]) {
 		char buffer[256];
 		// matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
 		// draw terrain
-		module_draw( terrain, &vtm, &gtm, ds, light, src);
+		module_draw( terrain, &vtm, &gtm, ds, light, src );
+		swarm_update( cubeSwarm );
+		swarm_draw( cubeSwarm, &vtm, &gtm, ds, light, src );
 
 		// write out image
 		sprintf(buffer, "test10a-frame%03d.ppm", frame);
@@ -139,6 +152,7 @@ int main(int argc, char *argv[]) {
 	image_free(src);
 	module_delete(b);
 	module_delete(terrain);
+	swarm_free(cubeSwarm);
 
 	return(0);
 }
