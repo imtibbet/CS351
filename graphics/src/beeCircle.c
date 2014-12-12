@@ -20,14 +20,14 @@ int main(int argc, char *argv[]) {
 	Module *bee;
 	Point start;
 	Vector velocity, tempVelocity;
-	Swarm *beeSwarm;
+	Swarm *beeSwarm, *beeSwarm2;
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
 	int i, frame;
 	char buffer[256];
-	float leaderSpeed = 2.0;
-	int zoom, numFrames = 720;
+	float leaderSpeed = 0.0;
+	int zoom, numFrames = 360;
 	srand(time(NULL));
 
 	// set up color palette
@@ -69,28 +69,41 @@ int main(int argc, char *argv[]) {
 	module_cube(bee, 1);
 
 	// create the swarm
-	point_set3D(&start, -80, 0, 0);
+	point_set3D(&start, 0, 0, 0);
 	vector_set(&velocity, leaderSpeed, 0, 0);
-	beeSwarm = swarm_create(&start, &velocity, bee, 10, 10, 20);
+	beeSwarm = swarm_create(&start, &velocity, bee, 1, 10, 20);
 	for(i=0; i<beeSwarm->numActors; i++){
-		beeSwarm->actors[i].minDist = 7;
+		beeSwarm->actors[i].minDist = 10;
 		beeSwarm->actors[i].thresholdDist = 15;
 	}
+	/*point_set3D(&start, 80, 0, 0);
+	vector_set(&velocity, -leaderSpeed, 0, 0);
+	beeSwarm2 = swarm_create(&start, &velocity, bee, 1, 10, 10);
+	for(i=0; i<beeSwarm2->numActors; i++){
+		beeSwarm2->actors[i].minDist = 10;
+		beeSwarm2->actors[i].thresholdDist = 15;
+	}*/
 
 	// animate the scene
 	zoom = 1;
 	for (frame=0; frame<numFrames; frame++){
-		if(((frame+1) % (numFrames/8)) == 0){
+		/*if(((frame+1) % (numFrames/4)) == 0){
 			for(i=0; i<beeSwarm->numLeaders; i++){
-				//vector_cross(&(beeSwarm->leaders[i].velocity), &(view.vup), &tempVelocity);
-				//vector_copy(&(beeSwarm->leaders[i].velocity), &tempVelocity);
-				beeSwarm->leaders[i].velocity.val[0] *= -1;
-				beeSwarm->leaders[i].velocity.val[1] *= -1;
-				beeSwarm->leaders[i].velocity.val[2] *= -1;
+				vector_cross(&(beeSwarm->leaders[i].velocity), &(view.vup), &tempVelocity);
+				vector_copy(&(beeSwarm->leaders[i].velocity), &tempVelocity);
+				//beeSwarm->leaders[i].velocity.val[0] *= -1;
+				//beeSwarm->leaders[i].velocity.val[1] *= -1;
+				//beeSwarm->leaders[i].velocity.val[2] *= -1;
+			}
+			for(i=0; i<beeSwarm2->numLeaders; i++){
+				vector_cross(&(view.vup), &(beeSwarm2->leaders[i].velocity), &tempVelocity);
+				vector_copy(&(beeSwarm2->leaders[i].velocity), &tempVelocity);
 			}
 			zoom *= -1;
-		}
-		point_set3D( &(view.vrp), 0, 0, -120);
+		}*/
+		point_set3D( &(view.vrp), 	100*cos(frame*M_PI/(numFrames/2)), 50, 
+									100*sin(frame*M_PI/(numFrames/2)));
+		//point_set3D( &(view.vrp), 0, 0, -120);
 		vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 		lighting_init(light);
 		lighting_add( light, LightAmbient, &Ambient, NULL, NULL, 0, 0 );
@@ -101,7 +114,9 @@ int main(int argc, char *argv[]) {
 		
 		// draw swarm
 		swarm_update( beeSwarm );
+		//swarm_update( beeSwarm2 );
 		swarm_draw( beeSwarm, &vtm, &gtm, ds, light, src );
+		//swarm_draw( beeSwarm2, &vtm, &gtm, ds, light, src );
 
 		// write out image
 		sprintf(buffer, "test10a-frame%03d.ppm", frame);
@@ -126,6 +141,7 @@ int main(int argc, char *argv[]) {
 	free(light);
 	image_free(src);
 	swarm_free(beeSwarm);
+	//swarm_free(beeSwarm2);
 
 	return(0);
 }

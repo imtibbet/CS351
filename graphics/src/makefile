@@ -201,6 +201,12 @@ city2-gif: $(ODIR)/city-gif.o
 # proj 10
 test10a: $(ODIR)/test10a.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+beeCircle: $(ODIR)/beeCircle.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+beeOneSwarm: $(ODIR)/beeOneSwarm.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+beeTwoSwarm: $(ODIR)/beeTwoSwarm.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
 

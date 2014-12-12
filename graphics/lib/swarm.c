@@ -22,7 +22,6 @@ static inline double point_dist(Point *x, Point *y){
 void leader_init(Leader *l, Module* shape){
 	point_set3D(&(l->location), 0.0, 0.0, 0.0);
 	vector_set(&(l->velocity), 0.0, 0.0, 0.0);
-	color_set(&(l->color), 1.0, 1.0, 1.0);
 
 	l->shape = shape;
 }
@@ -39,13 +38,6 @@ void leader_setLocation(Leader *l, float x, float y, float z){
  */
 void leader_setVelocity(Leader *l, Vector *velocity){
 	vector_copy(&(l->velocity), velocity);
-}
-
-/*
- * set the leader color
- */
-void leader_setColor(Leader *l, Color *c){
-	color_copy(&(l->color), c);
 }
 
 /*
@@ -82,11 +74,10 @@ void leader_update(Leader *l){
  */
 void actor_init(Actor *a, Leader *boss, Module* shape){
 	a->dispersion = 0.5;
-	a->speed = 0.5;
+	a->minDist = 4;
+	a->thresholdDist = 6;
 	a->id = 0;
 	point_set3D(&(a->location), 0.0, 0.0, 0.0);
-	color_set(&(a->color), 1.0, 1.0, 1.0);
-
 	a->boss = boss;
 	a->shape = shape;
 }
@@ -99,10 +90,17 @@ void actor_setLocation(Actor *a, float x, float y, float z){
 }
 
 /*
- * set the actor velocity
+ * set the actor min dist from other actors
  */
-void actor_setSpeed(Actor *a, float speed){
-	a->speed = speed;
+void actor_setMin(Actor *a, float minDist){
+	a->minDist = minDist; 
+}
+
+/*
+ * set the actor threshold dist from other actors
+ */
+void actor_setThreshold(Actor *a, float thresholdDist){
+	a->thresholdDist = thresholdDist; 
 }
 
 /*
@@ -110,13 +108,6 @@ void actor_setSpeed(Actor *a, float speed){
  */
 void actor_setDispersion(Actor *a, float dispersion){
 	a->dispersion = dispersion; 
-}
-
-/*
- * set the actor color
- */
-void actor_setColor(Actor *a, Color *c){
-	color_copy(&(a->color), c);
 }
 
 /*
@@ -134,13 +125,17 @@ void actor_setBoss(Actor *a, Leader *boss){
 void actor_update(Actor *a, Actor *others, int nothers){
 	double genX, genY, genZ;
 	double dist, closest[2];
-	double distToOthers, alpha, minDist, thresholdDist, distToBoss;
+	double distToOthers, alpha, distToBoss;
 	double leaderSpeed = vector_length(&(a->boss->velocity));
 	int i, verbose = 0;
 	if(verbose) printf("updating actor\n");
 	Actor closestActors[2];
 	Vector toBoss, awayFromOthers, heading;
 	Point otherAvgLoc;
+
+	genX = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
+	genY = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
+	genZ = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
 
 	// find closest two actors
 	closest[0] = closest[1] = DBL_MAX;
@@ -159,39 +154,48 @@ void actor_update(Actor *a, Actor *others, int nothers){
 		}
 	}
 	
-	// TODO: specify action if there arent close actors (or just one)
+	// handle case where no other actors
+	if(closest[0] == DBL_MAX)
+		vector_set(&heading,a->boss->location.val[0] - a->location.val[0],
+							a->boss->location.val[1] - a->location.val[1],
+							a->boss->location.val[2] - a->location.val[2]); 
+	else {
+	
+		// handle case where only one other actor
+		if(closest[1] == DBL_MAX)
+			vector_set(&awayFromOthers, a->location.val[0] - closestActors[0].location.val[0], 
+										a->location.val[1] - closestActors[0].location.val[1], 
+										a->location.val[2] - closestActors[0].location.val[2]);
 
-	genX = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
-	genY = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
-	genZ = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
+		// calculate vector away from average position of others
+		else{			
+			point_avg(&otherAvgLoc, &(closestActors[0].location), &(closestActors[1].location));
+			vector_set(&awayFromOthers, a->location.val[0] - otherAvgLoc.val[0], 
+										a->location.val[1] - otherAvgLoc.val[1], 
+										a->location.val[2] - otherAvgLoc.val[2] );
+		}
+		distToOthers = vector_length(&awayFromOthers);
+		vector_normalize(&awayFromOthers); 
 
-	// calculate vector away from average position of others
-	point_avg(&otherAvgLoc, &(closestActors[0].location), &(closestActors[1].location));
-	vector_set(&awayFromOthers, a->location.val[0] - otherAvgLoc.val[0], 
-								a->location.val[1] - otherAvgLoc.val[1], 
-								a->location.val[2] - otherAvgLoc.val[2]);
-	distToOthers = vector_length(&awayFromOthers);
-	vector_normalize(&awayFromOthers); 
+		// calculate vector to leader
+		vector_set(&toBoss, a->boss->location.val[0] - a->location.val[0],
+							a->boss->location.val[1] - a->location.val[1],
+							a->boss->location.val[2] - a->location.val[2]); 
+		distToBoss = vector_length(&toBoss);
+		vector_normalize(&toBoss);
 
-	// calculate vector to leader
-	vector_set(&toBoss, a->boss->location.val[0] - a->location.val[0],
-						a->boss->location.val[1] - a->location.val[1],
-						a->boss->location.val[2] - a->location.val[2]); 
-	distToBoss = vector_length(&toBoss);
-	vector_normalize(&toBoss);
-
-	// andrew suggests vector blending with toBoss and awayFromOthers
-	thresholdDist = 6.0; // getting too close, start evading
-	minDist = 4.0; // bug size, time to really move away
-	alpha = 0.0; // just going toward boss
-	if(distToOthers < minDist || distToBoss <= minDist){
-		alpha = 1.0; // just going away from others
-	} else if(distToOthers <= thresholdDist){
-		alpha = (thresholdDist-distToOthers) / (thresholdDist-minDist);
+		// andrew suggests vector blending with toBoss and awayFromOthers
+		alpha = 0.0; // just going toward boss
+		if(distToOthers < a->minDist || distToBoss <= a->minDist){
+			alpha = 1.0; // just going away from others
+		} else if(distToOthers <= a->thresholdDist){
+			alpha = (a->thresholdDist-distToOthers) / 
+					(a->thresholdDist-a->minDist);
+		}
+		vector_set(&heading,(1-alpha) * toBoss.val[0] + alpha * awayFromOthers.val[0], 
+							(1-alpha) * toBoss.val[1] + alpha * awayFromOthers.val[1], 
+							(1-alpha) * toBoss.val[2] + alpha * awayFromOthers.val[2] );
 	}
-	vector_set(&heading,(1-alpha) * toBoss.val[0] + alpha * awayFromOthers.val[0], 
-						(1-alpha) * toBoss.val[1] + alpha * awayFromOthers.val[1], 
-						(1-alpha) * toBoss.val[2] + alpha * awayFromOthers.val[2] );
 	vector_normalize(&heading);
 
 	// update location according to new heading with jitter and speed

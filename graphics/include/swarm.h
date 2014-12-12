@@ -6,15 +6,14 @@ typedef struct {
 	Point location;
 	Vector velocity;
 	Module *shape;
-	Color color;
 } Leader;
 
 typedef struct {
 	Point location;
-	float dispersion;
-	float speed;
+	float minDist; // distance at which the acots only evade other actors
+	float thresholdDist; // distance at which the actors start to evade
+	float dispersion; // randomness of motion (jitter)
 	Module *shape;
-	Color color;
 	Leader *boss;
 	int id;
 } Actor;
@@ -44,11 +43,6 @@ void leader_setLocation(Leader *l, float x, float y, float z);
 void leader_setVelocity(Leader *l, Vector *velocity);
 
 /*
- * set the leader color
- */
-void leader_setColor(Leader *l, Color *c);
-
-/*
  * update the leader's location
  */
 void leader_update(Leader *l);
@@ -71,19 +65,19 @@ void actor_init(Actor *a, Leader *boss, Module *shape);
 void actor_setLocation(Actor *a, float x, float y, float z);
 
 /*
- * set the actor speed
+ * set the actor min dist from other actors
  */
-void actor_setSpeed(Actor *a, float speed);
+void actor_setMin(Actor *a, float minDist);
+
+/*
+ * set the actor threshold dist from other actors
+ */
+void actor_setThreshold(Actor *a, float thresholdDist);
 
 /*
  * set the actor dispersion
  */
 void actor_setDispersion(Actor *a, float dispersion);
-
-/*
- * set the actor color
- */
-void actor_setColor(Actor *a, Color *c);
 
 /*
  * set the actor's boss, which informs the actor how to update
