@@ -32,9 +32,11 @@ int main(int argc, char *argv[]) {
 	// set up color palette
 	Color Ambient = {{0.1, 0.1, 0.1}};
 	Color White = {{1.0, 1.0, 1.0}};
+	Color Black = {{0.0, 0.0, 0.0}};
+	Color Blue = {{0.2, 0.2, 0.6}};
 	Color yellow = {{253/255.0, 127/255.0, 25/255.0}};
 
-	cube = module_create();
+	bee = module_create();
 
 
 	// create drawstate + image
@@ -60,27 +62,36 @@ int main(int argc, char *argv[]) {
 	matrix_setView3D( &vtm, &view );
 	matrix_identity( &gtm );
 
-	module_bodyColor(cube, &yellow);
-	module_scale(cube, 2, 2, 2);
-	module_cube(cube, 1);
+	module_bodyColor(bee, &yellow);
+	module_scale(bee, 1, 4, 4);
+	module_cube(bee, 1);
+	module_bodyColor(bee, &Black);
+	module_translate(bee, 1, 0, 0);
+	module_cube(bee, 1);
+	module_bodyColor(bee, &yellow);
+	module_translate(bee, 1, 0, 0);
+	module_cube(bee, 1);
+	module_bodyColor(bee, &Black);
+	module_translate(bee, 1, 0, 0);
+	module_cube(bee, 1);
 
 	point_set3D(&start, -10, 0, 0);
 	vector_set(&velocity, 0.5, 0, 0);
-	cubeSwarm = swarm_create(&start, &velocity, cube, 2, 10, 10);
+	beeSwarm = swarm_create(&start, &velocity, bee, 2, 10, 10);
 
 	for (frame=0; frame<60; frame++){
 		
 		// matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
 		// draw terrain
-		swarm_update( cubeSwarm );
-		swarm_draw( cubeSwarm, &vtm, &gtm, ds, light, src );
+		swarm_update( beeSwarm );
+		swarm_draw( beeSwarm, &vtm, &gtm, ds, light, src );
 
 		// write out image
 		sprintf(buffer, "test10a-frame%03d.ppm", frame);
 		image_write(src, buffer);
 		system(command);
 		// reset image
-		image_reset(src);
+		image_fillColor(Blue);
 	}
 
 	// convert to gif
@@ -96,7 +107,7 @@ int main(int argc, char *argv[]) {
 	// free drawstate, image, modules
 	free(ds);
 	image_free(src);
-	swarm_free(cubeSwarm);
+	swarm_free(beeSwarm);
 
 	return(0);
 }

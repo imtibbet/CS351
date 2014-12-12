@@ -8,7 +8,7 @@
 #include "graphics.h"
 #include "float.h"
 
-static inline float point_dist(Point *x, Point *y){
+static inline double point_dist(Point *x, Point *y){
 	return 	(x->val[0] - y->val[0]) * (x->val[0] - y->val[0]) +
 			(x->val[1] - y->val[1]) * (x->val[1] - y->val[1]) +
 			(x->val[2] - y->val[2]) * (x->val[2] - y->val[2]);
@@ -127,17 +127,17 @@ void actor_setBoss(Actor *a, Leader *boss){
  * -staying a minimum distance from other actors
  */
 void actor_update(Actor *a, Actor *others, int nothers){
-	float genX, genY, genZ;
+	double genX, genY, genZ;
+	double dist, closest[2];
+	double distToOthers, distToBoss, alpha, minDist, thresholdDist;
 	int i, verbose = 0;
 	if(verbose) printf("updating actor\n");
-	float dist, closest[2];
 	Actor closestActors[2];
-
 	Vector toBoss, awayFromOthers, heading;
 	Point otherAvgLoc;
 
 	// find closest two actors
-	closest[0] = closest[1] = FLT_MAX;
+	closest[0] = closest[1] = DBL_MAX;
 	for(i=0; i<nothers; i++){
 		dist = point_dist(&(others[i].location), &(a->location));
 		if(dist && (dist < closest[0])) {
@@ -162,16 +162,28 @@ void actor_update(Actor *a, Actor *others, int nothers){
 	vector_set(&awayFromOthers, a->location.val[0] - otherAvgLoc.val[0], 
 								a->location.val[1] - otherAvgLoc.val[1], 
 								a->location.val[2] - otherAvgLoc.val[2]);
+	distToOthers = vector_length(&awayFromOthers);
+	vector_normalize(&awayFromOthers); 
 
 	// calculate vector to leader
 	vector_set(&toBoss, a->boss->location.val[0] - a->location.val[0],
 						a->boss->location.val[1] - a->location.val[1],
 						a->boss->location.val[2] - a->location.val[2]); 
+	distToBoss = vector_length(&toBoss);
+	vector_normalize(&toBoss);
 
 	// andrew suggests vector blending with toBoss and awayFromOthers
-	//vector_normalize(&toBoss); // by normalizing out bugs move at pretty constant speed
-	vector_normalize(&awayFromOthers); // unless vectors totally agree/disagree
-	vector_avg(&heading, &toBoss, &awayFromOthers);
+	thresholdDist = 10; // getting too close, start evading
+	minDist = 4.0; // bug size, time to really move away
+	alpha = 0.0; // just going toward boss
+	if(distToOthers < minDist){
+		alpha = 1.0; // just going away from others
+	} else if(distToOthers <= thresholdDist){
+		alpha = (thresholdDist-distToOthers) / (thresholdDist-minDist);
+	}
+	vector_set(&heading,(1-alpha) * toBoss.val[0] + alpha * awayFromOthers.val[0], 
+						(1-alpha) * toBoss.val[1] + alpha * awayFromOthers.val[1], 
+						(1-alpha) * toBoss.val[2] + alpha * awayFromOthers.val[2] );
 	vector_normalize(&heading);
 
 	// update location according to new heading with jitter and speed
