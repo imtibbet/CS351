@@ -63,12 +63,16 @@ void leader_setColor(Leader *l, Color *c){
  * update the leader's location
  */
 void leader_update(Leader *l){
+	double genX, genY, genZ, dispersion;
 	int verbose = 0;
 	if(verbose) printf("updating leader\n");
-
-	l->location.val[0] += l->velocity.val[0];
-	l->location.val[1] += l->velocity.val[1];
-	l->location.val[2] += l->velocity.val[2];
+	dispersion = vector_length(&(l->velocity))/3.0;
+	genX = dispersion - ((double)rand() / RAND_MAX) * 2.0 * dispersion;
+	genY = dispersion - ((double)rand() / RAND_MAX) * 2.0 * dispersion;
+	genZ = dispersion - ((double)rand() / RAND_MAX) * 2.0 * dispersion;
+	l->location.val[0] += l->velocity.val[0] + genX;
+	l->location.val[1] += l->velocity.val[1] + genY;
+	l->location.val[2] += l->velocity.val[2] + genZ;
 }
 
 // Actor
@@ -77,13 +81,14 @@ void leader_update(Leader *l){
  * set the actor shape to the module and assign defaults to other attributes
  */
 void actor_init(Actor *a, Leader *boss, Module* shape){
-	a->dispersion = a->speed = 0.5;
+	a->dispersion = 0.5;
+	a->speed = 0.5;
+	a->id = 0;
 	point_set3D(&(a->location), 0.0, 0.0, 0.0);
 	color_set(&(a->color), 1.0, 1.0, 1.0);
 
 	a->boss = boss;
 	a->shape = shape;
-
 }
 
 /*
@@ -129,7 +134,8 @@ void actor_setBoss(Actor *a, Leader *boss){
 void actor_update(Actor *a, Actor *others, int nothers){
 	double genX, genY, genZ;
 	double dist, closest[2];
-	double distToOthers, distToBoss, alpha, minDist, thresholdDist;
+	double distToOthers, alpha, minDist, thresholdDist, distToBoss;
+	double leaderSpeed = vector_length(&(a->boss->velocity));
 	int i, verbose = 0;
 	if(verbose) printf("updating actor\n");
 	Actor closestActors[2];
@@ -140,18 +146,20 @@ void actor_update(Actor *a, Actor *others, int nothers){
 	closest[0] = closest[1] = DBL_MAX;
 	for(i=0; i<nothers; i++){
 		dist = point_dist(&(others[i].location), &(a->location));
-		if(dist && (dist < closest[0])) {
+		if(others[i].id != a->id && (dist < closest[0])) {
 			closest[0] = dist;
 			closestActors[0] = others[i];
 		}
 	}
 	for(i=0; i<nothers; i++){
 		dist = point_dist(&(others[i].location), &(a->location));
-		if(dist && (dist < closest[1]) && (dist != closest[0])) {
+		if(others[i].id != a->id && (dist < closest[1]) && (dist != closest[0])) {
 			closest[1] = dist;
 			closestActors[1] = others[i];
 		}
 	}
+	
+	// TODO: specify action if there arent close actors (or just one)
 
 	genX = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
 	genY = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
@@ -173,10 +181,10 @@ void actor_update(Actor *a, Actor *others, int nothers){
 	vector_normalize(&toBoss);
 
 	// andrew suggests vector blending with toBoss and awayFromOthers
-	thresholdDist = 10; // getting too close, start evading
+	thresholdDist = 6.0; // getting too close, start evading
 	minDist = 4.0; // bug size, time to really move away
 	alpha = 0.0; // just going toward boss
-	if(distToOthers < minDist){
+	if(distToOthers < minDist || distToBoss <= minDist){
 		alpha = 1.0; // just going away from others
 	} else if(distToOthers <= thresholdDist){
 		alpha = (thresholdDist-distToOthers) / (thresholdDist-minDist);
@@ -187,21 +195,28 @@ void actor_update(Actor *a, Actor *others, int nothers){
 	vector_normalize(&heading);
 
 	// update location according to new heading with jitter and speed
-	a->location.val[0] += (heading.val[0] + genX) * a->speed;
-	a->location.val[1] += (heading.val[1] + genY) * a->speed;
-	a->location.val[2] += (heading.val[2] + genZ) * a->speed;
+	a->location.val[0] += (heading.val[0]) * leaderSpeed + genX;
+	a->location.val[1] += (heading.val[1]) * leaderSpeed + genY;
+	a->location.val[2] += (heading.val[2]) * leaderSpeed + genZ;
 }
 
 /*
- * set the Module* shape of the leader
+ * set the Module* shape of the actor
  */
- void actor_setModule(Actor *a, Module *shape){
- 	if(a->shape){
- 		module_delete(a->shape);
- 	}
+void actor_setModule(Actor *a, Module *shape){
+	if(a->shape){
+		module_delete(a->shape);
+	}
 
- 	a->shape = shape;
- }
+	a->shape = shape;
+}
+
+/*
+ * set the id of the actor
+ */
+void actor_setID(Actor *a, int id){
+	a->id = id;
+}
 
 // Swarm
 
@@ -211,7 +226,7 @@ void actor_update(Actor *a, Actor *others, int nothers){
  */
 Swarm *swarm_create(Point *start, Vector *initVel, Module *shape, 
 					int numLeaders, int numActorsPerLeader, float spread){
-	int i, j, verbose = 1;
+	int i, j, id = 0, verbose = 1;
  	float genX, genY, genZ;
 
 	if(verbose) printf("creating swarm\n");
@@ -226,16 +241,21 @@ Swarm *swarm_create(Point *start, Vector *initVel, Module *shape,
 		genY = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
 		genZ = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
 		leader_init(&(s->leaders[i]), shape);
-		leader_setLocation(&(s->leaders[i]), start->val[0] + genX, start->val[1] + genY, 
-						   start->val[2] + genZ);
+		leader_setLocation(&(s->leaders[i]), 
+							start->val[0] + genX, 
+							start->val[1] + genY, 
+						   	start->val[2] + genZ);
 		leader_setVelocity(&(s->leaders[i]), initVel);
 		for(j=0; j<numActorsPerLeader; j++){
 			genX = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
 			genY = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
 			genZ = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
 			actor_init(&(s->actors[j+(i*numActorsPerLeader)]), &(s->leaders[i]), shape);
-			actor_setLocation(&(s->actors[i]), start->val[0] + genX, start->val[1] + genY, 
+			actor_setLocation(&(s->actors[j+(i*numActorsPerLeader)]), 
+								start->val[0] + genX, 
+								start->val[1] + genY, 
 				 				start->val[2] + genZ);
+			actor_setID(&(s->actors[j+(i*numActorsPerLeader)]), id++);
 		}
 	}
 	return s;
@@ -284,9 +304,9 @@ void swarm_update(Swarm *s){
  */
  void swarm_draw(Swarm *s, Matrix *VTM, Matrix *GTM, DrawState *ds, 
 				Lighting *lighting, Image *src){
- 	int i;
- 	Element *translateE, *colorE, *bodyColorE, *identityE, *headE_old;
-	Matrix m;
+ 	int i, verbose = 0;
+ 	if(verbose) printf("drawing swarm\n");
+	Matrix m, transGTM;
 
  	if (!s){
  		printf("no swarm to draw!\n");
@@ -295,48 +315,27 @@ void swarm_update(Swarm *s){
  	// draw actors
  	for (i = 0; i < s->numActors; i++){
  		matrix_identity(&m);
-		matrix_translate(&m, s->actors[i].location.val[0], s->actors[i].location.val[1], 
+		matrix_translate(&m,s->actors[i].location.val[0], 
+							s->actors[i].location.val[1], 
 							s->actors[i].location.val[2]);
-		translateE = element_init(ObjMatrix, &m);
-		colorE = element_init(ObjColor, &(s->actors[i].color));
-		bodyColorE = element_init(ObjBodyColor, &(s->actors[i].color));
-		identityE = element_init(ObjIdentity, NULL);
+		matrix_multiply(&m, GTM, &transGTM);
+		
+		module_draw(s->actors[i].shape, VTM, &transGTM, ds, lighting, src);
 
-		headE_old = s->actors[i].shape->head;
-		s->actors[i].shape->head = identityE;
-		identityE->next = translateE;
-		translateE->next = colorE;
-		colorE->next = bodyColorE;
-		bodyColorE->next = headE_old;
-		module_draw(s->actors[i].shape, VTM, GTM, ds, lighting, src);
-
-		s->actors[i].shape->head = headE_old;
-		element_delete(translateE);
-		element_delete(colorE);
 	}
 
 	// draw leaders
 	for (i = 0; i < s->numLeaders; i++){
  		matrix_identity(&m);
-		matrix_translate(&m, s->leaders[i].location.val[0], s->leaders[i].location.val[1], 
+		matrix_translate(&m,s->leaders[i].location.val[0], 
+							s->leaders[i].location.val[1], 
 							s->leaders[i].location.val[2]);
-		translateE = element_init(ObjMatrix, &m);
-		colorE = element_init(ObjColor, &(s->leaders[i].color));
-		bodyColorE = element_init(ObjBodyColor, &(s->leaders[i].color));
-		identityE = element_init(ObjIdentity, NULL);
+		matrix_multiply(&m, GTM, &transGTM);
 
-		headE_old = s->leaders[i].shape->head;
-		s->leaders[i].shape->head = identityE;
-		identityE->next = translateE;
-		translateE->next = colorE;
-		colorE->next = bodyColorE;
-		bodyColorE->next = headE_old;
-		module_draw(s->leaders[i].shape, VTM, GTM, ds, lighting, src);
+		module_draw(s->leaders[i].shape, VTM, &transGTM, ds, lighting, src);
 
-		s->leaders[i].shape->head = headE_old;
-		element_delete(translateE);
-		element_delete(colorE);
 	}
+ 	if(verbose) printf("swarm drawn\n");
  }
  
 

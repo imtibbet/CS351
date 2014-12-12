@@ -1483,12 +1483,14 @@ void polygon_print(Polygon *p, FILE *fp){
 /*
  * normalize the x and y values of each vertex by the homogeneous coord
  */
-void polygon_normalize( Polygon *p ){
-	int i;
+int polygon_normalize( Polygon *p ){
+	int i, behind = 0;
 	for(i=0;i<p->nVertex;i++){
+		if(p->vertex[i].val[2] < 0.0001) behind = 1;
 		p->vertex[i].val[0] = p->vertex[i].val[0] / p->vertex[i].val[3];
 		p->vertex[i].val[1] = p->vertex[i].val[1] / p->vertex[i].val[3];
 	}
+	return behind;
 }
 
 /*

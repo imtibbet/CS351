@@ -432,7 +432,8 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 					polygon_shade(tempPolygon, lighting, ds);
 				}
 				matrix_xformPolygon(VTM, tempPolygon);
-				polygon_normalize(tempPolygon);
+				if(polygon_normalize(tempPolygon))
+					break;
 				if(verbose) polygon_print(tempPolygon, stdout);
 				polygon_drawShade(tempPolygon, src, ds, NULL);
 				break;

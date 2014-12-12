@@ -16,6 +16,7 @@ typedef struct {
 	Module *shape;
 	Color color;
 	Leader *boss;
+	int id;
 } Actor;
 
 typedef struct {
@@ -97,9 +98,14 @@ void actor_setBoss(Actor *a, Leader *boss);
 void actor_update(Actor *a, Actor *others, int nothers);
 
 /*
- * set the Module* shape of the leader
+ * set the Module* shape of the actor
  */
  void actor_setModule(Actor *a, Module *shape);
+
+/*
+ * set the id of the actor
+ */
+ void actor_setID(Actor *a, int id);
 
 // Swarm
 
