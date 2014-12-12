@@ -126,6 +126,7 @@ void actor_setBoss(Actor *a, Leader *boss){
  * -staying a minimum distance from other actors
  */
 void actor_update(Actor *a, Actor *others, int nothers){
+	float genX, genY, genZ;
 	int i, verbose = 1;
 	if(verbose) printf("updating actor\n");
 	float dist, closest[2];
@@ -150,9 +151,9 @@ void actor_update(Actor *a, Actor *others, int nothers){
 		}
 	}
 
-	int x1, z1;
-	x1 = (float)cos((rand() % 2)*M_PI*2);
-	z1 = (float)sin((rand() % 2)*M_PI*2);
+	genX = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
+	genY = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
+	genZ = a->dispersion - ((double)rand() / RAND_MAX) * 2.0 * a->dispersion;
 
 	// calculate vector away from average position of others
 	point_avg(&otherAvgLoc, &(closestActors[0].location), &(closestActors[1].location));
@@ -170,10 +171,10 @@ void actor_update(Actor *a, Actor *others, int nothers){
 	vector_normalize(&awayFromOthers); // unless vectors totally agree/disagree
 	vector_avg(&heading, &toBoss, &awayFromOthers);
 
-	// update location according to new heading and speed
-	a->location.val[0] += heading.val[0] * a->speed;
-	a->location.val[1] += heading.val[1] * a->speed;
-	a->location.val[2] += heading.val[2] * a->speed;
+	// update location according to new heading with jitter and speed
+	a->location.val[0] += (heading.val[0] + genX) * a->speed;
+	a->location.val[0] += (heading.val[1] + genY) * a->speed;
+	a->location.val[0] += (heading.val[2] + genZ) * a->speed;
 }
 
 /*
@@ -272,12 +273,12 @@ void swarm_update(Swarm *s){
 }
 
 /* 
- * draws the swarm
+ * draws the swarm using the given view etc into the given image
  */
  void swarm_draw(Swarm *s, Matrix *VTM, Matrix *GTM, DrawState *ds, 
 				Lighting *lighting, Image *src){
  	int i;
- 	Element *e, *e_old;
+ 	Element *translateE, *colorE, *headE_old;
 	Matrix m;
 
  	if (!s){
@@ -289,29 +290,45 @@ void swarm_update(Swarm *s){
  		matrix_identity(&m);
 		matrix_translate(&m, s->actors[i].location.val[0], s->actors[i].location.val[1], 
 							s->actors[i].location.val[2]);
-		e = element_init(ObjMatrix, &m);
-		e_old = s->actors[i].shape->head;
-		s->actors[i].shape->head = e;
-		e->next = e_old;
-		module_draw(s->actors[i].shape, VTM, GTM, ds, lighting, src);
-		s->actors[i].shape->head = e_old;
+		translateE = element_init(ObjMatrix, &m);
+		colorE = element_init(ObjColor, &(s->actors[i].color));
+		bodyColorE = element_init(ObjBodyColor, &(s->actors[i].color));
+		identityE = element_init(ObjIdentity, NULL);
 
-		element_delete(e);
+		headE_old = s->actors[i].shape->head;
+		s->actors[i].shape->head = identityE;
+		identityE->next = translateE;
+		translateE->next = colorE;
+		colorE->next = bodyColorE;
+		bodyColorE->next = headE_old;
+		module_draw(s->actors[i].shape, VTM, GTM, ds, lighting, src)
+
+		s->actors[i].shape->head = headE_old;
+		element_delete(translateE);
+		element_delete(colorE);
 	}
 
 	// draw leaders
 	for (i = 0; i < s->numLeaders; i++){
-		matrix_identity(&m);
+ 		matrix_identity(&m);
 		matrix_translate(&m, s->leaders[i].location.val[0], s->leaders[i].location.val[1], 
 							s->leaders[i].location.val[2]);
-		e = element_init(ObjMatrix, &m);
-		e_old = s->leaders[i].shape->head;
-		s->leaders[i].shape->head = e;
-		e->next = e_old;
-		module_draw(s->leaders[i].shape, VTM, GTM, ds, lighting, src);
-		s->leaders[i].shape->head = e_old;
+		translateE = element_init(ObjMatrix, &m);
+		colorE = element_init(ObjColor, &(s->leaders[i].color));
+		bodyColorE = element_init(ObjBodyColor, &(s->leaders[i].color));
+		identityE = element_init(ObjIdentity, NULL);
 
-		element_delete(e);
+		headE_old = s->leaders[i].shape->head;
+		s->leaders[i].shape->head = identityE;
+		identityE->next = translateE;
+		translateE->next = colorE;
+		colorE->next = bodyColorE;
+		bodyColorE->next = headE_old;
+		module_draw(s->leaders[i].shape, VTM, GTM, ds, lighting, src)
+
+		s->leaders[i].shape->head = headE_old;
+		element_delete(translateE);
+		element_delete(colorE);
 	}
  }
  
