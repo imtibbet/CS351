@@ -108,7 +108,7 @@ void actor_update(Actor *a, Actor *others, int nothers);
  * the same initial velocity. 
  */
 Swarm *swarm_create(Point *start, Vector *initVel, Module *shape, int numLeaders, 
-					int numActors, int spread);
+					int numActors, float spread);
 
 /*
  * free the swarm memory, setting numbers to zero

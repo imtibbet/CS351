@@ -6,6 +6,7 @@
  */
 
 #include "graphics.h"
+#include "float.h"
 
 static inline float point_dist(Point *x, Point *y){
 	return 	(x->val[0] - y->val[0]) * (x->val[0] - y->val[0]) +
@@ -62,7 +63,7 @@ void leader_setColor(Leader *l, Color *c){
  * update the leader's location
  */
 void leader_update(Leader *l){
-	int verbose = 1;
+	int verbose = 0;
 	if(verbose) printf("updating leader\n");
 
 	l->location.val[0] += l->velocity.val[0];
@@ -127,7 +128,7 @@ void actor_setBoss(Actor *a, Leader *boss){
  */
 void actor_update(Actor *a, Actor *others, int nothers){
 	float genX, genY, genZ;
-	int i, verbose = 1;
+	int i, verbose = 0;
 	if(verbose) printf("updating actor\n");
 	float dist, closest[2];
 	Actor closestActors[2];
@@ -136,6 +137,7 @@ void actor_update(Actor *a, Actor *others, int nothers){
 	Point otherAvgLoc;
 
 	// find closest two actors
+	closest[0] = closest[1] = FLT_MAX;
 	for(i=0; i<nothers; i++){
 		dist = point_dist(&(others[i].location), &(a->location));
 		if(dist && (dist < closest[0])) {
@@ -157,24 +159,25 @@ void actor_update(Actor *a, Actor *others, int nothers){
 
 	// calculate vector away from average position of others
 	point_avg(&otherAvgLoc, &(closestActors[0].location), &(closestActors[1].location));
-	vector_set(&awayFromOthers, a->location.val[0] - otherAvgLoc.val[0] + x1, 
+	vector_set(&awayFromOthers, a->location.val[0] - otherAvgLoc.val[0], 
 								a->location.val[1] - otherAvgLoc.val[1], 
-								a->location.val[2] - otherAvgLoc.val[2] + z1);
+								a->location.val[2] - otherAvgLoc.val[2]);
 
 	// calculate vector to leader
 	vector_set(&toBoss, a->boss->location.val[0] - a->location.val[0],
 						a->boss->location.val[1] - a->location.val[1],
 						a->boss->location.val[2] - a->location.val[2]); 
 
-	// new heading is the average of the two (normalize them first?)
-	vector_normalize(&toBoss); // by normalizing out bugs move at pretty constant speed
+	// andrew suggests vector blending with toBoss and awayFromOthers
+	//vector_normalize(&toBoss); // by normalizing out bugs move at pretty constant speed
 	vector_normalize(&awayFromOthers); // unless vectors totally agree/disagree
 	vector_avg(&heading, &toBoss, &awayFromOthers);
+	vector_normalize(&heading);
 
 	// update location according to new heading with jitter and speed
 	a->location.val[0] += (heading.val[0] + genX) * a->speed;
-	a->location.val[0] += (heading.val[1] + genY) * a->speed;
-	a->location.val[0] += (heading.val[2] + genZ) * a->speed;
+	a->location.val[1] += (heading.val[1] + genY) * a->speed;
+	a->location.val[2] += (heading.val[2] + genZ) * a->speed;
 }
 
 /*
@@ -195,17 +198,9 @@ void actor_update(Actor *a, Actor *others, int nothers){
  * the same initial velocity. 
  */
 Swarm *swarm_create(Point *start, Vector *initVel, Module *shape, 
-					int numLeaders, int numActorsPerLeader, int spread){
+					int numLeaders, int numActorsPerLeader, float spread){
 	int i, j, verbose = 1;
  	float genX, genY, genZ;
-	int d_spread = 2*spread;
-	Vector *rand_vect, *velocity;
-
-	// random vector gen
-	// rand_vect = (Vector*){(rand() % initVel->val[0]), ((rand() % initVel->val[1])/2), 
-	// 			 (rand() % initVel->val[2]), 0}
-	// vector_avg(velocity, initVel, rand_vect);
-	// vector_normalize(velocity);
 
 	if(verbose) printf("creating swarm\n");
 
@@ -215,17 +210,17 @@ Swarm *swarm_create(Point *start, Vector *initVel, Module *shape,
 	s->numActors = numActorsPerLeader*numLeaders;
 	s->numLeaders = numLeaders;
 	for(i=0; i<numLeaders; i++){
-		genX = spread - (float)(rand() % d_spread) + 2;
-		genY = spread - (float)(rand() % d_spread);
-		genZ = spread - (float)(rand() % d_spread) + 2;
+		genX = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
+		genY = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
+		genZ = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
 		leader_init(&(s->leaders[i]), shape);
 		leader_setLocation(&(s->leaders[i]), start->val[0] + genX, start->val[1] + genY, 
 						   start->val[2] + genZ);
 		leader_setVelocity(&(s->leaders[i]), initVel);
 		for(j=0; j<numActorsPerLeader; j++){
-			genX = spread - (float)(rand() % d_spread);
-			genY = spread - (float)(rand() % d_spread);
-			genZ = spread - (float)(rand() % d_spread);
+			genX = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
+			genY = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
+			genZ = spread - ((double)rand() / RAND_MAX) * 2.0 * spread;
 			actor_init(&(s->actors[j+(i*numActorsPerLeader)]), &(s->leaders[i]), shape);
 			actor_setLocation(&(s->actors[i]), start->val[0] + genX, start->val[1] + genY, 
 				 				start->val[2] + genZ);
@@ -278,7 +273,7 @@ void swarm_update(Swarm *s){
  void swarm_draw(Swarm *s, Matrix *VTM, Matrix *GTM, DrawState *ds, 
 				Lighting *lighting, Image *src){
  	int i;
- 	Element *translateE, *colorE, *headE_old;
+ 	Element *translateE, *colorE, *bodyColorE, *identityE, *headE_old;
 	Matrix m;
 
  	if (!s){
@@ -301,7 +296,7 @@ void swarm_update(Swarm *s){
 		translateE->next = colorE;
 		colorE->next = bodyColorE;
 		bodyColorE->next = headE_old;
-		module_draw(s->actors[i].shape, VTM, GTM, ds, lighting, src)
+		module_draw(s->actors[i].shape, VTM, GTM, ds, lighting, src);
 
 		s->actors[i].shape->head = headE_old;
 		element_delete(translateE);
@@ -324,7 +319,7 @@ void swarm_update(Swarm *s){
 		translateE->next = colorE;
 		colorE->next = bodyColorE;
 		bodyColorE->next = headE_old;
-		module_draw(s->leaders[i].shape, VTM, GTM, ds, lighting, src)
+		module_draw(s->leaders[i].shape, VTM, GTM, ds, lighting, src);
 
 		s->leaders[i].shape->head = headE_old;
 		element_delete(translateE);
