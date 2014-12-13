@@ -321,7 +321,7 @@ void swarm_update(Swarm *s){
  	for (i = 0; i < s->numActors; i++){
 
  		matrix_identity(&m);
-	 	vector_copy(&forward, s->actors[i].leader->velocity);
+	 	vector_copy(&forward, &(s->actors[i].boss->velocity));
 	 	vector_cross(&forward, &up, &right);
 	 	vector_cross(&right, &forward, &up);
 	 	matrix_rotateXYZ(&m, &forward, &right, &up); 
@@ -338,7 +338,7 @@ void swarm_update(Swarm *s){
 	for (i = 0; i < s->numLeaders; i++){
 
  		matrix_identity(&m);
-	 	vector_copy(&forward, s->leaders[i].velocity);
+	 	vector_copy(&forward, &(s->leaders[i].velocity));
 	 	vector_cross(&forward, &up, &right);
 	 	vector_cross(&right, &forward, &up);
 	 	matrix_rotateXYZ(&m, &forward, &right, &up); 
