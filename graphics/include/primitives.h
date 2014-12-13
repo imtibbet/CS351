@@ -81,7 +81,7 @@ void line_set(Line *l, Point ta, Point tb);
 /** Set the z-buffer flag to the given value. **/
 void line_zBuffer(Line *l, int flag);
 
-void line_normalize(Line *l);
+int line_normalize(Line *l);
 
 /** Copy the line data structure. **/
 void line_copy(Line *to, Line *from);

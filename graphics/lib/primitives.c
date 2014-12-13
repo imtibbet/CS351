@@ -381,11 +381,14 @@ void line_print(Line *l, FILE *fp){
 /*
  * normalize the x and y values of a line by its homogeneous coordinate
  */
-void line_normalize(Line *line){
+int line_normalize(Line *line){
+	if(line->a.val[2] < 0.0001 || line->b.val[2] < 0.0001)
+		return(1);
 	line->a.val[0] = line->a.val[0] / line->a.val[3]; // x=x/h
 	line->a.val[1] = line->a.val[1] / line->a.val[3]; // y=y/h
 	line->b.val[0] = line->b.val[0] / line->b.val[3]; // x=x/h
 	line->b.val[1] = line->b.val[1] / line->b.val[3]; // y=y/h
+	return(0);
 }
 
 // CIRCLE

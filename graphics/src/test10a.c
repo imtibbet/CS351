@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 	int i, frame;
 	char buffer[256];
 	float leaderSpeed = 2.0;
-	int zoom, numFrames = 720;
+	int zoom, numFrames = 360;
 	srand(time(NULL));
 
 	// set up color palette
@@ -66,7 +66,10 @@ int main(int argc, char *argv[]) {
 	// create the bee
 	bee = module_create();
 	module_color(bee, &Black);
-	module_bezierCurve(bee, &antennae, 2);
+	module_translate(bee, 0.5, 0.5, 0);
+	module_bezierCurve(bee, &antennae, 4);
+	module_translate(bee, 0.0, -1.0, 0);
+	module_bezierCurve(bee, &antennae, 4);
 	module_bodyColor(bee, &yellow);
 	module_scale(bee, 1, 4, 4);
 	module_cube(bee, 1);
@@ -96,13 +99,13 @@ int main(int argc, char *argv[]) {
 	// animate the scene
 	zoom = 1;
 	for (frame=0; frame<numFrames; frame++){
-		if(((frame+1) % (numFrames/8)) == 0){
+		if(((frame+1) % (numFrames/4)) == 0){
 			for(i=0; i<beeSwarm->numLeaders; i++){
-				//vector_cross(&(beeSwarm->leaders[i].velocity), &(view.vup), &tempVelocity);
-				//vector_copy(&(beeSwarm->leaders[i].velocity), &tempVelocity);
-				beeSwarm->leaders[i].velocity.val[0] *= -1;
-				beeSwarm->leaders[i].velocity.val[1] *= -1;
-				beeSwarm->leaders[i].velocity.val[2] *= -1;
+				vector_cross(&(beeSwarm->leaders[i].velocity), &(view.vup), &tempVelocity);
+				vector_copy(&(beeSwarm->leaders[i].velocity), &tempVelocity);
+				//beeSwarm->leaders[i].velocity.val[0] *= -1;
+				//beeSwarm->leaders[i].velocity.val[1] *= -1;
+				//beeSwarm->leaders[i].velocity.val[2] *= -1;
 			}
 			zoom *= -1;
 		}
@@ -130,12 +133,9 @@ int main(int argc, char *argv[]) {
 	// convert to gif
 	printf("converting to gif...\n");
 	system("convert -delay 3 -loop 0 test10a-frame*.ppm test10a.gif");
-	printf("converted gif\n");
 	// remove ppm files
+	printf("removing frames\n");
 	system("rm test10a-frame*.ppm");
-	printf("animating gif...\n");
-	// animate gif
-	system("animate test10a.gif");
 
 	// free drawstate, lighting, image, modules
 	free(ds);
