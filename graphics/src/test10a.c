@@ -88,9 +88,10 @@ int main(int argc, char *argv[]) {
 	module_cone(bee, 10, 1, 1, 0, 0, 0);
 
 	// create the swarm
-	point_set3D(&start, -80, 0, 0);
+	//point_set3D(&start, -80, 0, 0);
+	point_set3D(&start, 0, 0, 0);
 	vector_set(&velocity, leaderSpeed, 0, 0);
-	beeSwarm = swarm_create(&start, &velocity, bee, 10, 10, 20);
+	beeSwarm = swarm_create(&start, &velocity, bee, 1, 1, 10);
 	for(i=0; i<beeSwarm->numActors; i++){
 		beeSwarm->actors[i].minDist = 7;
 		beeSwarm->actors[i].thresholdDist = 15;
@@ -98,7 +99,7 @@ int main(int argc, char *argv[]) {
 
 	// animate the scene
 	zoom = 1;
-	for (frame=0; frame<numFrames; frame++){
+	for (frame=0; frame<1; frame++){
 		if(((frame+1) % (numFrames/4)) == 0){
 			for(i=0; i<beeSwarm->numLeaders; i++){
 				vector_cross(&(beeSwarm->leaders[i].velocity), &(view.vup), &tempVelocity);
@@ -131,12 +132,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	// convert to gif
-	printf("converting to gif...\n");
+	/*printf("converting to gif...\n");
 	system("convert -delay 3 -loop 0 test10a-frame*.ppm test10a.gif");
 	// remove ppm files
 	printf("removing frames\n");
 	system("rm test10a-frame*.ppm");
-
+	*/
 	// free drawstate, lighting, image, modules
 	free(ds);
 	free(light);
