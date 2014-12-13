@@ -57,18 +57,18 @@ int main(int argc, char *argv[]) {
 
 	// create the antennae
 	point_set3D(&(bezPoints[0]), 0.0, 0.0, 0.0); 
-	point_set3D(&(bezPoints[1]), 1.0, 0.0, 0.0); 
-	point_set3D(&(bezPoints[2]), 2.0, 2.0, 0.0); 
-	point_set3D(&(bezPoints[3]), 1.0, 1.0, 0.0);
+	point_set3D(&(bezPoints[1]), 2.0, 0.0, 0.0); 
+	point_set3D(&(bezPoints[2]), 4.0, 4.0, 0.0); 
+	point_set3D(&(bezPoints[3]), 2.0, 2.0, 0.0);
 	bezierCurve_init(&antennae);
 	bezierCurve_set(&antennae, bezPoints);
 
 	// create the bee
 	bee = module_create();
 	module_color(bee, &Black);
-	module_translate(bee, 0.5, 0.5, 0);
+	module_translate(bee, 0.5, 0.0, 0.5);
 	module_bezierCurve(bee, &antennae, 4);
-	module_translate(bee, 0.0, -1.0, 0);
+	module_translate(bee, 0.0, 0.0, -1.0);
 	module_bezierCurve(bee, &antennae, 4);
 	module_bodyColor(bee, &yellow);
 	module_scale(bee, 1, 4, 4);
@@ -82,16 +82,17 @@ int main(int argc, char *argv[]) {
 	module_bodyColor(bee, &Black);
 	module_translate(bee, -1, 0, 0);
 	module_cube(bee, 1);
-	module_rotateZ(bee, cos(-M_PI/2), sin(-M_PI/2));
-	module_identity(bee);
-	module_translate(bee, -4, 0, 0);
-	module_cone(bee, 10, 1, 1, 0, 0, 0);
+//	module_identity(bee);
+//	module_scale(bee, 1, 4, 1);
+//	module_rotateZ(bee, cos(M_PI/2.0), sin(M_PI/2.0));
+//	module_translate(bee, -2, 0, 0);
+//	module_cone(bee, 10, 1, 1, 0, 0, 0);
 
 	// create the swarm
-	//point_set3D(&start, -80, 0, 0);
-	point_set3D(&start, 0, 0, 0);
+	point_set3D(&start, -80, 0, 0);
+	//point_set3D(&start, 0, 0, 0);
 	vector_set(&velocity, leaderSpeed, 0, 0);
-	beeSwarm = swarm_create(&start, &velocity, bee, 1, 1, 10);
+	beeSwarm = swarm_create(&start, &velocity, bee, 10, 10, 20);
 	for(i=0; i<beeSwarm->numActors; i++){
 		beeSwarm->actors[i].minDist = 7;
 		beeSwarm->actors[i].thresholdDist = 15;
@@ -99,7 +100,7 @@ int main(int argc, char *argv[]) {
 
 	// animate the scene
 	zoom = 1;
-	for (frame=0; frame<1; frame++){
+	for (frame=0; frame<numFrames; frame++){
 		if(((frame+1) % (numFrames/4)) == 0){
 			for(i=0; i<beeSwarm->numLeaders; i++){
 				vector_cross(&(beeSwarm->leaders[i].velocity), &(view.vup), &tempVelocity);
@@ -132,12 +133,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	// convert to gif
-	/*printf("converting to gif...\n");
+	printf("converting to gif...\n");
 	system("convert -delay 3 -loop 0 test10a-frame*.ppm test10a.gif");
 	// remove ppm files
 	printf("removing frames\n");
 	system("rm test10a-frame*.ppm");
-	*/
+	
 	// free drawstate, lighting, image, modules
 	free(ds);
 	free(light);
