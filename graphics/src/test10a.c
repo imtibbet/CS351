@@ -21,6 +21,8 @@ int main(int argc, char *argv[]) {
 	Point start;
 	Vector velocity, tempVelocity;
 	Swarm *beeSwarm;
+	BezierCurve antennae;
+	Point[4] bezPoints;
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
@@ -53,20 +55,34 @@ int main(int argc, char *argv[]) {
 	view.screeny = rows;
 	matrix_identity( &gtm );
 
+	// create the antennae
+	point_set3D(&(bezPoints[0]), 0.0, 0.0, 0.0); 
+	point_set3D(&(bezPoints[1]), 1.0, 0.0, 0.0); 
+	point_set3D(&(bezPoints[2]), 2.0, 2.0, 0.0); 
+	point_set3D(&(bezPoints[3]), 1.0, 1.0, 0.0);
+	bezierCurve_init(&antennae);
+	bezierCurve_set(&antennae, bezPoints);
+
 	// create the bee
 	bee = module_create();
+	module_color(bee, &Black);
+	module_bezierCurve(bee, &antennae, 2);
 	module_bodyColor(bee, &yellow);
 	module_scale(bee, 1, 4, 4);
 	module_cube(bee, 1);
 	module_bodyColor(bee, &Black);
-	module_translate(bee, 1, 0, 0);
+	module_translate(bee, -1, 0, 0);
 	module_cube(bee, 1);
 	module_bodyColor(bee, &yellow);
-	module_translate(bee, 1, 0, 0);
+	module_translate(bee, -1, 0, 0);
 	module_cube(bee, 1);
 	module_bodyColor(bee, &Black);
-	module_translate(bee, 1, 0, 0);
+	module_translate(bee, -1, 0, 0);
 	module_cube(bee, 1);
+	module_rotateZ(bee, 270);
+	module_identity(bee);
+	module_translate(bee, -4, 0, 0);
+	module_cone(bee, 10, 1, 1, 0, 0, 0);
 
 	// create the swarm
 	point_set3D(&start, -80, 0, 0);
