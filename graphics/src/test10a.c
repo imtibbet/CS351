@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 	Vector velocity, tempVelocity;
 	Swarm *beeSwarm;
 	BezierCurve antennae;
-	Point[4] bezPoints;
+	Point bezPoints[4];
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 	module_bodyColor(bee, &Black);
 	module_translate(bee, -1, 0, 0);
 	module_cube(bee, 1);
-	module_rotateZ(bee, 270);
+	module_rotateZ(bee, cos(-M_PI/2), sin(-M_PI/2));
 	module_identity(bee);
 	module_translate(bee, -4, 0, 0);
 	module_cone(bee, 10, 1, 1, 0, 0, 0);
