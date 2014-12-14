@@ -407,7 +407,8 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 				matrix_xformLine(&LTM, &tempLine);
 				matrix_xformLine(GTM, &tempLine);
 				matrix_xformLine(VTM, &tempLine);
-				line_normalize(&tempLine);
+				if(line_normalize(&tempLine))
+					break;
 				line_draw(&tempLine, src, ds->color);
 				if(verbose) line_print(&tempLine, stdout);
 				break;
@@ -432,7 +433,8 @@ void module_draw(Module *md, Matrix *VTM, Matrix *GTM, DrawState *ds,
 					polygon_shade(tempPolygon, lighting, ds);
 				}
 				matrix_xformPolygon(VTM, tempPolygon);
-				polygon_normalize(tempPolygon);
+				if(polygon_normalize(tempPolygon))
+					break;
 				if(verbose) polygon_print(tempPolygon, stdout);
 				polygon_drawShade(tempPolygon, src, ds, NULL);
 				break;

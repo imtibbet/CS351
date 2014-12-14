@@ -32,10 +32,10 @@ _DEPS = graphics.h
 DEPS = $(patsubst %,$(INCDIR)/%,$(_DEPS))
 
 # put a list of the executables here
-EXECUTABLES = test10a
+EXECUTABLES = test10a beeCircle beeOneSwarm beeTwoSwarm beetle-invasion
 
 # put a list of all the object files here for all executables (with .o endings)
-_OBJ =  test10a.o
+_OBJ =  test10a.o beeCircle.o beeOneSwarm.o beeTwoSwarm.o beetle-invasion.o
 
 # convert them to point to the right place
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -204,6 +204,14 @@ teapot2: $(ODIR)/teapot.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 # proj 10
 test10a: $(ODIR)/test10a.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+beeCircle: $(ODIR)/beeCircle.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+beeOneSwarm: $(ODIR)/beeOneSwarm.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+beeTwoSwarm: $(ODIR)/beeTwoSwarm.o
+	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
+beetle-invasion: $(ODIR)/beetle-invasion.o
 	$(CC) -o $(BINDIR)/$@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean

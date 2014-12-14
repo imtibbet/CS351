@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 		swarm_draw( beeSwarm2, &vtm, &gtm, ds, light, src );
 
 		// write out image
-		sprintf(buffer, "test10a-frame%03d.ppm", frame);
+		sprintf(buffer, "beeTwoSwarm-frame%03d.ppm", frame);
 		image_write(src, buffer);
 		
 		// reset image
@@ -126,13 +126,13 @@ int main(int argc, char *argv[]) {
 
 	// convert to gif
 	printf("converting to gif...\n");
-	system("convert -delay 3 -loop 0 test10a-frame*.ppm test10a.gif");
+	system("convert -delay 3 -loop 0 beeTwoSwarm-frame*.ppm beeTwoSwarm.gif");
 	printf("converted gif\n");
 	// remove ppm files
-	system("rm test10a-frame*.ppm");
+	system("rm beeTwoSwarm-frame*.ppm");
 	printf("animating gif...\n");
 	// animate gif
-	system("animate test10a.gif");
+	system("animate beeTwoSwarm.gif");
 
 	// free drawstate, lighting, image, modules
 	free(ds);

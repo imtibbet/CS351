@@ -13,126 +13,121 @@
 
 int main(int argc, char *argv[]) {
 	// initialize fields
-	const int rows = 500*2;
-	const int cols = 560*2;
+	const int rows = 500;
+	const int cols = 560;
 	Image *src;
 	Lighting *light;
-	Module *b, *terrain, *cube;
+	Module *bee;
 	Point start;
-	Vector velocity;
-	Swarm *cubeSwarm;
+	Vector velocity, tempVelocity;
+	Swarm *beeSwarm;
+	BezierCurve antennae;
+	Point bezPoints[4];
 	View3D view;
 	Matrix vtm, gtm;
 	DrawState *ds;
-	int frame;
-	char command[256];
+	int i, frame;
+	char buffer[256];
+	float leaderSpeed = 2.0;
+	int zoom, numFrames = 360;
 	srand(time(NULL));
 
 	// set up color palette
-	Color Grey = {{0.5, 0.5, 0.5}};
-	Color ltGrey = {{0.7, 0.7, 0.7}};
-	Color blueGrey = {{29/255.0, 30/255.0, 25/255.0}};
-	Color brown =  {{72/255.0, 57/255.0, 42/255.0}};
-	Color wBrown = {{50/255.0, 31/255.0, 12/255.0}};
-	Color sandyBrown = {{87/255.0, 68/255.0, 44/255.0}};
-	Color ltBrown = {{147/255.0, 106/255.0, 57/255.0}};
+	Color Ambient = {{0.1, 0.1, 0.1}};
+	Color White = {{1.0, 1.0, 1.0}};
+	Color Black = {{0.0, 0.0, 0.0}};
+	Color Blue = {{0.2, 0.2, 0.6}};
 	Color yellow = {{253/255.0, 127/255.0, 25/255.0}};
 
-	terrain = module_create();
-	cube = module_create();
-
-	point_set3D(&start, 200, 0, 0);
-	vector_set(&velocity, 0.5, 0, 0);
-
-	// create drawstate + image
+	// create drawstate, lighting and image
 	ds = drawstate_create();
+	light = lighting_create();
 	ds->shade = ShadeGouraud;
 	src = image_create( rows, cols );
 
 	// set up the view
-	point_set3D( &(view.vrp), 0, 42, -100);
-	vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
 	vector_set( &(view.vup), 0, 1, 0 );
 	view.d = 6;
 	view.du = 6;
 	view.f = 1;
-	view.b = 200;
+	view.b = 2000;
 	view.screenx = cols;
 	view.screeny = rows;
-
-	matrix_setView3D( &vtm, &view );
 	matrix_identity( &gtm );
 
-	module_bodyColor(cube, &yellow);
-	module_scale(cube, 2, 2, 2);
-	module_cube(cube, 1);
+	// create the antennae
+	point_set3D(&(bezPoints[0]), 0.0, 0.0, 0.0); 
+	point_set3D(&(bezPoints[1]), 2.0, 0.0, 0.0); 
+	point_set3D(&(bezPoints[2]), 4.0, 4.0, 0.0); 
+	point_set3D(&(bezPoints[3]), 2.0, 2.0, 0.0);
+	bezierCurve_init(&antennae);
+	bezierCurve_set(&antennae, bezPoints);
 
-	cubeSwarm = swarm_create(&start, &velocity, cube, 4, 5, 10);
+	// create the bee
+	bee = module_create();
+	module_color(bee, &Black);
+	module_translate(bee, 0.5, 0.0, 0.5);
+	module_bezierCurve(bee, &antennae, 4);
+	module_translate(bee, 0.0, 0.0, -1.0);
+	module_bezierCurve(bee, &antennae, 4);
+	module_bodyColor(bee, &yellow);
+	module_scale(bee, 1, 4, 4);
+	module_cube(bee, 1);
+	module_bodyColor(bee, &Black);
+	module_translate(bee, -1, 0, 0);
+	module_cube(bee, 1);
+	module_bodyColor(bee, &yellow);
+	module_translate(bee, -1, 0, 0);
+	module_cube(bee, 1);
+	module_bodyColor(bee, &Black);
+	module_translate(bee, -1, 0, 0);
+	module_cube(bee, 1);
+//	module_identity(bee);
+//	module_scale(bee, 1, 4, 1);
+//	module_rotateZ(bee, cos(M_PI/2.0), sin(M_PI/2.0));
+//	module_translate(bee, -2, 0, 0);
+//	module_cone(bee, 10, 1, 1, 0, 0, 0);
 
-	for (frame=0; frame<60; frame++){
-	 	// keep ground matt for contrast by withholding surface color
-	 	b = module_create();
-	 	module_scale(b, 77, 1, 26);
-	 	module_translate(b, 0, -2.5, 13);
-	 	module_bodyColor(b, &blueGrey);
-	 	module_cube(b, 1);
-	 	module_module(terrain, b);
-	 	b = module_create();
-	 	module_scale(b, 77, 1.5, 26);
-	 	module_translate(b, 0, -6, 13);
-	 	module_bodyColor(b, &brown);
-	 	module_cube(b, 1);
-	 	module_module(terrain, b);
-	 	b = module_create();
-	 	module_scale(b, 77, 2, 26);
-	 	module_translate(b, 0, -10, 13);
-	 	module_bodyColor(b, &wBrown);
-	 	module_cube(b, 1);
-	 	module_module(terrain, b);
-	 	b = module_create();
-	 	module_scale(b, 77, 0.5, 26);
-	 	module_translate(b, 0, -13, 13);
-	 	module_bodyColor(b, &ltBrown);
-	 	module_cube(b, 1);
-	 	module_module(terrain, b);
-	 	b = module_create();
-	 	module_scale(b, 77, 1, 26);
-	 	module_translate(b, 0, -15, 13);
-	 	module_bodyColor(b, &sandyBrown);
-	 	module_cube(b, 1);
-	 	module_module(terrain, b);
+	// create the swarm
+	point_set3D(&start, -80, 0, 0);
+	//point_set3D(&start, 0, 0, 0);
+	vector_set(&velocity, leaderSpeed, 0, 0);
+	beeSwarm = swarm_create(&start, &velocity, bee, 10, 10, 20);
+	for(i=0; i<beeSwarm->numActors; i++){
+		beeSwarm->actors[i].minDist = 7;
+		beeSwarm->actors[i].thresholdDist = 15;
+	}
 
+	// animate the scene
+	zoom = 1;
+	for (frame=0; frame<numFrames; frame++){
+		if(((frame+1) % (numFrames/4)) == 0){
+			for(i=0; i<beeSwarm->numLeaders; i++){
+				vector_cross(&(beeSwarm->leaders[i].velocity), &(view.vup), &tempVelocity);
+				vector_copy(&(beeSwarm->leaders[i].velocity), &tempVelocity);
+				//beeSwarm->leaders[i].velocity.val[0] *= -1;
+				//beeSwarm->leaders[i].velocity.val[1] *= -1;
+				//beeSwarm->leaders[i].velocity.val[2] *= -1;
+			}
+			zoom *= -1;
+		}
+		point_set3D( &(view.vrp), 0, 0, -120);
+		vector_set( &(view.vpn), -view.vrp.val[0], -view.vrp.val[1], -view.vrp.val[2] );
+		lighting_init(light);
+		lighting_add( light, LightAmbient, &Ambient, NULL, NULL, 0, 0 );
+		lighting_add( light, LightPoint, &White, NULL, &(view.vrp), 0, 0 );
 		point_copy(&(ds->viewer), &(view.vrp));
-		light = lighting_create();
-		light->light[0].type = LightPoint;
-		light->light[1].type = LightAmbient;
-		light->light[0].position.val[0] = 0;
-		light->light[0].position.val[1] = 25;
-		light->light[0].position.val[2] = 0;
-		light->light[1].position.val[0] = 0;
-		light->light[1].position.val[1] = 26;
-		light->light[1].position.val[2] = 0;
-		light->light[0].color.c[0] = 1;
-		light->light[0].color.c[1] = 1;
-		light->light[0].color.c[2] = 1;
-		light->light[1].color.c[0] = 1;
-		light->light[1].color.c[1] = 1;
-		light->light[1].color.c[2] = 1;
-		light->nLights = 2;
+		matrix_setView3D( &vtm, &view );
+		image_fillColor(src, Blue);
 		
-		char buffer[256];
-		// matrix_rotateY(&gtm, cos(M_PI/30.0), sin(M_PI/30.0) );
-		// draw terrain
-		module_draw( terrain, &vtm, &gtm, ds, light, src );
-		swarm_update( cubeSwarm );
-		swarm_draw( cubeSwarm, &vtm, &gtm, ds, light, src );
+		// draw swarm
+		swarm_update( beeSwarm );
+		swarm_draw( beeSwarm, &vtm, &gtm, ds, light, src );
 
 		// write out image
 		sprintf(buffer, "test10a-frame%03d.ppm", frame);
 		image_write(src, buffer);
-		sprintf(command, "convert -scale %03dx%03d test10a-frame%03d.ppm test10a-frame%03d.ppm", 
-		cols/2, rows/2, frame, frame);
-		system(command);
+		
 		// reset image
 		image_reset(src);
 	}
@@ -140,19 +135,15 @@ int main(int argc, char *argv[]) {
 	// convert to gif
 	printf("converting to gif...\n");
 	system("convert -delay 3 -loop 0 test10a-frame*.ppm test10a.gif");
-	printf("converted gif\n");
 	// remove ppm files
+	printf("removing frames\n");
 	system("rm test10a-frame*.ppm");
-	printf("animating gif...\n");
-	// animate gif
-	system("animate test10a.gif");
-
-	// free drawstate, image, modules
+	
+	// free drawstate, lighting, image, modules
 	free(ds);
+	free(light);
 	image_free(src);
-	module_delete(b);
-	module_delete(terrain);
-	swarm_free(cubeSwarm);
+	swarm_free(beeSwarm);
 
 	return(0);
 }
