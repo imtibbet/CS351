@@ -311,20 +311,14 @@ void swarm_update(Swarm *s){
  	int i, verbose = 0;
  	if(verbose) printf("drawing swarm\n");
 	Matrix m, transGTM;
-	Vector up, right, forward;
+
  	if (!s){
  		printf("no swarm to draw!\n");
  	}
- 	vector_set(&up, 0, 1, 0);
 
  	// draw actors
  	for (i = 0; i < s->numActors; i++){
-
  		matrix_identity(&m);
-	 	vector_copy(&forward, &(s->actors[i].boss->velocity));
-	 	vector_cross(&forward, &up, &right);
-	 	vector_cross(&right, &forward, &up);
-	 	matrix_rotateXYZ(&m, &forward, &right, &up); 
 		matrix_translate(&m,s->actors[i].location.val[0], 
 							s->actors[i].location.val[1], 
 							s->actors[i].location.val[2]);
@@ -336,12 +330,7 @@ void swarm_update(Swarm *s){
 
 	// draw leaders
 	for (i = 0; i < s->numLeaders; i++){
-
  		matrix_identity(&m);
-	 	vector_copy(&forward, &(s->leaders[i].velocity));
-	 	vector_cross(&forward, &up, &right);
-	 	vector_cross(&right, &forward, &up);
-	 	matrix_rotateXYZ(&m, &forward, &right, &up); 
 		matrix_translate(&m,s->leaders[i].location.val[0], 
 							s->leaders[i].location.val[1], 
 							s->leaders[i].location.val[2]);
