@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
 
 	// convert to gif
 	printf("converting to gif...\n");
-	system("convert -delay 3 -loop 0 tower-frame*.ppm tower.gif");
+	system("convert -delay 5 -loop 0 tower-frame*.ppm tower.gif");
 	printf("converted gif\n");
 	// remove ppm files
 	system("rm tower-frame*.ppm");

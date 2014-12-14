@@ -326,8 +326,6 @@ int main(int argc, char *argv[]) {
   module_module(giza, khaf);
   module_module(giza, menk);
 
-  printf("added light\n");
-
   // create the image and drawstate
   src = image_create( rows, cols );
   image_fillColor(src, navy);
@@ -354,6 +352,9 @@ int main(int argc, char *argv[]) {
   light->light[1].color.c[1] = 1;
   light->light[1].color.c[2] = 1;
   light->nLights = 2;
+
+  printf("added light\n");
+
 
   module_draw(sand, &vtm, &gtm, ds, light, src );
   module_draw(giza, &vtm, &gtm, ds, light, src); 

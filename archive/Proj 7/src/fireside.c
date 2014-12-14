@@ -392,7 +392,7 @@ int main(int argc, char *argv[]) {
 
 	// convert to gif
 	printf("converting to gif...\n");
-	system("convert -delay 2 -loop 0 fireside-frame*.ppm fireside.gif");
+	system("convert -delay 5 -loop 0 fireside-frame*.ppm fireside.gif");
 	printf("converted gif\n");
 	// remove ppm files
 	system("rm fireside-frame*.ppm");
