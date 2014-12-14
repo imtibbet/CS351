@@ -1,6 +1,6 @@
 /*
  * author: Astrid Moore + Ian Tibbetts 
- * date: 12/11/12
+ * Fall 2014
  *
  * Test of the swarm's behaviors.
  */
