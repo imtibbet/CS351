@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 	const int cols = 560;
 	Image *src;
 	Lighting *light;
-	Module *bee;
+	Module *bee, *tree;
 	Point start;
 	Vector velocity, tempVelocity;
 	Swarm *beeSwarm;
@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
 	Color Ambient = {{0.1, 0.1, 0.1}};
 	Color White = {{1.0, 1.0, 1.0}};
 	Color Black = {{0.0, 0.0, 0.0}};
+	Color Brown = {{0.2, 0.2, 0.1}};
 	Color Blue = {{0.2, 0.2, 0.6}};
 	Color yellow = {{253/255.0, 127/255.0, 25/255.0}};
 
@@ -65,6 +66,7 @@ int main(int argc, char *argv[]) {
 
 	// create the bee
 	bee = module_create();
+	module_rotateY(bee, cos(M_PI/2.0), sin(M_PI/2.0));
 	module_color(bee, &Black);
 	module_translate(bee, 0.5, 0.0, 0.5);
 	module_bezierCurve(bee, &antennae, 4);
@@ -87,6 +89,12 @@ int main(int argc, char *argv[]) {
 //	module_rotateZ(bee, cos(M_PI/2.0), sin(M_PI/2.0));
 //	module_translate(bee, -2, 0, 0);
 //	module_cone(bee, 10, 1, 1, 0, 0, 0);
+
+	// create the tree
+	tree = module_create();
+	module_bodyColor(tree, &Brown);
+	module_scale(tree, 1, 40, 1);
+	module_cylinder(tree, 10, 1, 5, 0, -50, 100);
 
 	// create the swarm
 	point_set3D(&start, -80, 0, 0);
@@ -123,6 +131,7 @@ int main(int argc, char *argv[]) {
 		// draw swarm
 		swarm_update( beeSwarm );
 		swarm_draw( beeSwarm, &vtm, &gtm, ds, light, src );
+		module_draw( tree, &vtm, &gtm, ds, light, src );
 
 		// write out image
 		sprintf(buffer, "test10a-frame%03d.ppm", frame);
@@ -144,6 +153,7 @@ int main(int argc, char *argv[]) {
 	free(light);
 	image_free(src);
 	swarm_free(beeSwarm);
+	module_delete(tree);
 
 	return(0);
 }
